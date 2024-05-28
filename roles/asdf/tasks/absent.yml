@@ -1,0 +1,6 @@
+---
+- name: Remove .asdf directory
+  ansible.builtin.file:
+    path: "{{ user_homedir | default('/home/' + user_name) }}/.asdf"
+    state: absent
+  become: true

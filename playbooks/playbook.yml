@@ -27,3 +27,7 @@
     - ansible.builtin.include_role:
         name: net.markfaine.yq
       tags: yq
+
+    - ansible.builtin.include_role:
+        name: net.markfaine.asdf
+      tags: asdf

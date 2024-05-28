@@ -1,0 +1,140 @@
+---
+# Get latest version URL
+- name: Get URL for latest release
+  ansible.builtin.git:
+    repo: "{{ asdf_repo }}"
+    dest: "{{ user_homedir | default('/home/' + user_name) }}/.asdf" 
+  become: true
+  become_user: "{{ user_name }}"
+
+- name: Install asdf plugins
+  ansible.builtin.shell: > 
+    source "$ASDF_DIR/asdf.sh" && asdf plugin add "{{ item }}"
+  args:
+    executable: /usr/bin/bash
+  environment:
+    ASDF_DIR: "{{ user_homedir | default('/home/' + user_name) }}/.asdf"
+  changed_when: false
+  become: true
+  become_user: "{{ user_name }}"
+  tags: skip_ansible_lint
+  loop: "{{ asdf_plugins | default([]) }}"
+
+- name: Install with asdf
+  ansible.builtin.shell: > 
+    source "$ASDF_DIR/asdf.sh" && asdf install "{{ item }}" latest
+  args:
+    executable: /usr/bin/bash
+  environment:
+    ASDF_DIR: "{{ user_homedir | default('/home/' + user_name) }}/.asdf"
+  changed_when: false
+  become: true
+  become_user: "{{ user_name }}"
+  tags: skip_ansible_lint
+  loop: "{{ asdf_install | default([]) }}"
+
+- name: Get ruby version
+  ansible.builtin.shell: > 
+    source "$ASDF_DIR/asdf.sh" && ruby -v
+  args:
+    executable: /usr/bin/bash
+  register: ruby_version
+  environment:
+    ASDF_DIR: "{{ user_homedir | default('/home/' + user_name) }}/.asdf"
+  become: true
+  become_user: "{{ user_name }}"
+  tags: skip_ansible_lint
+
+- name: Set global ruby version
+  ansible.builtin.shell: > 
+    source "$ASDF_DIR/asdf.sh" && asdf global ruby "{{ ruby_version.stdout }}"
+  args:
+    executable: /usr/bin/bash
+  environment:
+    ASDF_DIR: "{{ user_homedir | default('/home/' + user_name) }}/.asdf"
+  changed_when: false
+  become: true
+  become_user: "{{ user_name }}"
+  tags: skip_ansible_lint
+  when: ruby_version.stdout is defined
+
+- name: Install ruby gems
+  ansible.builtin.shell: > 
+    source "$ASDF_DIR/asdf.sh" && gem install "{{ item }}"
+  args:
+    executable: /usr/bin/bash
+  environment:
+    ASDF_DIR: "{{ user_homedir | default('/home/' + user_name) }}/.asdf"
+  changed_when: false
+  become: true
+  become_user: "{{ user_name }}"
+  tags: skip_ansible_lint
+  loop: "{{ asdf_ruby_gems | default([]) }}"
+
+- name: Update ruby system gems
+  ansible.builtin.shell: > 
+    source "$ASDF_DIR/asdf.sh" && gem update --system
+  args:
+    executable: /usr/bin/bash
+  environment:
+    ASDF_DIR: "{{ user_homedir | default('/home/' + user_name) }}/.asdf"
+  changed_when: false
+  become: true
+  become_user: "{{ user_name }}"
+  tags: skip_ansible_lint
+
+- name: Find files in dotfiles/asdf
+  ansible.builtin.find:
+    paths: "{{ user_homedir | default('/home/' + user_name) }}/dotfiles/asdf/"
+    use_regex: true
+    hidden: true
+  register: asdf_dotfiles
+  become: true
+  become_user: "{{ user_name }}"
+  tags: skip_ansible_lint
+
+- name: Manage dotfiles
+  block:
+    - name: Find asdf config files in home directory
+      ansible.builtin.find:
+        paths: "{{ user_homedir | default('/home/' + user_name) }}"
+        patterns: '.asdf*'
+        file_type: file
+        hidden: true
+        recurse: false
+      register: asdf_config_files
+    
+    - name: Backup asdf Config Files
+      ansible.builtin.copy:
+        src: "{{ item.path }}"
+        dest: "{{ item.path | split('-') | first }}-{{ ansible_date_time.iso8601_basic_short }}"
+        remote_src: true
+      become_user: "{{ user_name }}"
+      loop: "{{ asdf_config_files.files | default([]) }}"
+    
+    - name: Find asdf config links
+      ansible.builtin.find:
+        paths: "{{ user_homedir | default('/home/' + user_name) }}"
+        patterns: '.asdf*'
+        hidden: true
+        file_type: link
+        recurse: false
+      register: asdf_config_links
+    
+    - name: Delete Bash Config Files and Links
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        state: absent
+      become_user: "{{ user_name }}"
+      loop: "{{ asdf_config_files.files | default([]) + asdf_config_links.files | default([]) }}"
+    
+    - name: Stow apply asdf config files
+      ansible.builtin.command: stow . --target "{{ user_homedir | default('/home/' + user_name) }}"
+      args:
+        chdir: "{{ user_homedir | default('/home/' + user_name) }}/dotfiles/asdf"
+      register: result
+      changed_when: 'result.stderr is search("LINK: ")'
+      become_user: "{{ user_name }}"
+      tags: skip_ansible_lint
+  become: true
+  when: asdf_dotfiles.files is defined and asdf_dotfiles.files | length
