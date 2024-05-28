@@ -6,12 +6,19 @@
   become: true
   register: yq_cmd
 
+# Get latest version URL
+- name Get URL for latest release
+  ansible.builtin.shell: >
+    wget -q -O - "{{ yq_repo }}" | jq -r '.assets[] | select(.name=="{{ yq_arch }}").browser_download_url'
+  changed_when: false
+  when: yq_cmd.stat.exists is defined and not yq_cmd.stat.exists
+  register: yq_latest
+  tags: skip_ansible_lint
+
 # This is not canonical but should always get the latest version
 # which is more important for my needs
 - name: Install yq
-  ansible.builtin.shell: >
-    wget -q -O "{{ yq_path }}" 
-    "$(wget -q -O - {{ yq_repo }} | jq -r '.assets[] | select(.name=={{ yq_arch }}).browser_download_url')"
+  ansible.builtin.command: wget -q -O "{{ yq_path }}" "{{ yq_latest.stdout }}"
   args:
     creates: "{{ yq_path }}"
     executable: /usr/bin/bash
