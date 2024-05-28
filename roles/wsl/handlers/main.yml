@@ -1,0 +1,4 @@
+---
+- name: restart-msg
+  ansible.builtin.debug:
+    msg: "You should exit all WSL shells, shutdown WSL, and then retart it"

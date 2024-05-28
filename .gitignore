@@ -1,0 +1,8 @@
+**/*.git
+**/*.old
+**/*.bak
+**/*.key
+**/.vault
+**/*.log
+ansible.cfg
+

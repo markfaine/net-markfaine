@@ -1,0 +1,31 @@
+---
+# Packages
+apt_packages:
+  - ca-certificates
+  - curl
+  - wget
+  - stow
+  - zsh
+  - direnv
+  - fzf
+  - jq
+  - tmux
+  - ripgrep
+  - git
+  - zlib1g-dev
+  - build-essential
+  - libssl-dev
+  - libreadline-dev
+  - libyaml-dev
+  - libsqlite3-dev
+  - sqlite3
+  - libxml2-dev
+  - libxslt1-dev
+  - libcurl4-openssl-dev
+  - software-properties-common
+  - sudo
+  - stow
+  - libffi-dev
+  - python3
+  - python3-pip
+  - python3-venv

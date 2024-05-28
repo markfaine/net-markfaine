@@ -1,0 +1,16 @@
+---
+- name: Install wsl.conf from template
+  ansible.builtin.template:
+    src: wsl.conf.j2
+    dest: /etc/wsl.conf
+    owner: root
+    group: root
+    mode: '0644'
+  become: true
+  notify: restart-msg
+
+- name: Install .wslconfig from template
+  ansible.builtin.template:
+    src: wslconfig.j2
+    dest: "/mnt/c/Users/{{ user_name }}/.wslconfig"
+  notify: restart-msg

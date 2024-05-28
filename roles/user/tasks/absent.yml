@@ -1,0 +1,45 @@
+---
+- name: Disable the user
+  ansible.builtin.user:
+    name: "{{ user_name }}"
+    password: '*'
+    state: present
+  become: true
+
+- name: Remove authorized keys from github
+  ansible.posix.authorized_key:
+    user: "{{ user_name }}"
+    state: absent
+    key: "https://github.com/{{ github_username | default(user) }}.keys"
+    validate_certs: false
+  ignore_errors: true
+
+- name: Remove ~/.ssh directory
+  ansible.builtin.file:
+    path: "{{ homedir }}/.ssh"
+    state: absent
+  become: true
+
+- name: Remove sudo configuration
+  ansible.builtin.file:
+    path: "/etc/sudoers.d/{{ user_name }}"
+    state: absent
+  become: true
+
+- name: Remove CA Certificates
+  ansible.builtin.file:
+    path: "/usr/local/share/ca-certificates/{{ item | basename }}"
+    state: absent
+  become: true
+  loop: "{{ lookup('ansible.builtin.fileglob', '{{ homedir }}/dotfiles/ca/*.crt') }}"
+
+- name: Remove dotfiles
+  ansible.builtin.file:
+    path: "{{ homedir }}/dotfiles"
+    state: absent
+  become: true
+
+- name: Update CA Certificates
+  ansible.builtin.command: update-ca-certificates
+  changed_when: false
+  become: true

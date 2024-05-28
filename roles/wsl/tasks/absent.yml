@@ -1,0 +1,18 @@
+---
+- name: Install wsl.conf from template
+  ansible.builtin.copy:
+    content: |
+      [user]
+      default={{ wsl_user | default(user_name) }}
+    dest: /etc/wsl.conf
+    owner: root
+    group: root
+    mode: '0644'
+  become: true
+  notify: restart-msg
+
+- name: Install .wslconfig from template
+  ansible.builtin.file:
+    path: "/mnt/c/Users/{{ user_name }}/.wslconfig"
+    state: absent
+  notify: restart-msg

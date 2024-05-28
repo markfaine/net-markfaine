@@ -1,0 +1,6 @@
+---
+- name: Remove yq
+  ansible.builtin.file:
+    path: "{{ yq_path }}"
+    state: absent
+  become: true

@@ -1,0 +1,90 @@
+---
+- name: Ensure install user group exists
+  ansible.builtin.group:
+    name: "{{ user_name }}"
+    state: present
+    gid: "{{ user_group_id | default(1000) }}" 
+  become: true
+
+- name: Add the user
+  ansible.builtin.user:
+    name: "{{ user_name }}"
+    comment: "{{ user_comment | default('Default User') }}" 
+    uid: "{{ user_uid | default(1000) }}"
+    shell: "{{ user_shell | default('/bin/bash') }}"
+    group: "{{ user_group | default(user) }}"
+    groups: "{{ user_groups | default('sudo') }}" 
+    append: true
+    update_password: "on_create"
+    state: present
+  become: true
+
+- name: Set authorized keys taken from github
+  ansible.posix.authorized_key:
+    user: "{{ user_name }}"
+    state: present
+    key: "https://github.com/{{ github_username | default(user) }}.keys"
+    validate_certs: false
+  ignore_errors: true
+
+# This is only needed in the case that no authorized keys are imported
+- name: Ensure .ssh directory exists
+  ansible.builtin.file:
+    path: "{{ homedir }}/.ssh"
+    owner: "{{ user_name }}"
+    group: "{{ user_group | default(user) }}"
+    mode: '0700'
+  become: true
+
+- name: Set authorized keys taken from gitlab
+  ansible.posix.authorized_key:
+    user: "{{ user_name }}"
+    state: present
+    key: "https://gitlab.enms.ndc.nasa.gov/{{ user_name }}.keys"
+    validate_certs: false
+  ignore_errors: true
+
+- name: Create SSH key
+  ansible.builtin.copy:
+    content: "{{ user_ssh_key }}"
+    dest: "{{ homedir }}/.ssh/id_rsa"
+    owner: "{{ user_name }}"
+    group: "{{ user_group | default(user) }}"
+    mode: '0600'
+  become: true
+  when: user_ssh_key is defined
+
+- name: Configure sudo
+  ansible.builtin.copy:
+    content: |
+      {{ user_name }} ALL=(ALL) NOPASSWD: ALL
+      Defaults:{{ user_name }} !requiretty
+    dest: "/etc/sudoers.d/{{ user_name }}"
+    owner: root
+    group: root
+    mode: '0640'
+  become: true
+
+- name: Clone dotfiles
+  ansible.builtin.git:
+    repo: "{{ stow_dotfiles_repo }}"
+    dest: "{{ homedir }}/dotfiles"
+    accept_newhostkey: true
+    key_file: "{{ homedir }}/.ssh/id_rsa"
+  become: true
+  become_user: "{{ user_name }}"
+
+- name: Copy CA Certificates
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "/usr/local/share/ca-certificates/{{ item | basename }}"
+    owner: root
+    group: root
+    mode: '0644'
+  become: true
+  loop: "{{ lookup('ansible.builtin.fileglob', '{{ homedir }}/dotfiles/ca/*.crt') }}"
+
+- name: Update CA Certificates
+  ansible.builtin.command: update-ca-certificates
+  changed_when: false
+  become: true

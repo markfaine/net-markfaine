@@ -1,0 +1,37 @@
+---
+- name: Download nvm installer script 
+  ansible.builtin.shell: |
+    set -o pipefail
+    wget -q -O "/tmp/{{ nvm_install_file }}" \
+    "{{ nvm_install_url }}/$(wget -q -O - {{ nvm_api_url }} | jq -r '.name')/{{ nvm_install_file }}"
+    creates: "/tmp/{{ nvm_install_file }}"
+  changed_when: false
+  become: true
+  become_user: "{{ user_name }}"
+  when: yq_cmd.stat.exists is defined and not yq_cmd.stat.exists
+  tags: skip_ansible_lint
+
+- name: Execute nvm installer script 
+  ansible.builtin.command: "/tmp/{{ nvm_install_file }}"
+  environment:
+    - PROFILE: '/dev/null'
+  changed_when: false
+  become: true
+  become_user: "{{ user_name }}"
+ 
+- name: Install Node 
+  ansible.builtin.shell: |
+    . "{{ homedir }}/.nvm/nvm.sh" \
+    && nvm install "{{ node_version }}" 
+  changed_when: false
+  become: true
+  become_user: "{{ user_name }}"
+
+- name: Install node modules
+  ansible.builtin.shell:
+    . "{{ homedir }}/.nvm/nvm.sh" \
+    && npm install -g "{{ item }}" 
+  changed_when: false
+  become: true
+  become_user: "{{ user_name }}"
+  loop: "{{ node_modules }}"

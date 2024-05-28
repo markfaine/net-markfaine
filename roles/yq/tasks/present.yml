@@ -1,0 +1,22 @@
+---
+## yq
+# Stat yq, to help make the next task idempotent
+- name: Stat yq
+  ansible.builtin.stat:
+    path: "{{ yq_path }}"
+  become: true
+  register: yq_cmd
+
+# This is not canonical but should always get the latest version
+# which is more important for my needs
+- name: Install yq
+  ansible.builtin.shell: |
+    set -o pipefail
+    wget -q -O {{ yq_path }} \
+    "$(wget -q -O - "{{ yq_repo }}" \
+    | jq -r '.assets[] | select(.name=="{{ yq_arch }}").browser_download_url')"
+    creates: "{{ yq_path }}"
+  changed_when: false
+  become: true
+  when: yq_cmd.stat.exists is defined and not yq_cmd.stat.exists
+  tags: skip_ansible_lint

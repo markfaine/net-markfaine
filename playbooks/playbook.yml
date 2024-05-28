@@ -1,0 +1,17 @@
+---
+- name: Development Environment Configuration 
+  hosts: localhost
+  tasks:
+    - ansible.builtin.include_role:
+        name: net.markfaine.base
+      tags: always 
+
+    - ansible.builtin.include_role:
+        name: net.markfaine.user
+      tags: user
+
+    - ansible.builtin.include_role:
+        name: net.markfaine.wsl
+      tags: 
+        - never
+        - wsl
