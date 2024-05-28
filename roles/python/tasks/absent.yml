@@ -1,0 +1,6 @@
+---
+- name: Delete the python virtual environment in the home directory
+  ansible.builtin.file:
+    path: "{{ user_homedir | default('/home/' + user_name) }}/venv"
+    state: absent
+  become: true

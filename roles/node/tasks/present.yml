@@ -40,8 +40,7 @@
     hidden: true
   become: true
   become_user: "{{ user_name }}"
-  loop: "{{ node_modules | default([]) }}"
-  tags: skip_ansible_lint
+  register: node_dotfiles
 
 - name: Manage dotfiles
   block:
