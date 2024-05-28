@@ -39,3 +39,7 @@
     - ansible.builtin.include_role:
         name: net.markfaine.git
       tags: git
+
+    - ansible.builtin.include_role:
+        name: net.markfaine.nvim
+      tags: nvim

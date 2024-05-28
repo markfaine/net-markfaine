@@ -1,0 +1,62 @@
+---
+- name: Download nvim
+  ansible.builtin.unarchive:
+    src: "{{ nvim_download_url }}"
+    dest: "{{ nvim_install_dir }}"
+    remote_src: true
+  become: true
+
+- name: Find files in dotfiles/nvim
+  ansible.builtin.find:
+    paths: "{{ user_homedir | default('/home/' + user_name) }}/dotfiles/nvim/"
+    use_regex: true
+    hidden: true
+  become: true
+  become_user: "{{ user_name }}"
+  register: nvim_dotfiles
+
+- name: Manage dotfiles
+  block:
+    - name: Find nvim config files in home directory
+      ansible.builtin.find:
+        paths: "{{ user_homedir | default('/home/' + user_name) }}/.config/"
+        patterns: 'nvim'
+        file_type: directory
+        hidden: true
+        recurse: false
+      register: nvim_config_files
+    
+    - name: Backup nvim Config Files
+      ansible.builtin.copy:
+        src: "{{ item.path }}"
+        dest: "{{ item.path | split('-') | first }}-{{ ansible_date_time.iso8601_basic_short }}"
+        remote_src: true
+      become_user: "{{ user_name }}"
+      loop: "{{ nvim_config_files.files | default([]) }}"
+    
+    - name: Find nvim config links
+      ansible.builtin.find:
+        paths: "{{ user_homedir | default('/home/' + user_name) }}/.config/"
+        patterns: 'nvim'
+        hidden: true
+        file_type: link
+        recurse: false
+      register: nvim_config_links
+    
+    - name: Delete nvim config files and links
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        state: absent
+      become_user: "{{ user_name }}"
+      loop: "{{ nvim_config_files.files | default([]) + nvim_config_links.files | default([]) }}"
+    
+    - name: Stow apply nvim config files
+      ansible.builtin.command: stow . --target "{{ user_homedir | default('/home/' + user_name) }}/.config/"
+      args:
+        chdir: "{{ user_homedir | default('/home/' + user_name) }}/dotfiles/nvim"
+      register: result
+      changed_when: 'result.stderr is search("LINK: ")'
+      become_user: "{{ user_name }}"
+      tags: skip_ansible_lint
+  become: true
+  when: nvim_dotfiles.files is defined and nvim_dotfiles.files | length
