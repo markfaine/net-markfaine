@@ -10,11 +10,11 @@
 # which is more important for my needs
 - name: Install yq
   ansible.builtin.shell: >
-    wget -q -O "{{ yq_path }}" "$(wget -q -O - "{{ yq_repo }}" | jq -r '.assets[] | select(.name=="{{ yq_arch }}").browser_download_url')"
-    creates: "{{ yq_path }}"
+    wget -q -O {{ yq_path }} 
+    $(wget -q -O - {{ yq_repo }} | jq -r '.assets[] | select(.name=={{ yq_arch }}).browser_download_url')
   args:
+    creates: "{{ yq_path }}"
     executable: /usr/bin/bash
-  changed_when: false
   become: true
   when: yq_cmd.stat.exists is defined and not yq_cmd.stat.exists
   tags: skip_ansible_lint
