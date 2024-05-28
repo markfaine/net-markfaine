@@ -46,8 +46,6 @@
 
 - name: Manage dotfiles
   block:
-  become: true
-  when: node_dotfiles.stat.exists is defined and node_dotfiles.stat.exists
     - name: Find node config files
       ansible.builtin.find:
         paths: "{{ user_homedir | default('/home/' + user_name)"
@@ -88,3 +86,5 @@
       changed_when: 'result.stderr is search("LINK: ")'
       become_user: "{{ user_name }}"
       tags: skip_ansible_lint
+  become: true
+  when: node_dotfiles.stat.exists is defined and node_dotfiles.stat.exists
