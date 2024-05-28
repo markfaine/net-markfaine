@@ -21,7 +21,7 @@
  
 - name: Install Node 
   ansible.builtin.shell: |
-    . "{{ homedir }}/.nvm/nvm.sh" \
+    . "{{ user_homedir | default('/home/' + user_name)/.nvm/nvm.sh" \
     && nvm install "{{ node_version }}" 
   changed_when: false
   become: true
@@ -29,9 +29,58 @@
 
 - name: Install node modules
   ansible.builtin.shell:
-    . "{{ homedir }}/.nvm/nvm.sh" \
+    . "{{ user_homedir | default('/home/' + user_name)/.nvm/nvm.sh" \
     && npm install -g "{{ item }}" 
   changed_when: false
   become: true
   become_user: "{{ user_name }}"
   loop: "{{ node_modules }}"
+
+- name: Stat node dotfiles
+  ansible.builtin.stat:
+    path: "{{ user_homedir | default('/home/' + user_name)/dotfiles/node"
+  register: node_dotfiles
+
+- name: Manage dotfiles
+  block:
+    become: true
+    when: node_dotfiles.stat.exists is defined and node_dotfiles.stat.exists
+    - name: Find node config files
+      ansible.builtin.find:
+        paths: "{{ user_homedir | default('/home/' + user_name)"
+        patterns: '.npm*,.node'
+        file_type: any
+        recurse: false
+      register: node_config_files
+    
+    - name: Backup node Config Files
+      ansible.bultin.copy:
+        src: "{{ item.path }}"
+        dest: "{{ item.path }}-{{ ansible_date_time.iso8601_basic_short }}"
+        remote_src: true
+      become_user: "{{ user_name }}"
+      loop: "{{ node_config_files.files | default([]) }}"
+    
+    - name: Find node config links
+      ansible.builtin.find:
+        paths: "{{ user_homedir | default('/home/' + user_name)"
+        patterns: '.npm*,.node*'
+        file_type: link
+        recurse: false
+      register: node_config_links
+    
+    - name: Delete Bash Config Files and Links
+      ansible.bultin.file:
+        path: "{{ item.path }}"
+        remote_src: true
+        state: absent
+      become_user: "{{ user_name }}"
+      loop: "{{ node_config_files.files | default([]) + node_config_links.files | default([]) }}"
+    
+    - name: Stow apply node config files
+      ansible.builtin.command: stow . --target "{{ user_homedir | default('/home/' + user_name)"
+      args:
+        chdir: "{{ user_homedir | default('/home/' + user_name) }}/dotfiles/node"
+      register: result
+      changed_when: 'result.stderr is search("LINK: ")'
+      become_user: "{{ user_name }}"

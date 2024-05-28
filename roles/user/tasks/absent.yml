@@ -16,7 +16,7 @@
 
 - name: Remove ~/.ssh directory
   ansible.builtin.file:
-    path: "{{ homedir }}/.ssh"
+    path: "{{ user_homedir | default('/home/' + user_name }}/.ssh"
     state: absent
   become: true
 
@@ -31,11 +31,11 @@
     path: "/usr/local/share/ca-certificates/{{ item | basename }}"
     state: absent
   become: true
-  loop: "{{ lookup('ansible.builtin.fileglob', '{{ homedir }}/dotfiles/ca/*.crt') }}"
+  loop: "{{ lookup('ansible.builtin.fileglob', '{{ user_homedir | default('/home/' + user_name) }}/dotfiles/ca/*.crt') }}"
 
 - name: Remove dotfiles
   ansible.builtin.file:
-    path: "{{ homedir }}/dotfiles"
+    path: "{{ user_homedir | default('/home/' + user_name) }}/dotfiles"
     state: absent
   become: true
 

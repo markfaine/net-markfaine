@@ -1,6 +1,6 @@
 ---
 - name: Remove nvm directory
   ansible.builtin.file:
-    path: "{{ homedir }}/.nvm"
+    path: "{{ user_homedir | default('/home/' + user_name)/.nvm"
     state: absent
   become: true

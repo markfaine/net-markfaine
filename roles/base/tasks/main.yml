@@ -1,8 +1,4 @@
 ---
-- name: Set user home directory as fact
-  ansible.builtin.set_fact:
-    homedir: "/home/{{ user_name }}"
-
 - name: Include task for state
   ansible.builtin.include_tasks:
     file: "{{ state | default('present') }}.yml"

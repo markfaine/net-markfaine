@@ -1,5 +1,4 @@
 ---
-## yq
 # Stat yq, to help make the next task idempotent
 - name: Stat yq
   ansible.builtin.stat:

@@ -12,10 +12,11 @@
     comment: "{{ user_comment | default('Default User') }}" 
     uid: "{{ user_uid | default(1000) }}"
     shell: "{{ user_shell | default('/bin/bash') }}"
-    group: "{{ user_group | default(user) }}"
+    group: "{{ user_group | default(user_name) }}"
     groups: "{{ user_groups | default('sudo') }}" 
+    password: "{{ user_password | default(lookup('ansible.builtin.password', '/dev/null', seed=user_password_salt) | password_hash('sha512', user_password_salt)) }}" 
     append: true
-    update_password: "on_create"
+    update_password: "always"
     state: present
   become: true
 
@@ -23,16 +24,16 @@
   ansible.posix.authorized_key:
     user: "{{ user_name }}"
     state: present
-    key: "https://github.com/{{ github_username | default(user) }}.keys"
+    key: "https://github.com/{{ github_username | default(user_name) }}.keys"
     validate_certs: false
   ignore_errors: true
 
 # This is only needed in the case that no authorized keys are imported
 - name: Ensure .ssh directory exists
   ansible.builtin.file:
-    path: "{{ homedir }}/.ssh"
+    path: "{{ user_homedir | default('/home/' + user_name) }}/.ssh"
     owner: "{{ user_name }}"
-    group: "{{ user_group | default(user) }}"
+    group: "{{ user_group | default(user_name) }}"
     mode: '0700'
   become: true
 
@@ -46,13 +47,13 @@
 
 - name: Create SSH key
   ansible.builtin.copy:
-    content: "{{ user_ssh_key }}"
-    dest: "{{ homedir }}/.ssh/id_rsa"
+    src: "{{ item }}"
+    dest: "{{ user_homedir | default('/home/' + user_name) }}/.ssh/{{ item | basename }}"
     owner: "{{ user_name }}"
-    group: "{{ user_group | default(user) }}"
+    group: "{{ user_group | default(user_name) }}"
     mode: '0600'
   become: true
-  when: user_ssh_key is defined
+  loop: "{{ user_ssh_keys | default([]) }}"
 
 - name: Configure sudo
   ansible.builtin.copy:
@@ -65,12 +66,13 @@
     mode: '0640'
   become: true
 
+# This will fail if there is no SSH key
 - name: Clone dotfiles
   ansible.builtin.git:
     repo: "{{ stow_dotfiles_repo }}"
-    dest: "{{ homedir }}/dotfiles"
+    dest: "{{ user_homedir | default('/home/' + user_name) }}/dotfiles"
     accept_newhostkey: true
-    key_file: "{{ homedir }}/.ssh/id_rsa"
+    key_file: "{{ user_homedir | default('/home/' + user_name) }}/.ssh/id_rsa"
   become: true
   become_user: "{{ user_name }}"
 
@@ -82,7 +84,7 @@
     group: root
     mode: '0644'
   become: true
-  loop: "{{ lookup('ansible.builtin.fileglob', '{{ homedir }}/dotfiles/ca/*.crt') }}"
+  loop: "{{ lookup('ansible.builtin.fileglob', '{{ user_homedir | default('/home/' + user_name) }}/dotfiles/ca/*.crt') }}"
 
 - name: Update CA Certificates
   ansible.builtin.command: update-ca-certificates

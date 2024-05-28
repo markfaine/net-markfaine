@@ -2,63 +2,66 @@
 - name: Clone bash-it 
   ansible.builtin.git:
     repo: "https://github.com/Bash-it/bash-it.git"
-    dest: "/home/{{ user_name }}/.bash_it"
+    dest: "{{ user_homedir | default('/home/' + user_name)/.bash_it"
     single_branch: yes
     depth: 1
   become: true
   become_user: "{{ user_name }}"
 
 - name: Install bash-it
-  ansible.builtin.command: "/home/{{ user_name }}/.bash_it/install.sh" --silent --no-modify-config
+  ansible.builtin.command: "{{ user_homedir | default('/home/' + user_name)/.bash_it/install.sh" --silent --no-modify-config
   changed_when: false
   become: true
   become_user: "{{ user_name }}"
 
-- name: Find bash config files
-  ansible.builtin.find:
-    paths: "/home/{{ user_name }}"
-    patterns: '.bash*'
-    file_type: file
-    recurse: false
-  register: bash_config_files
-
-- name: Backup Bash Config Files
-  ansible.bultin.copy:
-    src: "{{ item }}"
-    dest: "{{ item }}-{{ ansible_date_time.iso8601_basic_short }}"
-    remote_src: true
-  become: true
-  become_user: "{{ user_name }}"
-  loop: "{{ bash_config_files }}"
-
-- name: Find bash config links
-  ansible.builtin.find:
-    paths: "/home/{{ user_name }}"
-    patterns: '.bash*'
-    file_type: link
-    recurse: false
-  register: bash_config_links
-
-- name: Delete Bash Config Files and Links
-  ansible.bultin.file:
-    path: "{{ item }}"
-    remote_src: true
-    state: absent
-  become: true
-  become_user: "{{ user_name }}"
-  loop: "{{ bash_config_files | default([]) + bash_config_links | default([]) }}"
-
 - name: Stat bash dotfiles
   ansible.builtin.stat:
-    path: "/home/{{ user_name }}/dotfiles/bash"
+    path: "{{ user_homedir | default('/home/' + user_name)/dotfiles/bash"
   register: bash_dotfiles
 
-- name: Stow apply bash config files
-  ansible.builtin.command: stow . --target "/home/{{ user_name }}"
-  args:
-    chdir: "/home/{{ bash_user }}/dotfiles/bash"
-  register: result
-  changed_when: 'result.stderr is search("LINK: ")'
-  become: true
-  become_user: "{{ user_name }}"
-  when: bash_dotfiles.exists is defined and bash_dotfiles.exists
+- name: Manage dotfiles
+  block:
+    become: true
+    when: bash_dotfiles.stat.exists is defined and bash_dotfiles.stat.exists
+    - name: Find bash config files
+      ansible.builtin.find:
+        paths: "{{ user_homedir | default('/home/' + user_name)"
+        patterns: '.bash*'
+        file_type: file
+        recurse: false
+      register: bash_config_files
+    
+    - name: Backup Bash Config Files
+      ansible.bultin.copy:
+        src: "{{ item.path }}"
+        dest: "{{ item.path }}-{{ ansible_date_time.iso8601_basic_short }}"
+        remote_src: true
+      become: true
+      become_user: "{{ user_name }}"
+      loop: "{{ bash_config_files.files | default([]) }}"
+    
+    - name: Find bash config links
+      ansible.builtin.find:
+        paths: "{{ user_homedir | default('/home/' + user_name)"
+        patterns: '.bash*'
+        file_type: link
+        recurse: false
+      register: bash_config_links
+    
+    - name: Delete Bash Config Files and Links
+      ansible.bultin.file:
+        path: "{{ item.path }}"
+        remote_src: true
+        state: absent
+      become: true
+      become_user: "{{ user_name }}"
+      loop: "{{ bash_config_files.files | default([]) + bash_config_links.files | default([]) }}"
+    
+    - name: Stow apply bash config files
+      ansible.builtin.command: stow . --target "{{ user_homedir | default('/home/' + user_name)"
+      args:
+        chdir: "{{ user_homedir | default('/home/' + user_name) }}/dotfiles/bash"
+      register: result
+      changed_when: 'result.stderr is search("LINK: ")'
+      become: true
+      become_user: "{{ user_name }}"
