@@ -1,18 +1,16 @@
 ---
 - name: Download nvm installer script 
-  ansible.builtin.shell: |
+  ansible.builtin.shell: | 
     wget -q "{{ nvm_install_url }}/$(wget -q -O - {{ nvm_api_url }} | jq -r '.name')/{{ nvm_install_file }}"
-    chmod +x "/tmp/{{ nvm_install_file }}"
   args:
     chdir: /tmp
     creates: "/tmp/{{ nvm_install_file }}"
-  changed_when: false
   become: true
   become_user: "{{ user_name }}"
   tags: skip_ansible_lint
 
 - name: Execute nvm installer script 
-  ansible.builtin.command: "/tmp/{{ nvm_install_file }}"
+  ansible.builtin.command: bash "/tmp/{{ nvm_install_file }}"
   environment:
     - PROFILE: '/dev/null'
   args:
@@ -23,7 +21,7 @@
  
 - name: Install Node 
   ansible.builtin.shell: > 
-    . "{{ user_homedir | default('/home/' + user_name) }}/.nvm/nvm.sh" \
+    . "{{ user_homedir | default('/home/' + user_name) }}/.nvm/nvm.sh"
     && nvm install "{{ node_version }}" 
   changed_when: false
   become: true
@@ -32,7 +30,7 @@
 
 - name: Install node modules
   ansible.builtin.shell: >
-    . "{{ user_homedir | default('/home/' + user_name) }}/.nvm/nvm.sh" \
+    . "{{ user_homedir | default('/home/' + user_name) }}/.nvm/nvm.sh"
     && npm install -g "{{ item }}" 
   changed_when: false
   become: true
