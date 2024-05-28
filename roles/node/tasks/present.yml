@@ -10,7 +10,7 @@
 
 - name: Install Node 
   ansible.builtin.shell: > 
-    "source $NVM_DIR/nvm.sh && nvm install {{ node_version | default('node') }}" 
+    source "$NVM_DIR/nvm.sh" && nvm install {{ node_version | default('node') }}
   environment:
     NVM_DIR: "{{ user_homedir | default('/home/' + user_name) }}/.nvm"
   changed_when: false
@@ -20,7 +20,7 @@
 
 - name: Install node modules
   ansible.builtin.shell: >
-    "source $NVM_DIR/nvm.sh && npm install -g {{ item }}"
+    source "$NVM_DIR/nvm.sh" && npm install -g {{ item }}
   environment:
     NVM_DIR: "{{ user_homedir | default('/home/' + user_name) }}/.nvm"
   changed_when: false
