@@ -41,7 +41,7 @@
     - name: Backup Bash Config Files
       ansible.builtin.copy:
         src: "{{ item.path }}"
-        dest: "{{ item.path }}-{{ ansible_date_time.iso8601_basic_short }}"
+        dest: "{{ item.path | split('-') | first }}-{{ ansible_date_time.iso8601_basic_short }}"
         remote_src: true
       become: true
       become_user: "{{ user_name }}"
