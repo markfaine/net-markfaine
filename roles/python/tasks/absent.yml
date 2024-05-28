@@ -4,3 +4,15 @@
     path: "{{ user_homedir | default('/home/' + user_name) }}/venv"
     state: absent
   become: true
+
+- name: Delete .pip directory
+  ansible.builtin.file:
+    path: "{{ user_homedir | default('/home/' + user_name) }}/.pip"
+    state: absent
+  become: true
+
+- name: Delete requirements.txt in home directory 
+  ansible.builtin.file:
+    path: "{{ user_homedir | default('/home/' + user_name) }}/requirements.txt"
+    state: absent
+  become: true

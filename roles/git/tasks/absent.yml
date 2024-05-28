@@ -1,0 +1,16 @@
+---
+- name: Find git config links in home directory
+  ansible.builtin.find:
+    paths: "{{ user_homedir | default('/home/' + user_name) }}"
+    patterns: '.git*'
+    file_type: link
+    hidden: true
+    recurse: false
+  register: git_config_links
+   
+- name: Delete git config files
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  become_user: "{{ user_name }}"
+  loop: "{{ git_config_links.files | default([]) }}"

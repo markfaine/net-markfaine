@@ -35,3 +35,7 @@
     - ansible.builtin.include_role:
         name: net.markfaine.python
       tags: python
+
+    - ansible.builtin.include_role:
+        name: net.markfaine.git
+      tags: git
