@@ -8,6 +8,7 @@
   become: true
   become_user: "{{ user_name }}"
 
+# Not sure how to make this idempotent
 - name: Install bash-it
   ansible.builtin.command:
     argv:
@@ -18,9 +19,12 @@
   become: true
   become_user: "{{ user_name }}"
 
-- name: Stat bash dotfiles
-  ansible.builtin.stat:
-    path: "{{ user_homedir | default('/home/' + user_name) }}/dotfiles/bash"
+- name: Find bash config files in dotfiles/bash
+  ansible.builtin.find:
+    path: "{{ user_homedir | default('/home/' + user_name) }}/dotfiles/bash/"
+    file_type: any
+    use_regex: true
+    hidden: true
   register: bash_dotfiles
 
 - name: Manage dotfiles
@@ -30,6 +34,7 @@
         paths: "{{ user_homedir | default('/home/' + user_name) }}"
         patterns: '.bash*'
         file_type: file
+        hidden: true
         recurse: false
       register: bash_config_files
     
@@ -47,6 +52,7 @@
         paths: "{{ user_homedir | default('/home/' + user_name) }}"
         patterns: '.bash*'
         file_type: link
+        hidden: true
         recurse: false
       register: bash_config_links
     
@@ -68,4 +74,4 @@
       become: true
       become_user: "{{ user_name }}"
   become: true
-  when: bash_dotfiles.stat.exists is defined and bash_dotfiles.stat.exists
+  when: bash_dotfiles.files is defined and bash_dotfiles.files | length
