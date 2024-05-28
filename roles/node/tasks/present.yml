@@ -1,28 +1,17 @@
 ---
 - name: Download nvm installer script 
-  ansible.builtin.shell: | 
-    wget -q "{{ nvm_install_url }}/$(wget -q -O - {{ nvm_api_url }} | jq -r '.name')/{{ nvm_install_file }}"
+  ansible.builtin.shell: >
+    curl -o - "{{ nvm_install_url }}/$(wget -q -O - {{ nvm_api_url }} | jq -r '.name')/{{ nvm_install_file }} | bash"
   args:
-    chdir: /tmp
-    creates: "/tmp/{{ nvm_install_file }}"
+    creates: "{{ user_homedir | default('/home/' + user_name) }}/.nvm/nvm.sh"
   become: true
   become_user: "{{ user_name }}"
   tags: skip_ansible_lint
 
-- name: Execute nvm installer script 
-  ansible.builtin.command: bash "/tmp/{{ nvm_install_file }}"
-  environment:
-    - PROFILE: '/dev/null'
-  args:
-  changed_when: false
-  become: true
-  become_user: "{{ user_name }}"
-  tags: skip_ansible_lint
- 
 - name: Install Node 
   ansible.builtin.shell: > 
     . "{{ user_homedir | default('/home/' + user_name) }}/.nvm/nvm.sh"
-    && nvm install "{{ node_version }}" 
+    && nvm install "{{ node_version | default('node') }}" 
   changed_when: false
   become: true
   become_user: "{{ user_name }}"
@@ -35,7 +24,7 @@
   changed_when: false
   become: true
   become_user: "{{ user_name }}"
-  loop: "{{ node_modules }}"
+  loop: "{{ node_modules | default([]) }}"
   tags: skip_ansible_lint
 
 - name: Find files in dotfiles/node
