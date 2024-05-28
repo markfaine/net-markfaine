@@ -55,7 +55,7 @@
       register: node_config_files
     
     - name: Backup node Config Files
-      ansible.bultin.copy:
+      ansible.builtin.copy:
         src: "{{ item.path }}"
         dest: "{{ item.path }}-{{ ansible_date_time.iso8601_basic_short }}"
         remote_src: true
@@ -71,7 +71,7 @@
       register: node_config_links
     
     - name: Delete Bash Config Files and Links
-      ansible.bultin.file:
+      ansible.builtin.file:
         path: "{{ item.path }}"
         remote_src: true
         state: absent
