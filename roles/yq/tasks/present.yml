@@ -25,3 +25,18 @@
   become: true
   when: yq_cmd.stat.exists is defined and not yq_cmd.stat.exists
   tags: skip_ansible_lint
+
+- name: Stat yq
+  ansible.builtin.stat:
+    path: "{{ yq_path }}"
+  become: true
+  register: yq_cmd
+
+- name: Set yq executable
+  ansible.builtin.file:
+    path: "{{ yq_path }}"
+    owner: root
+    group: root
+    mode: '0755'
+  become: true
+  when: yq_cmd.stat.exists is defined and yq_cmd.stat.exists
