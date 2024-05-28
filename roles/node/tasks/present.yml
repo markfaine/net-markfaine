@@ -1,9 +1,10 @@
 ---
 - name: Download nvm installer script 
-  ansible.builtin.shell: >
-    wget -q -O "/tmp/{{ nvm_install_file }}" 
-    "{{ nvm_install_url }}/$(wget -q -O - {{ nvm_api_url }} 
-    | jq -r '.name')/{{ nvm_install_file }}"
+  ansible.builtin.shell: |
+    wget -q "{{ nvm_install_url }}/$(wget -q -O - {{ nvm_api_url }} | jq -r '.name')/{{ nvm_install_file }}"
+    chmod +x "/tmp/{{ nvm_install_file }}"
+  args:
+    chdir: /tmp
     creates: "/tmp/{{ nvm_install_file }}"
   changed_when: false
   become: true
@@ -14,6 +15,7 @@
   ansible.builtin.command: "/tmp/{{ nvm_install_file }}"
   environment:
     - PROFILE: '/dev/null'
+  args:
   changed_when: false
   become: true
   become_user: "{{ user_name }}"
