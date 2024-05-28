@@ -1,7 +1,7 @@
 ---
 python_modules:
   - click
-  - request
+  - requests
   - ansible-lint
   - docker
   - python-gitlab
