@@ -60,7 +60,7 @@
       loop: "{{ bash_config_files.files | default([]) + bash_config_links.files | default([]) }}"
     
     - name: Stow apply bash config files
-      ansible.builtin.command: stow . --target "{{ user_homedir | default('/home/' + user_name)"
+      ansible.builtin.command: stow . --target "{{ user_homedir | default('/home/' + user_name) }}"
       args:
         chdir: "{{ user_homedir | default('/home/' + user_name) }}/dotfiles/bash"
       register: result
