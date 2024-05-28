@@ -9,7 +9,11 @@
   become_user: "{{ user_name }}"
 
 - name: Install bash-it
-  ansible.builtin.command: "{{ user_homedir | default('/home/' + user_name)/.bash_it/install.sh" --silent --no-modify-config
+  ansible.builtin.command:
+    argv:
+      - "{{ user_homedir | default('/home/' + user_name)/.bash_it/install.sh"
+      - --silent 
+      - --no-modify-config
   changed_when: false
   become: true
   become_user: "{{ user_name }}"

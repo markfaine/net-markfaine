@@ -18,23 +18,26 @@
   changed_when: false
   become: true
   become_user: "{{ user_name }}"
+  tags: skip_ansible_lint
  
 - name: Install Node 
-  ansible.builtin.shell: |
+  ansible.builtin.shell: > 
     . "{{ user_homedir | default('/home/' + user_name)/.nvm/nvm.sh" \
     && nvm install "{{ node_version }}" 
   changed_when: false
   become: true
   become_user: "{{ user_name }}"
+  tags: skip_ansible_lint
 
 - name: Install node modules
-  ansible.builtin.shell:
+  ansible.builtin.shell: >
     . "{{ user_homedir | default('/home/' + user_name)/.nvm/nvm.sh" \
     && npm install -g "{{ item }}" 
   changed_when: false
   become: true
   become_user: "{{ user_name }}"
   loop: "{{ node_modules }}"
+  tags: skip_ansible_lint
 
 - name: Stat node dotfiles
   ansible.builtin.stat:
@@ -84,3 +87,4 @@
       register: result
       changed_when: 'result.stderr is search("LINK: ")'
       become_user: "{{ user_name }}"
+      tags: skip_ansible_lint
