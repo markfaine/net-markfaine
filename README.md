@@ -24,7 +24,7 @@ See [Setup a new computer](https://gist.github.com/markfaine/ba7468b0d81d1914ac1
 
 1. Create an Ansible vault file as `~/.vault` and edit the file to add the password:
 ```
-@default SUPER_SECRET_PASSWORD
+default SUPER_SECRET_PASSWORD
 ```
 2. Set permissions on vault file
 ```sh
@@ -82,22 +82,22 @@ VAULT_FILE="$HOME/vault.yml"
 if [[ -f "$VAULT_FILE" ]]; then
     exit 0
 fi
-cat <<EOF > "$VAULT_FILE"
 SALT="$(tr -dc A-Za-z0-9 </dev/urandom | head -c 12; echo)"
+cat <<EOF > "$VAULT_FILE"
 ---
 user_password_salt: "$SALT"
 user_password: $(mkpasswd --method=sha-512 -S "$SALT")
 EOF
 ```
-6. Encrypt `~/vault.yml` with Ansible vault:
-```sh
-. /tmp/venv/bin/activate
-ansible-vault encrypt default ~/vault.yml
-```
-7. Run `bootstrap.sh` 
+6. Run `bootstrap.sh` 
 ```sh
 chmod +x bootstrap.sh
 ./bootstrap.sh
+```
+7. Encrypt `~/vault.yml` with Ansible vault:
+```sh
+. /tmp/venv/bin/activate
+ansible-vault encrypt ~/vault.yml
 ```
 8. Install the collection:
 ```sh

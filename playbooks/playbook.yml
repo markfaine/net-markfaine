@@ -15,3 +15,15 @@
       tags: 
         - never
         - wsl
+
+   - ansible.builtin.include_role:
+        name: net.markfaine.bash
+      tags: bash
+
+   - ansible.builtin.include_role:
+        name: net.markfaine.node
+      tags: node
+
+   - ansible.builtin.include_role:
+        name: net.markfaine.yq
+      tags: yq
