@@ -77,7 +77,6 @@
     - name: Delete Bash Config Files and Links
       ansible.builtin.file:
         path: "{{ item.path }}"
-        remote_src: true
         state: absent
       become_user: "{{ user_name }}"
       loop: "{{ node_config_files.files | default([]) + node_config_links.files | default([]) }}"
