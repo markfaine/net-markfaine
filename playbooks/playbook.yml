@@ -31,3 +31,7 @@
     - ansible.builtin.include_role:
         name: net.markfaine.asdf
       tags: asdf
+
+    - ansible.builtin.include_role:
+        name: net.markfaine.python
+      tags: python
