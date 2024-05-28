@@ -4,6 +4,7 @@
     name: "{{ python_modules }}"
     virtualenv: "{{ user_homedir | default('/home/' + user_name) }}/venv"
     virtualenv_site_packages: true
+    virtualenv_command: python3 -m venv
   become: true
   become_user: "{{ user_name }}"
 
@@ -73,6 +74,7 @@
   ansible.builtin.pip:
     requirements: "{{ user_homedir | default('/home/' + user_name) }}/requirements.txt"
     virtualenv: "{{ user_homedir | default('/home/' + user_name) }}/venv"
+    virtualenv_command: python3 -m venv
   become: true
   become_user: "{{ user_name }}"
   when: requirements_file.stat.exists is defined and requirements_file.stat.exists
