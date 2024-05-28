@@ -1,7 +1,7 @@
 ---
 - name: Create nvim install directory
   ansible.builtin.file:
-    path: "{{ nvm_install_dir }}"
+    path: "{{ nvim_install_dir }}"
     state: directory
   become: true
 
