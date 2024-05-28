@@ -30,16 +30,6 @@
   changed_when: false
   become: true
   become_user: "{{ user_name }}"
-  tags: skip_ansible_lint
-
-- name: Install node modules
-  ansible.builtin.shell: >
-    source "$NVM_DIR/nvm.sh" && npm install -g {{ item }}
-  environment:
-    NVM_DIR: "{{ user_homedir | default('/home/' + user_name) }}/.nvm"
-  changed_when: false
-  become: true
-  become_user: "{{ user_name }}"
   loop: "{{ node_modules | default([]) }}"
   tags: skip_ansible_lint
 
