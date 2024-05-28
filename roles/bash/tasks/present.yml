@@ -2,7 +2,7 @@
 - name: Clone bash-it 
   ansible.builtin.git:
     repo: "https://github.com/Bash-it/bash-it.git"
-    dest: "{{ user_homedir | default('/home/' + user_name)/.bash_it"
+    dest: "{{ user_homedir | default('/home/' + user_name) }}/.bash_it"
     single_branch: yes
     depth: 1
   become: true
@@ -11,7 +11,7 @@
 - name: Install bash-it
   ansible.builtin.command:
     argv:
-      - "{{ user_homedir | default('/home/' + user_name)/.bash_it/install.sh"
+      - "{{ user_homedir | default('/home/' + user_name) }}/.bash_it/install.sh"
       - --silent 
       - --no-modify-config
   changed_when: false
@@ -20,14 +20,14 @@
 
 - name: Stat bash dotfiles
   ansible.builtin.stat:
-    path: "{{ user_homedir | default('/home/' + user_name)/dotfiles/bash"
+    path: "{{ user_homedir | default('/home/' + user_name) }}/dotfiles/bash"
   register: bash_dotfiles
 
 - name: Manage dotfiles
   block:
     - name: Find bash config files
       ansible.builtin.find:
-        paths: "{{ user_homedir | default('/home/' + user_name)"
+        paths: "{{ user_homedir | default('/home/' + user_name) }}"
         patterns: '.bash*'
         file_type: file
         recurse: false
@@ -44,7 +44,7 @@
     
     - name: Find bash config links
       ansible.builtin.find:
-        paths: "{{ user_homedir | default('/home/' + user_name)"
+        paths: "{{ user_homedir | default('/home/' + user_name) }}"
         patterns: '.bash*'
         file_type: link
         recurse: false

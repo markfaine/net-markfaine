@@ -22,7 +22,7 @@
  
 - name: Install Node 
   ansible.builtin.shell: > 
-    . "{{ user_homedir | default('/home/' + user_name)/.nvm/nvm.sh" \
+    . "{{ user_homedir | default('/home/' + user_name) }}/.nvm/nvm.sh" \
     && nvm install "{{ node_version }}" 
   changed_when: false
   become: true
@@ -31,7 +31,7 @@
 
 - name: Install node modules
   ansible.builtin.shell: >
-    . "{{ user_homedir | default('/home/' + user_name)/.nvm/nvm.sh" \
+    . "{{ user_homedir | default('/home/' + user_name) }}/.nvm/nvm.sh" \
     && npm install -g "{{ item }}" 
   changed_when: false
   become: true
@@ -41,14 +41,14 @@
 
 - name: Stat node dotfiles
   ansible.builtin.stat:
-    path: "{{ user_homedir | default('/home/' + user_name)/dotfiles/node"
+    path: "{{ user_homedir | default('/home/' + user_name) }}/dotfiles/node"
   register: node_dotfiles
 
 - name: Manage dotfiles
   block:
     - name: Find node config files
       ansible.builtin.find:
-        paths: "{{ user_homedir | default('/home/' + user_name)"
+        paths: "{{ user_homedir | default('/home/' + user_name) }}"
         patterns: '.npm*,.node'
         file_type: any
         recurse: false
@@ -64,7 +64,7 @@
     
     - name: Find node config links
       ansible.builtin.find:
-        paths: "{{ user_homedir | default('/home/' + user_name)"
+        paths: "{{ user_homedir | default('/home/' + user_name) }}"
         patterns: '.npm*,.node*'
         file_type: link
         recurse: false
