@@ -1,4 +1,10 @@
 ---
+- name: Create nvim install directory
+  ansible.builtin.file:
+    path: "{{ nvm_install_dir }}"
+    state: directory
+  become: true
+
 - name: Download nvim
   ansible.builtin.unarchive:
     src: "{{ nvim_download_url }}"
