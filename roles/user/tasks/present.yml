@@ -84,7 +84,7 @@
     group: root
     mode: '0644'
   become: true
-  loop: "{{ lookup('ansible.builtin.fileglob', '{{ user_homedir | default('/home/' + user_name) }}/dotfiles/ca/*.crt') }}"
+  loop: "{{ lookup('ansible.builtin.fileglob', user_homedir | default('/home/' + user_name) + '/dotfiles/ca/*.crt') }}"
 
 - name: Update CA Certificates
   ansible.builtin.command: update-ca-certificates
