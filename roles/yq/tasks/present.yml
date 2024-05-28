@@ -7,7 +7,7 @@
   register: yq_cmd
 
 # Get latest version URL
-- name Get URL for latest release
+- name: Get URL for latest release
   ansible.builtin.shell: >
     wget -q -O - "{{ yq_repo }}" | jq -r '.assets[] | select(.name=="{{ yq_arch }}").browser_download_url'
   changed_when: false
