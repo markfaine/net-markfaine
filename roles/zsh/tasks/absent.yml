@@ -1,18 +1,30 @@
 ---
-- name: Remove bash-it 
-  ansible.builtin.file
-    path: "{{ user_homedir | default('/home/' + user_name)/.bash_it"
+- name: Create zim_home directory
+  ansible.builtin.file:
+    path: "{{ user_homedir | default('/home/' + user_name) }}/.zim"
     state: absent
   become: true
+  become_user: "{{ user_name }}"
 
-- name: Install stock bash configuration files
-  ansible.builtin.copy:
-    src: "{{ item }}"
-    dest: "{{ user_homedir | default('/home/' + user_name)/{{ item | basename }}"
-    owner: "{{ user_name }}"
-    group: "{{ user_name }}"
-    mode: '0600'
+- name: Find zsh config links
+  ansible.builtin.find:
+    paths: "{{ user_homedir | default('/home/' + user_name) }}"
+    patterns: '.zsh*,.zim*'
+    file_type: link
+    hidden: true
+    recurse: false
+  register: zsh_config_links
+
+- name: Delete Bash Config Files and Links
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
   become: true
-  loop:
-    - /etc/skel/.bash_logout
-    - /etc/skel/.bashrc
+  become_user: "{{ user_name }}"
+  loop: "{{ zsh_config_files.files | default([]) }}"
+
+- name: Change the shell to bash
+  ansible.builtin.user:
+    name: "{{ user_name }}"
+    shell: /usr/bin/bash
+  become: true

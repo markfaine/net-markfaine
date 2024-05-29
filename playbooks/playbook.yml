@@ -43,3 +43,7 @@
     - ansible.builtin.include_role:
         name: net.markfaine.nvim
       tags: nvim
+
+    - ansible.builtin.include_role:
+        name: net.markfaine.zsh
+      tags: zsh
