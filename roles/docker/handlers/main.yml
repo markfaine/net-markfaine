@@ -56,6 +56,6 @@
   become: true
 
 - name: systemd-daemon-reload
-  ansible.builtin.systemd_service:
-    state: restarted
-    daemon_reload: true
+  ansible.builtin.command: systemd daemon-reload
+  changed_when: false
+  become: true
