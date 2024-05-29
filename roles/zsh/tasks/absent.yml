@@ -1,0 +1,18 @@
+---
+- name: Remove bash-it 
+  ansible.builtin.file
+    path: "{{ user_homedir | default('/home/' + user_name)/.bash_it"
+    state: absent
+  become: true
+
+- name: Install stock bash configuration files
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ user_homedir | default('/home/' + user_name)/{{ item | basename }}"
+    owner: "{{ user_name }}"
+    group: "{{ user_name }}"
+    mode: '0600'
+  become: true
+  loop:
+    - /etc/skel/.bash_logout
+    - /etc/skel/.bashrc
