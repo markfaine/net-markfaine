@@ -123,3 +123,13 @@
     groups: docker
     append: true
   become: true
+
+- name: Install docker credential helper
+  ansible.builtin.get_url:
+    url: 'https://github.com/docker/docker-credential-helpers/releases/download/v0.8.2/docker-credential-pass-v0.8.2.linux-amd64'
+    dest: /usr/local/bin/docker-credential-pass
+    checksum: sha256:cd22b15fe2ce1b58c5098f541edc3dd84af17bcf3f63abbeef47e5d4ad53e5ee
+    owner: root
+    group: root
+    mode: '0755'
+  become: true

@@ -4,6 +4,7 @@
 # ## The Ubuntu specific installation information
 docker_repo_baseurl: https://download.docker.com/linux/ubuntu
 docker_repo_gpgkey: https://download.docker.com/linux/ubuntu/gpg
+docker_cred_helper_url: https://github.com/docker/docker-credential-helpers/releases/download/v0.8.2/docker-credential-pass-v0.8.2.linux-amd64
 
 docker_packages:
   - ca-certificates
