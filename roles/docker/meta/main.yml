@@ -1,0 +1,15 @@
+---
+galaxy_info:
+  author: mfaine
+  role_name: docker
+  description: Configures docker (container runtime)
+  company: NaTS
+  license: GPLv3
+  min_ansible_version: "2.13"
+  platforms:
+    - name: EL
+      versions:
+        - "8"
+        - "9"
+  galaxy_tags:
+    - containers

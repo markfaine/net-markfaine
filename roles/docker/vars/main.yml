@@ -1,0 +1,53 @@
+---
+# ## docker
+# ## Packages
+# ## The Ubuntu specific installation information
+docker_repo_baseurl: https://download.docker.com/linux/ubuntu
+docker_repo_gpgkey: https://download.docker.com/linux/ubuntu/gpg
+
+docker_packages:
+  - ca-certificates
+  - curl
+  - docker-ce
+  - docker-ce-cli
+  - containerd.io
+  - docker-buildx-plugin
+  - docker-compose-plugin
+
+docker_remove_packages:
+  - docker-buildx-plugin
+  - docker-compose-plugin
+  - docker-ce-cli
+
+docker_compose_url: https://github.com/docker/compose/releases/download/v2.27.0/docker-compose-linux-x86_64
+
+docker_obsolete_packages:
+  - docker.io
+  - docker-doc
+  - docker-compose
+  - docker-compose-v2
+  - podman-docker
+  - containerd
+  - runc
+   
+# ## Configuration Files
+docker_config_dir: /etc/docker
+docker_config_file: daemon.json
+docker_config_file_mode: "0600"
+docker_config_dir_mode: "0755"
+
+# ## Data dir
+docker_data_dir: /var/lib/docker
+
+# ## Log dir 
+docker_log_dir: /var/log/docker
+
+  # ## Configuration
+docker_default_config:
+  ipv6: false
+  icc: true
+  experimental: false
+  selinux-enabled: false
+
+# ## Service
+docker_service_name: docker

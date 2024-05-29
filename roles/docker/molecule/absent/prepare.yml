@@ -1,0 +1,19 @@
+---
+- name: Prepare
+  hosts: all
+  environment:
+    SMDEV_CONTAINER_OFF: true
+  vars:
+    proxy_env:
+      http_proxy: 'http://10.0.13.3:3128'
+      https_proxy: 'http://10.0.13.3:3128'
+
+  tasks:
+    - name: Include nats.default.docker
+      ansible.builtin.include_role:
+        name: nats.default.docker
+        apply:
+          vars:
+            docker_enabled: true
+            docker_state: present
+      tags: always

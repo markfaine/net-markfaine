@@ -1,0 +1,7 @@
+#jinja2: lstrip_blocks: True, trim_blocks: True
+
+# {{ansible_managed}}
+
+check process {{ role_name }} with pidfile {{ base_pid_dir }}/{{ docker_service_name }}.pid
+   start program = "/bin/systemctl start {{ docker_service_name }}.service"
+   stop  program = "/bin/systemctl stop {{ docker_service_name }}.service"

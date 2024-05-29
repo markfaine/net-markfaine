@@ -1,0 +1,61 @@
+---
+- name: Get service state
+  ansible.builtin.service_facts:
+  listen: docker-start
+
+- name: docker-enable
+  ansible.builtin.service:
+    name: docker
+    enabled: true
+  listen: docker-start
+  become: true
+
+- name: docker-disable
+  ansible.builtin.service:
+    name: docker
+    enabled: false
+  become: true
+
+- name: docker-service-start
+  ansible.builtin.service:
+    name: docker
+    state: started
+  listen: docker-start
+  become: true
+  when: ansible_facts.services['docker.service']['state'] != 'running'
+
+- name: docker-stop
+  ansible.builtin.service:
+    name: docker
+    state: stopped
+  become: true
+
+- name: docker-reload
+  ansible.builtin.service:
+    name: docker
+    state: reloaded
+  become: true
+
+- name: docker-restart
+  ansible.builtin.service:
+    name: docker
+    state: restarted
+  listen: docker-start
+  become: true
+  when: ansible_facts.services['docker.service']['state'] == 'running'
+
+- name: docker-start
+  ansible.builtin.command: /bin/true
+  changed_when: false
+  tags: skip_ansible_lint
+
+- name: nftables-restart
+  ansible.builtin.service:
+    name: nftables
+    state: restarted
+  become: true
+
+- name: systemd-daemon-reload
+  ansible.builtin.systemd_service:
+    state: restarted
+    daemon_reload: true

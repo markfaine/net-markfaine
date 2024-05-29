@@ -1,0 +1,107 @@
+---
+- name: Ensure that /etc/apt/keyrings exists 
+  ansible.builtin.file:
+    path: /etc/apt/keyrings 
+    state: directory 
+    owner: root
+    group: root
+    mode: '0755'
+  become: true
+
+- name: Install docker official gpg key 
+  block:
+    - name: Get repo key
+      ansible.builtin.get_url:
+        url: "{{ docker_repo_gpgkey }}"
+        dest: /etc/apt/keyrings/docker.asc
+        owner: root
+        group: root
+        mode: '0640'
+      become: true
+    - name: Install repo
+      ansible.builtin.apt_repository:
+        repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.asc] {{ docker_repo_baseurl }} {{ ansible_distribution_release }} stable"
+        state: present
+      become: true
+
+- name: Remove any obsolete versions of docker
+  ansible.builtin.yum:
+    name: "{{ docker_obsolete_packages }}"
+    state: absent
+  become: true
+  notify: systemd-daemon-reload
+
+- name: Install packages
+  ansible.builtin.apt:
+    name: "{{ docker_packages }}"
+    state: "{{ docker_state | default('latest') }}"
+    update_cache: true
+  become: true
+  environment: "{{ proxy_env | default({}) }}"
+  notify: 
+    - systemd-daemon-reload
+    - docker-start
+
+- name: Create docker systemd drop-in directory
+  ansible.builtin.file:
+    path: "/etc/systemd/system/{{ docker_service_name }}.service.d"
+    state: directory
+    owner: root
+    group: root
+    mode: '0700'
+  become: true
+
+- name: Install docker systemd drop-in
+  ansible.builtin.file:
+    path: "/etc/systemd/system/{{ docker_service_name }}.service.d/{{ docker_service_name }}.service.conf"
+    owner: root
+    group: root
+    mode: '0640'
+    state: present
+  become: true
+  notify: 
+    - systemd-daemon-reload
+    - docker-start
+
+- name: Ensure correct permissions for configuration directory
+  ansible.builtin.file:
+    path: "{{ docker_config_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ docker_config_dir_mode }}"
+  become: true
+  notify: docker-start
+
+- name: Install docker configuration file from template
+  ansible.builtin.template:
+    src: docker.conf.j2
+    dest: "{{ docker_config_dir }}/{{ docker_config_file }}"
+    owner: root
+    group: root
+    mode: "{{ docker_config_file_mode }}"
+    backup: true
+  become: true
+  notify:
+    - systemd-daemon-reload
+    - docker-start
+
+- name: Install default iptables(nftables) config
+  ansible.builtin.template:
+    src: nftables.conf.j2
+    dest: "/etc/nftables.conf"
+    owner: root
+    group: root
+    mode: '0600'
+    backup: true
+  become: true
+  notify:
+    - systemd-daemon-reload
+    - docker-start
+
+- name: Add the user to the group 'docker'
+  ansible.builtin.user:
+    name: "{{ user_name }}"
+    groups: docker
+    append: true
+  become: true

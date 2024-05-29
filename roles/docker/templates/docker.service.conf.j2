@@ -1,0 +1,13 @@
+#jinja2: lstrip_blocks: True, trim_blocks: True
+# ## {{ ansible_managed }}
+
+[Service]
+Restart=always
+{% if proxy_env is defined and 'http_proxy' in proxy_env %}
+Environment="HTTP_PROXY={{ proxy_env['http_proxy'] }}"
+{% endif %}
+{% if proxy_env is defined and 'https_proxy' in proxy_env %}
+Environment="HTTPS_PROXY={{ proxy_env['https_proxy'] }}"
+{% endif %}
+ExecStart=
+ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock 

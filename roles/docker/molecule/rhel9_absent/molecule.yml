@@ -1,0 +1,40 @@
+---
+dependency:
+  name: galaxy
+  options:
+    ignore-certs: true
+    ignore-errors: true
+lint: |
+  set -e
+  yamllint -c ../../.yamllint .
+  ansible-lint -v -c ../../.ansible-lint  --exclude ./molecule
+  flake8
+driver:
+  name: default
+platforms:
+  - name: "molecule-docker-rhel9_absent-mfaine"
+    vm_rhel_version: rhel9
+    vm_memory: 2048
+    vm_cpu_cores: 2
+    vm_networks:
+      - name: 'VM Network'
+        ip: 10.0.13.225
+        netmask: 255.255.255.0
+        gateway: 10.0.13.1
+    vm_user: bean
+    vm_port: 22
+provisioner:
+  name: ansible
+  connection_options:
+    ansible_ssh_user: bean
+    ansible_ssh_extra_args: -qxt -J bean@192.100.9.85
+  config_options:
+    defaults:
+      conditional_bare_variables: false
+    ssh_connection:
+      pipelining: true
+  log: true
+  options:
+    vvv: true
+verifier:
+  name: ansible
