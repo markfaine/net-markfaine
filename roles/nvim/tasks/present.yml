@@ -17,6 +17,7 @@
 - name: Find files in dotfiles/nvim
   ansible.builtin.find:
     paths: "{{ user_homedir | default('/home/' + user_name) }}/dotfiles/nvim/"
+    file_type: any
   become: true
   become_user: "{{ user_name }}"
   register: nvim_dotfiles
