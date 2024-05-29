@@ -1,14 +1,4 @@
 ---
-- name: Remove packages 
-  ansible.builtin.apt:
-    name: "{{ apt_packages }}"
-    state: absent
-  become: true
-  environment:
-    - DEBIAN_FRONTEND: noninteractive
-
-- name: Remove yq
-  ansible.builtin.file:
-    path: "{{ yq_path }}"
-    state: absent
-  become: true
+- name: Removal of base packages is not supported
+  ansible.builtin.debug:
+    msg: "Removal of base packages is not supported"
