@@ -51,18 +51,64 @@
         recurse: false
       register: zsh_config_links
     
-    - name: Delete Bash Config Files and Links
+    - name: Delete zsh config files and links
       ansible.builtin.file:
         path: "{{ item.path }}"
         state: absent
       become: true
       become_user: "{{ user_name }}"
       loop: "{{ zsh_config_files.files | default([]) + zsh_config_links.files | default([]) }}"
+
+    # Zim
+    - name: Find zim config files
+      ansible.builtin.find:
+        paths: "{{ user_homedir | default('/home/' + user_name) }}/.zim"
+        patterns: 'init.zsh'
+        file_type: file
+        hidden: true
+        recurse: false
+      register: zim_config_files
     
+    - name: Backup zim config files
+      ansible.builtin.copy:
+        src: "{{ item.path }}"
+        dest: "{{ item.path | split('-') | first }}-{{ ansible_date_time.iso8601_basic_short }}"
+        remote_src: true
+      become: true
+      become_user: "{{ user_name }}"
+      loop: "{{ zim_config_files.files | default([]) }}"
+    
+    - name: Find zim config links
+      ansible.builtin.find:
+        paths: "{{ user_homedir | default('/home/' + user_name) }}/.zim"
+        patterns: 'init.zsh'
+        file_type: link
+        hidden: true
+        recurse: false
+      register: zim_config_links
+    
+    - name: Delete zim config files and links
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        state: absent
+      become: true
+      become_user: "{{ user_name }}"
+      loop: "{{ zim_config_files.files | default([]) + zim_config_links.files | default([]) }}"
+
     - name: Stow apply zsh config files
       ansible.builtin.command: stow . --target "{{ user_homedir | default('/home/' + user_name) }}"
       args:
         chdir: "{{ user_homedir | default('/home/' + user_name) }}/dotfiles/zsh"
+      register: result
+      changed_when: 'result.stderr is search("LINK: ")'
+      become: true
+      become_user: "{{ user_name }}"
+    
+    # Zim
+    - name: Stow apply zim config files
+      ansible.builtin.command: stow . --target "{{ user_homedir | default('/home/' + user_name) }}/.zim"
+      args:
+        chdir: "{{ user_homedir | default('/home/' + user_name) }}/dotfiles/zim"
       register: result
       changed_when: 'result.stderr is search("LINK: ")'
       become: true
