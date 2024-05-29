@@ -24,7 +24,7 @@
   ansible.builtin.user:
     name: "{{ user_name }}"
     comment: "{{ user_comment | default('Default User') }}"
-    uid: "{{ uid | default(user_id|default(1000)) }}"
+    uid: "{{ uid | default(user_uid|default(1000)) }}"
     shell: "{{ user_shell | default('/bin/bash') }}"
     group: "{{ user_group | default(user_name) }}"
     groups: "{{ user_groups | default('sudo') }}"
