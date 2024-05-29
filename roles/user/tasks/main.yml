@@ -2,6 +2,10 @@
 - name: Include task for state
   ansible.builtin.include_tasks:
     file: "{{ state | default('present') }}.yml"
+    apply:
+      tags: user
   when:
     - ansible_os_family is defined and ansible_os_family == "Debian"
     - state is not defined or state in ['present', 'absent']
+  tags: always
+
