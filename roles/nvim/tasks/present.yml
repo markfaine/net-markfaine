@@ -10,6 +10,8 @@
     src: "{{ nvim_download_url }}"
     dest: "{{ nvim_install_dir }}"
     remote_src: true
+    extra_opts:
+      - --strip-components=1
   become: true
 
 - name: Find files in dotfiles/nvim
@@ -55,7 +57,15 @@
         state: absent
       become_user: "{{ user_name }}"
       loop: "{{ nvim_config_files.files | default([]) + nvim_config_links.files | default([]) }}"
-    
+ 
+    - name: Ensure .config directory exists in home directory
+      ansible.builtin.file:
+        path: "{{ user_homedir | default('/home/' + user_name) }}/.config"
+        state: directory
+        owner: "{{ user_name }}"
+        group: "{{ user_group | default(user_name) }}"
+        mode: '0750'
+
     - name: Stow apply nvim config files
       ansible.builtin.command: stow . --target "{{ user_homedir | default('/home/' + user_name) }}/.config/"
       args:
