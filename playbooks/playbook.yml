@@ -4,7 +4,9 @@
   tasks:
     - ansible.builtin.include_role:
         name: net.markfaine.base
-      tags: always 
+      tags: 
+        - base
+        - always 
 
     - ansible.builtin.include_role:
         name: net.markfaine.user
