@@ -14,9 +14,8 @@
 
     - ansible.builtin.include_role:
         name: net.markfaine.wsl
-      tags: 
-        - never
-        - wsl
+      when: wsl_enabled is defined and wsl_enabled
+      tags: wsl
 
     - ansible.builtin.include_role:
         name: net.markfaine.bash
