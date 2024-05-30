@@ -1,14 +1,14 @@
 ---
 - name: Create nvim install directory
   ansible.builtin.file:
-    path: "{{ nvim_install_dir }}"
+    path: "{{ user_homedir | default('/home/' + user_name) }}/{{ nvim_install_dir }}"
     state: directory
   become: true
 
 - name: Download nvim
   ansible.builtin.unarchive:
     src: "{{ nvim_download_url }}"
-    dest: "{{ nvim_install_dir }}"
+    dest: "{{ user_homedir | default('/home/' + user_name) }}/{{ nvim_install_dir }}"
     remote_src: true
     extra_opts:
       - --strip-components=1

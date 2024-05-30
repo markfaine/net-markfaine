@@ -1,7 +1,7 @@
 ---
 - name: Remove nvim
   ansible.builtin.file:
-    path: "{{ nvim_install_dir }}"
+    paths: "{{ user_homedir | default('/home/' + user_name) }}/{{ nvim_install_dir }}"
     state: absent
   become: true
 
