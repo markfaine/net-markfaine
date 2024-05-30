@@ -14,3 +14,64 @@
     src: wslconfig.j2
     dest: "/mnt/c/Users/{{ user_name }}/.wslconfig"
   notify: restart-msg
+
+- name: Make vpnkit directory
+  ansible.builtin.file:
+    path: "{{ user_homedir | default('/home/' + user_name) }}/vpnkit" 
+    owner: "{{ user_name }}"
+    group: "{{ user_group | default(user_name) }}"
+    mode: '0755'
+  become: true
+
+# Disable resolved
+- name: Disable and stop resolved
+  ansible.builtin.systemd_service:
+    name: systemd-resolved
+    enabled: false
+    state: stopped
+    daemon_reload: true
+  become: true
+  notify: restart-network-manager
+
+- name: Create resolve.conf
+  ansible.builtin.template:
+    content: |
+      nameserver 192.149.141.11
+      nameserver 192.112.230.47
+    dest: /etc/resolv.conf
+    owner: root
+    group: root
+    mode: '0644'
+  become: true
+  notify: 
+    - restart-msg
+    - restart-network-manager
+
+# Get latest version URL
+- name: Get URL for latest release
+  ansible.builtin.shell: >
+    wget -q -O - "{{ wsl_vpnkit_api_url }}" | jq -r '.assets[] | select(.name=="wsl-vpnkit.tar.gz").browser_download_url'
+  changed_when: false
+  register: wsl_vpnkit_latest
+  tags: skip_ansible_lint
+
+- name: Download wsl-vpnkit
+  ansible.builtin.unarchive:
+    src: "{{ wsl_vpnkit_latest }}"
+    dest: "{{ user_homedir | default('/home/' + user_name) }}/vpnkit"
+    remote_src: true
+    extra_opts:
+      - --strip-components=1
+  become: true
+
+- name: Install wsl-vpnkit.service from template
+  ansible.builtin.template:
+    src: wsl-vpnkit.service.j2
+    dest: /etc/systemd/system/wsl-vpnkit.service
+    owner: root
+    group: root
+    mode: '0644'
+  become: true
+  notify: 
+   - restart-msg
+   - start-wsl-vpnkit

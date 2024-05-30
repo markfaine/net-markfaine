@@ -19,6 +19,7 @@ This project contains an Ansible collection for Ubuntu that is used to configure
 
 **Note:** I am assuming the commands below will be all executed as the root user and the ansible `remote_user` will also be root. 
 
+
 ## Instructions
 See [Setup a new computer](https://gist.github.com/markfaine/ba7468b0d81d1914ac1a7f97e2998606) for the files referenced below.
 
@@ -111,3 +112,37 @@ ansible-playbook -l localhost \
   -e @~/vault.yml
 ```
 10. Logout and login as the non-root user
+
+## Pre-requisites for WSL vpn-kit installations
+The steps below for WSL vpn-kit are not managed by the role and must be performed prior to running the `wsl` role.
+
+### Setup a distro
+
+Download the prebuilt file `wsl-vpnkit.tar.gz` from the [latest release](https://github.com/sakai135/wsl-vpnkit/releases/latest) to `$env:USERPROFILE\wsl-vpnkit wsl-vpnkit.tar.gz` and import the distro into WSL 2.
+
+```ps1
+# Powershell
+
+wsl --import wsl-vpnkit --version 2 $env:USERPROFILE\wsl-vpnkit wsl-vpnkit.tar.gz
+```
+
+### Run the wsl role
+```sh
+ansible-playbook -l localhost \
+  ~/.ansible/collections/ansible_collections/net/markfaine/playbooks/playbook.yml \
+  -e @~/vault.yml -e wsl
+```
+
+### Shutdown WSL
+```cmd
+# Get the default distro
+wsl --list
+# The verstion will be the item marked with (Default)
+# for example: Ubuntu-24.04 (Default)
+# Now run
+C:\Windows\System32\wsl.exe --shutdown "THE_DEFAULT_DISTRO"
+# For example:
+C:\Windows\System32\wsl.exe --shutdown Ubuntu-24.04 
+```
+
+Restart WSL and wsl-vpnkit should be installed.

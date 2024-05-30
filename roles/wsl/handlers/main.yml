@@ -2,3 +2,18 @@
 - name: restart-msg
   ansible.builtin.debug:
     msg: "You should exit all WSL shells, shutdown WSL, and then retart it"
+
+- name: restart-network-manager
+  ansible.builtin.systemd_service:
+    name: NetworkManager
+    state: started
+    daemon_reload: true
+  become: true
+
+- name: start-wsl-vpnkit
+  ansible.builtin.systemd_service:
+    name: wsl-vpnkit.service
+    enabled: true
+    state: started
+    daemon_reload: true
+  notify: restart-msg
