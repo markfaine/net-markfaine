@@ -6,6 +6,6 @@
       tags: wsl
   when:
     - ansible_os_family is defined and ansible_os_family == "Debian"
-    - ansible_system_vendor == "Microsoft Corporation"
+    - "'microsoft-standard-WSL2' in ansible_kernel"
     - state is not defined or state in ['present', 'absent']
   tags: always
