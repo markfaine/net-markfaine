@@ -52,6 +52,7 @@ all:
       user_ssh_keys: # each key here will be installed into `/home/USER_NAME/.ssh/<basename>`
         - /tmp/id_rsa_USER # be sure to delete this when it is no longer needed
       stow_dotfiles_repo: 'git@github.com:markfaine/dotfiles.git' 
+      dns_servers: ['127.0.0.1'] # dns servers should be added here, used by wsl role
 ```
 4. Create `~/ansible.cfg` with the following contents:
 ```

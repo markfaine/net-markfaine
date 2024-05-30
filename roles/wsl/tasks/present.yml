@@ -34,13 +34,8 @@
   notify: restart-network-manager
 
 - name: Create resolve.conf
-  ansible.builtin.copy:
-    content: |
-      nameserver 192.149.141.11
-      nameserver 192.112.230.47
-      nameserver 128.158.4.14
-      nameserver 128.158.6.17
-      nameserver 192.168.1.1
+  ansible.builtin.template:
+    src: resolv.conf.j2 
     dest: /etc/resolv.conf
     owner: root
     group: root
