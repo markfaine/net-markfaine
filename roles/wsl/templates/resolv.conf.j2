@@ -1,5 +1,5 @@
 #jinja2: lstrip_blocks: True, trim_blocks: True
 # ## {{ ansible_managed }}
 {% for dns_server in dns_servers | default([]) %}
-nameserver "{{ dns_server }}"
+nameserver {{ dns_server }}
 {% endfor %}
