@@ -10,7 +10,7 @@
 # Get latest version URL
 - name: Get URL for latest release
   ansible.builtin.shell: >
-    wget -q -O - "{{ fzf_repo }}" | jq -r '.assets[] | select(.name=="{{ fzf_arch }}").browser_download_url'
+    wget -q -O - "{{ fzf_repo }}" | jq -r '.assets[] | select(.name | contains("{{ fzf_arch }}")).browser_download_url'
   changed_when: false
   register: fzf_latest
   tags: skip_ansible_lint
@@ -21,7 +21,6 @@
   ansible.builtin.command: wget -q -O "{{ fzf_path }}" "{{ fzf_latest.stdout }}"
   args:
     creates: "{{ fzf_path }}"
-    executable: /usr/bin/bash
   become: true
   tags: skip_ansible_lint
 
