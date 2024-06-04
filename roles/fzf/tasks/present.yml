@@ -15,14 +15,17 @@
   register: fzf_latest
   tags: skip_ansible_lint
 
-# This is not canonical but should always get the latest version
-# which is more important for my needs
+# wget -q -O "{{ fzf_path }}" "{{ fzf_latest.stdout }}"
 - name: Install fzf
-  ansible.builtin.command: wget -q -O "{{ fzf_path }}" "{{ fzf_latest.stdout }}"
-  args:
+  ansible.builtin.unarchive:
+    src: "{{ fzf_latest.stdout }}"
+    dest: "{{ fzf_path | dirname }}"
+    remote_src: true
     creates: "{{ fzf_path }}"
+    owner: root
+    group: root
+    mode: '0755'
   become: true
-  tags: skip_ansible_lint
 
 - name: Stat fzf
   ansible.builtin.stat:
