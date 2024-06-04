@@ -1,0 +1,5 @@
+---
+# fzf
+fzf_arch: linux_amd64
+fzf_repo: https://api.github.com/repos/junegunn/fzf/releases/latest
+fzf_path: /usr/local/bin/fzf

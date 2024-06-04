@@ -1,0 +1,6 @@
+---
+- name: Remove fzf
+  ansible.builtin.file:
+    path: "{{ fzf_path }}"
+    state: absent
+  become: true

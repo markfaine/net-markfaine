@@ -1,0 +1,41 @@
+---
+- name: Remove fzf package (out-of-date)
+  ansible.builtin.apt:
+    name: fzf
+    state: absent
+  become: true
+  environment:
+    - DEBIAN_FRONTEND: noninteractive
+
+# Get latest version URL
+- name: Get URL for latest release
+  ansible.builtin.shell: >
+    wget -q -O - "{{ fzf_repo }}" | jq -r '.assets[] | select(.name=="{{ fzf_arch }}").browser_download_url'
+  changed_when: false
+  register: fzf_latest
+  tags: skip_ansible_lint
+
+# This is not canonical but should always get the latest version
+# which is more important for my needs
+- name: Install fzf
+  ansible.builtin.command: wget -q -O "{{ fzf_path }}" "{{ fzf_latest.stdout }}"
+  args:
+    creates: "{{ fzf_path }}"
+    executable: /usr/bin/bash
+  become: true
+  tags: skip_ansible_lint
+
+- name: Stat fzf
+  ansible.builtin.stat:
+    path: "{{ fzf_path }}"
+  become: true
+  register: fzf_cmd
+
+- name: Set fzf executable
+  ansible.builtin.file:
+    path: "{{ fzf_path }}"
+    owner: root
+    group: root
+    mode: '0755'
+  become: true
+  when: fzf_cmd.stat.exists is defined and fzf_cmd.stat.exists
