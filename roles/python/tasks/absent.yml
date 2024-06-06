@@ -1,18 +1,12 @@
 ---
-- name: Delete the python virtual environment in the home directory
+- name: Delete the python virtual environments in the home directory
   ansible.builtin.file:
-    path: "{{ user_homedir | default('/home/' + user_name) }}/venv"
+    path: "{{ user_homedir | default('/home/' + user_name) }}/.venvs"
     state: absent
   become: true
 
 - name: Delete .pip directory
   ansible.builtin.file:
     path: "{{ user_homedir | default('/home/' + user_name) }}/.pip"
-    state: absent
-  become: true
-
-- name: Delete requirements.txt in home directory 
-  ansible.builtin.file:
-    path: "{{ user_homedir | default('/home/' + user_name) }}/requirements.txt"
     state: absent
   become: true

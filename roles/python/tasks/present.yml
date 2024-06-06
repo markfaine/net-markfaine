@@ -1,13 +1,4 @@
 ---
-- name: Create a python virtual environment in the home directory
-  ansible.builtin.pip:
-    name: "{{ python_modules }}"
-    virtualenv: "{{ user_homedir | default('/home/' + user_name) }}/venv"
-    virtualenv_site_packages: true
-    virtualenv_command: python3 -m venv
-  become: true
-  become_user: "{{ user_name }}"
-
 - name: Find files in dotfiles/python
   ansible.builtin.find:
     paths: "{{ user_homedir | default('/home/' + user_name) }}/dotfiles/python/"
@@ -62,19 +53,3 @@
       tags: skip_ansible_lint
   become: true
   when: python_dotfiles.files is defined and python_dotfiles.files | length
-
-- name: Stat requirements.txt in home directory
-  ansible.builtin.stat:
-    path: "{{ user_homedir | default('/home/' + user_name) }}/requirements.txt"
-  become: true
-  become_user: "{{ user_name }}"
-  register: requirements_file
-
-- name: Install modules from requirements.txt
-  ansible.builtin.pip:
-    requirements: "{{ user_homedir | default('/home/' + user_name) }}/requirements.txt"
-    virtualenv: "{{ user_homedir | default('/home/' + user_name) }}/venv"
-    virtualenv_command: python3 -m venv
-  become: true
-  become_user: "{{ user_name }}"
-  when: requirements_file.stat.exists is defined and requirements_file.stat.exists
