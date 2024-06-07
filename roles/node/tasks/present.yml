@@ -3,6 +3,8 @@
   ansible.builtin.shell: |
     set -o pipefail
     wget -q -O - {{ nvm_api_url }} | jq -r '.name'
+  args:
+    executable: /usr/bin/bash
   register: nvm_latest_version_url
   tags: skip_ansible_lint
 
