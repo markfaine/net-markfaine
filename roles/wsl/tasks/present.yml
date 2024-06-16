@@ -77,3 +77,14 @@
   notify: 
    - restart-msg
    - start-wsl-vpnkit
+
+# Get latest version URL for win32yank
+- name: Get URL for latest win32yank release
+  ansible.builtin.shell: |
+    set -o pipefail
+    wget -q -O - "{{ wsl_win32yank_url }}" | jq -r '.assets[] | select(.name=="").browser_download_url'
+  args:
+    executable: /usr/bin/bash
+  changed_when: false
+  register: wsl_vpnkit_latest
+  tags: skip_ansible_lint
