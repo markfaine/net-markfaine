@@ -9,5 +9,5 @@
 
 - name: Install zoxide package
   ansible.builtin.apt:
-    deb: zoxide_latest.stdout
+    deb: "{{ zoxide_latest.stdout }}"
   become: true
