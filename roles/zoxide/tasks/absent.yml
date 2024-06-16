@@ -1,0 +1,6 @@
+---
+- name: Remove zoxide
+  ansible.builtin.apt:
+    name: zoxide
+    state: absent
+  become: true

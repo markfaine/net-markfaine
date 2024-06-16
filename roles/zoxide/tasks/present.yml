@@ -1,0 +1,13 @@
+---
+# Get latest version URL
+- name: Get URL for latest release
+  ansible.builtin.shell: >
+    wget -q -O - {{ zoxide_repo }} | jq -r '.assets[] | select(.name| contains("amd64.deb")).browser_download_url'
+  changed_when: false
+  register: zoxide_latest
+  tags: skip_ansible_lint
+
+- name: Install zoxide package
+  ansible.builtin.apt:
+    deb: zoxide_latest.stdout
+  become: true
