@@ -1,13 +1,13 @@
 ---
-# Get latest version URL
-- name: Get URL for latest release
-  ansible.builtin.shell: >
-    wget -q -O - {{ zoxide_repo }} | jq -r '.assets[] | select(.name| contains("amd64.deb")).browser_download_url'
-  changed_when: false
-  register: zoxide_latest
-  tags: skip_ansible_lint
+# The deb package doesn't seem to work for me 
+# So for now I will use the shell installer
+#
 
-- name: Install zoxide package
-  ansible.builtin.apt:
-    deb: "{{ zoxide_latest.stdout }}"
+# # Note: in the dotfiles '~/.local/bin' must be in the path
+# # or zoxide will not work
+- name: Install zoxide
+  ansible.builtin.shell: |
+    set -o pipefail
+    curl -sSfL "{{ zoxide_install_url }}" | sh
   become: true
+  become_user: {{ user }}
