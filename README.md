@@ -16,9 +16,10 @@ This project contains an Ansible collection for Ubuntu that is used to configure
 - wsl configuration (for WSL2 environments)
 - wsl vpn-kit (for WSL2 environments)
 - zsh with zim
+- zoxide
+- fonts from NerdFonts 
 
 **Note:** I am assuming the commands below will be all executed as the root user and the ansible `remote_user` will also be root. 
-
 
 ## Instructions
 See [Setup a new computer](https://gist.github.com/markfaine/ba7468b0d81d1914ac1a7f97e2998606) for the files referenced below.
@@ -49,6 +50,7 @@ all:
       user_group: USER_GROUP
       user_groups: sudo # This ensures that the user can sudo
       user_shell: USER_SHELL # i.e /usr/bin/bash or /usr/bin/zsh
+      user_font_list: ['Meslo'] # Optional list of fonts to install from NerdFonts or ['all'] to install them all
       user_ssh_keys: # each key here will be installed into `/home/USER_NAME/.ssh/<basename>`
         - /tmp/id_rsa_USER # be sure to delete this when it is no longer needed
       stow_dotfiles_repo: 'git@github.com:markfaine/dotfiles.git' 
@@ -131,7 +133,7 @@ wsl --import wsl-vpnkit --version 2 $env:USERPROFILE\wsl-vpnkit wsl-vpnkit.tar.g
 ```sh
 ansible-playbook -l localhost \
   ~/.ansible/collections/ansible_collections/net/markfaine/playbooks/playbook.yml \
-  -e @~/vault.yml -e wsl
+  -e @~/vault.yml -t wsl
 ```
 
 ### Shutdown WSL
