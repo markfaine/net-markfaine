@@ -12,10 +12,10 @@
 
 - name: Create a font map
   ansible.builtin.set_fact:
-    font_map: >
-      "{{ font_map 
+    font_map: >-
+      {{ font_map 
       | default([]) + [{'name': item | split('/') | last | split('.') 
-      | first, 'url': item}] }}"
+      | first, 'url': item}] }}
   loop: "{{ fonts_url_list.stdout_lines }}"
 
 - name: Make sure fonts directory exists
