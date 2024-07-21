@@ -60,3 +60,7 @@
     - ansible.builtin.include_role:
         name: net.markfaine.docker
       tags: docker
+
+    - ansible.builtin.include_role:
+        name: net.markfaine.fonts
+      tags: fonts
