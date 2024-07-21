@@ -5,9 +5,8 @@ Description=wsl-vpnkit
 After=network.target
 
 [Service]
-# for wsl-vpnkit setup as a standalone script
-ExecStart="{{ user_homedir | default('/home/' + user_name) }}/vpnkit/wsl-vpnkit"
-Environment=VMEXEC_PATH="{{ user_homedir | default('/home/' + user_name) }}/vpnkit/wsl-vm" GVPROXY_PATH="{{ user_homedir | default('/home/' + user_name) }}/vpnkit/wsl-gvproxy.exe"
+# for wsl-vpnkit setup as a distro
+ExecStart=/mnt/c/Windows/system32/wsl.exe -d wsl-vpnkit --cd /app wsl-vpnkit
 
 Restart=always
 KillMode=mixed

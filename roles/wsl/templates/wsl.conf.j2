@@ -5,8 +5,8 @@
 default={{ wsl_user | default(user_name) }}
 
 [network]
-generateResolvConf = false
-generateHosts = false
+generateResolvConf = true
+generateHosts = true
 hostname = "{{ wsl_hostname | default('wsl') }}"
 
 [interop]
