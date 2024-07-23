@@ -10,4 +10,4 @@
     set -o pipefail
     curl -sSfL "{{ zoxide_install_url }}" | sh
   become: true
-  become_user: {{ user }}
+  become_user: "{{ user_name }}"
