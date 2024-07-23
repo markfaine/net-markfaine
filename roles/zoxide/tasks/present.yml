@@ -9,5 +9,7 @@
   ansible.builtin.shell: |
     set -o pipefail
     curl -sSfL "{{ zoxide_install_url }}" | sh
+  args:
+    executable: /bin/bash
   become: true
-  become_user: "{{ user_name }}"
+  become_user: {{ user }}
