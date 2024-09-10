@@ -64,3 +64,7 @@
     - ansible.builtin.include_role:
         name: net.markfaine.fonts
       tags: fonts
+
+    - ansible.builtin.include_role:
+        name: net.markfaine.hashicorp
+      tags: hashicorp
