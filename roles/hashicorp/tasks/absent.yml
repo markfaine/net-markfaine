@@ -1,0 +1,8 @@
+---
+- name: Remove packages 
+  ansible.builtin.apt:
+    name: "{{ apt_packages }}"
+    state: absent
+  become: true
+  environment:
+    - DEBIAN_FRONTEND: noninteractive
