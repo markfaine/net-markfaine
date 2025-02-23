@@ -3,7 +3,6 @@
 ## Overview 
 This project contains an Ansible collection for Ubuntu that is used to configure a user environment and to install dotfiles.
 
-- ansible
 - bash with bash-it
 - asdf
 - git
@@ -79,37 +78,21 @@ python3 -m venv --system-site-packages /tmp/venv
 chmod -R u+rwX,g+rX,o+rX /tmp/venv
 . /tmp/venv/bin/activate
 python3 -m pip install ansible
-VAULT_FILE="$HOME/vault.yml"
-if [[ -f "$VAULT_FILE" ]]; then
-    exit 0
-fi
-SALT="$(tr -dc A-Za-z0-9 </dev/urandom | head -c 12; echo)"
-cat <<EOF > "$VAULT_FILE"
----
-user_password_salt: "$SALT"
-user_password: $(mkpasswd --method=sha-512 -S "$SALT")
-EOF
 ```
 6. Run `bootstrap.sh` 
 ```sh
 chmod +x bootstrap.sh
 ./bootstrap.sh
 ```
-7. Encrypt `~/vault.yml` with Ansible vault:
-```sh
-. /tmp/venv/bin/activate
-ansible-vault encrypt ~/vault.yml
-```
-8. Install the collection:
+7. Install the collection:
 ```sh
 . /tmp/venv/bin/activate
 ansible-galaxy collection install git+https://github.com/markfaine/net-markfaine.git
 ```
-9. Run the playbook
+8. Run the playbook
 ```sh
-ansible-playbook -l localhost \
-  ~/.ansible/collections/ansible_collections/net/markfaine/playbooks/playbook.yml \
-  -e @~/vault.yml
+ansible-playbook -l <HOSTNAME> \
+  ~/.ansible/collections/ansible_collections/net/markfaine/playbooks/playbook.yml 
 ```
 10. Logout and login as the non-root user
 
@@ -128,9 +111,12 @@ wsl --import wsl-vpnkit --version 2 $env:USERPROFILE\wsl-vpnkit wsl-vpnkit.tar.g
 
 ### Run the wsl role
 ```sh
-ansible-playbook -l localhost \
-  ~/.ansible/collections/ansible_collections/net/markfaine/playbooks/playbook.yml \
-  -e @~/vault.yml -t wsl
+ansible-playbook -l <HOSTNAME> \
+  ~/.ansible/collections/ansible_collections/net/markfaine/playbooks/playbook.yml -t wsl
+
+# You may want to run with connection=local if SSH is not available
+ansible-playbook -l <HOSTNAME> --connection=local \
+  ~/.ansible/collections/ansible_collections/net/markfaine/playbooks/playbook.yml -t wsl 
 ```
 
 ### Shutdown WSL
@@ -138,11 +124,12 @@ ansible-playbook -l localhost \
 # Get the default distro
 wsl --list
 # The verstion will be the item marked with (Default)
-# for example: Ubuntu-24.04 (Default)
+# for example: Ubuntu-24.10 (Default)
 # Now run
 C:\Windows\System32\wsl.exe --shutdown "THE_DEFAULT_DISTRO"
 # For example:
-C:\Windows\System32\wsl.exe --shutdown Ubuntu-24.04 
+C:\Windows\System32\wsl.exe --shutdown Ubuntu-24.10
 ```
 
 Restart WSL and wsl-vpnkit should be installed.
+
