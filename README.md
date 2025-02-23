@@ -77,7 +77,7 @@ apt-get install -y python3-venv whois
 python3 -m venv --system-site-packages /tmp/venv
 chmod -R u+rwX,g+rX,o+rX /tmp/venv
 . /tmp/venv/bin/activate
-python3 -m pip install ansible
+python3 -m pip install ansible passlib
 ```
 6. Run `bootstrap.sh` 
 ```sh
