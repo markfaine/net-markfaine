@@ -20,7 +20,7 @@
 
 - name: Make sure fonts directory exists
   ansible.builtin.file:
-    path: "{{ user_homedir }}/.fonts"
+    path: "{{ user_homedir | default('/home/' + user_name) }}/.fonts"
     state: directory
     owner: "{{ user_name }}"
     group: "{{ user_group | default(user_name) }}"
@@ -31,7 +31,7 @@
 - name: Install individual fonts
   ansible.builtin.unarchive:
     src: "{{ item.url }}"
-    dest: "{{ user_homedir }}/.fonts"
+    dest: "{{ user_homedir | default('/home/' + user_name) }}/.fonts"
     remote_src: true
   become: true
   become_user: "{{ user_name }}"
@@ -43,7 +43,7 @@
 - name: Install all fonts
   ansible.builtin.unarchive:
     src: "{{ item.url }}"
-    dest: "{{ user_homedir }}/.fonts"
+    dest: "{{ user_homedir | default('/home/' + user_name) }}/.fonts"
     remote_src: true
   become: true
   become_user: "{{ user_name }}"
