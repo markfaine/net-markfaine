@@ -20,7 +20,7 @@
     shell: "{{ user_shell | default('/bin/bash') }}"
     group: "{{ user_group | default(user_name) }}"
     groups: "{{ user_groups | default('sudo') }}"
-    password: "{{ user_password | default(lookup('ansible.builtin.password', '/dev/null', seed=inventory_hostname | hash('sha1')) | password_hash('sha512', inventory_hostname | hash('sha1'))) }}"
+    password: "{{ user_password | default(lookup('ansible.builtin.password', '/dev/null', seed=inventory_hostname | hash('sha1')[0:15]) | password_hash('sha512', inventory_hostname | hash('sha1')[0:15])) }}"
     append: true
     update_password: "on_create"
     state: present
