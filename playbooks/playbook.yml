@@ -1,6 +1,6 @@
 ---
 - name: Development Environment Configuration 
-  hosts: localhost
+  hosts: all
   tasks:
     - ansible.builtin.include_role:
         name: net.markfaine.base
@@ -14,7 +14,7 @@
 
     - ansible.builtin.include_role:
         name: net.markfaine.wsl
-      when: wsl_enabled is defined and wsl_enabled
+      when: is_wsl is defined and is_wsl
       tags: wsl
 
     - ansible.builtin.include_role:
