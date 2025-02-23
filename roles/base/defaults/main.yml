@@ -8,6 +8,7 @@ apt_packages:
   - direnv
   - dnsutils
   - git
+  - gnupg
   - htop
   - iproute2
   - iptables
