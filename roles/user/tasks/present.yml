@@ -22,7 +22,7 @@
     groups: "{{ user_groups | default('sudo') }}"
     password: "{{ user_password | default(lookup('ansible.builtin.password', '/dev/null', seed=inventory_hostname) | password_hash('sha512', inventory_hostname)) }}"
     append: true
-    update_password: "always"
+    update_password: "on_create"
     state: present
   become: true
 
