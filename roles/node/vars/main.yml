@@ -3,7 +3,7 @@
 nvm_install_url: 'https://raw.githubusercontent.com/nvm-sh/nvm'
 nvm_install_file: 'install.sh'
 nvm_api_url: 'https://api.github.com/repos/nvm-sh/nvm/releases/latest'
-node_version: 21
+node_version: 22
 node_modules:
   - tree-sitter
   - neovim

@@ -74,3 +74,10 @@
       become_user: "{{ user_name }}"
   become: true
   when: bash_dotfiles.files is defined and bash_dotfiles.files | length
+
+- name: Change the shell to bash
+  ansible.builtin.user:
+    name: "{{ user_name }}"
+    shell: "{{ user_shell }}"
+  become: true
+  when: user_shell is defined and 'bash' in user_shell

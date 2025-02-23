@@ -119,5 +119,6 @@
 - name: Change the shell to zsh 
   ansible.builtin.user:
     name: "{{ user_name }}"
-    shell: /usr/bin/zsh
+    shell: "{{ user_shell }}"
   become: true
+  when: user_shell is defined and 'zsh' in user_shell

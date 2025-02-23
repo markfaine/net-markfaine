@@ -8,4 +8,5 @@
     - ansible_os_family is defined and ansible_os_family == "Debian"
     - "'microsoft-standard-WSL2' in ansible_kernel"
     - state is not defined or state in ['present', 'absent']
+    - is_wsl is defined and is_wsl
   tags: always

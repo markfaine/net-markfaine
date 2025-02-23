@@ -1,4 +1,5 @@
 ---
+TODO: update from WSL installation to incorporate recent changes
 - name: Install wsl.conf from template
   ansible.builtin.template:
     src: wsl.conf.j2

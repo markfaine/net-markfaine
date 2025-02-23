@@ -1,2 +1,3 @@
 ---
-# handlers file for base
+- name: update-ca
+  ansible.builtin.command: update-ca-certificates

@@ -15,7 +15,6 @@
   register: fzf_latest
   tags: skip_ansible_lint
 
-# wget -q -O "{{ fzf_path }}" "{{ fzf_latest.stdout }}"
 - name: Install fzf
   ansible.builtin.unarchive:
     src: "{{ fzf_latest.stdout }}"

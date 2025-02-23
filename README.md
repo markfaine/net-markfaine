@@ -38,23 +38,20 @@ chmod 600 ~.vault
 # Edit the below as required
 all:
   hosts:
-    localhost:
+    marks-pc.markfaine.net:
       ansible_connection: local
       ansible_python_interpreter: "{{ ansible_playbook_python }}"
-      github_username: GITHUB_USERNAME # username may be different in github
-      user_name: USER_NAME
-      user_homedir: "/home/USER_NAME" # this is the default if unset
-      user_comment: "USER_FULL_NAME"
-      user_uid: 1000 # This id should exist on default Ubuntu installations but verify before using
-      user_group_id: 1000 # This gid should exist on default Ubuntu installations but verify before using
-      user_group: USER_GROUP
-      user_groups: sudo # This ensures that the user can sudo
-      user_shell: USER_SHELL # i.e /usr/bin/bash or /usr/bin/zsh
-      user_font_list: ['Meslo'] # Optional list of fonts to install from NerdFonts or ['all'] to install them all
-      user_ssh_keys: # each key here will be installed into `/home/USER_NAME/.ssh/<basename>`
-        - /tmp/id_rsa_USER # be sure to delete this when it is no longer needed
-      stow_dotfiles_repo: 'git@github.com:markfaine/dotfiles.git' 
       dns_servers: ['127.0.0.1'] # dns servers should be added here, used by wsl role
+      github_username: markfaine # username may be different in github
+      user_name: mfaine
+      user_comment: "Mark Faine"
+      user_uid: 1000
+      user_gid: 1000
+      user_group: mfaine
+      user_groups: ['sudo']
+      user_shell: /usr/bin/zsh
+      user_font_list: ['Meslo'] # Optional list of fonts to install from NerdFonts or ['all'] to install them all
+      stow_dotfiles_repo: 'git@github.com:markfaine/dotfiles.git'
 ```
 4. Create `~/ansible.cfg` with the following contents:
 ```
