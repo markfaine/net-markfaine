@@ -1,4 +1,4 @@
 ---
 # nvm
 nvim_install_dir: apps/nvim
-nvim_download_url: "https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz"
+nvim_download_url: "https://github.com/neovim/neovim-releases/releases/download/v0.10.4/nvim-linux-x86_64.tar.gz"
