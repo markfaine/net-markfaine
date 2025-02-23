@@ -1,4 +1,9 @@
 ---
+- name: Stat hashicorp keyring
+  ansible.builtin.stat:
+    path: /usr/share/keyrings/hashicorp-archive-keyring.gpg
+  register: hashicorp_keyring
+  become: true
 
 - name: Get hashicorp keyring
   ansible.builtin.shell: 
@@ -6,6 +11,13 @@
     wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
   args:
     executable: /bin/bash
+  become: true
+  when: hashicorp_keyring.stat.exists is defined and not hashicorp_keyring.stat.exists
+
+- name: Stat hashicorp keyring
+  ansible.builtin.stat:
+    path: /etc/apt/sources.list.d/hashicorp.list
+  register: hashicorp_list
   become: true
 
 - name: Configure apt
@@ -15,6 +27,7 @@
   args:
     executable: /bin/bash
   become: true
+  when: hashicorp_list.stat.exists is defined and not hashicorp_list.stat.exists
 
 - name: Install packages 
   ansible.builtin.apt:
