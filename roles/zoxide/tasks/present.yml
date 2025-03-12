@@ -1,15 +1,18 @@
 ---
-# The deb package doesn't seem to work for me 
-# So for now I will use the shell installer
-#
-
-# # Note: in the dotfiles '~/.local/bin' must be in the path
-# # or zoxide will not work
-- name: Install zoxide
-  ansible.builtin.shell: |
-    set -o pipefail
-    curl -sSfL "{{ zoxide_install_url }}" | sh
-  args:
-    executable: /bin/bash
+- name: Remove zoxide package
+  ansible.builtin.apt:
+    name: zoxide
+    state: absent
   become: true
-  become_user: "{{ user_name }}"
+  environment:
+    - DEBIAN_FRONTEND: noninteractive
+
+- name: Add zoxide to tools if not present
+  ansible.builtin.lineinfile:
+    path: "{{ user_homedir | default('/home/' + user_name) }}/.tool-versions"
+    regex: ^(zoxide)\s+([0-9\.]+)$
+    line: \g<1> {{ zoxide_version | default('latest') }}
+    backrefs: true
+    create: true
+  become: true
+  notify: "markfaine.net.handlers : asdf-install"

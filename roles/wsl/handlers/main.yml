@@ -1,7 +1,7 @@
 ---
 - name: restart-msg
   ansible.builtin.debug:
-    msg: "You should exit all WSL shells, shutdown WSL, and then retart it"
+    msg: "You should exit all WSL shells, run wsl.exe --shutdown, and then retart it"
 
 - name: restart-network-manager
   ansible.builtin.systemd_service:

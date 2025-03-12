@@ -1,6 +1,1 @@
 ---
-# Packages
-apt_packages:
-  - terraform
-  - packer
-

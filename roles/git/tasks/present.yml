@@ -1,19 +1,11 @@
 ---
-- name: Update apt cache and install required packages 
-  ansible.builtin.apt:
-    name: git
-    update_cache: true
-  become: true
-  environment:
-    - DEBIAN_FRONTEND: noninteractive
-
 - name: Find files in dotfiles/git
   ansible.builtin.find:
     paths: "{{ user_homedir | default('/home/' + user_name) }}/dotfiles/git/"
     use_regex: true
     hidden: true
   become: true
-  become_user: "{{ user_name }}"
+  become_user: '{{ user_name }}'
   register: git_dotfiles
 
 - name: Manage dotfiles
@@ -21,43 +13,56 @@
     - name: Find git config files in home directory
       ansible.builtin.find:
         paths: "{{ user_homedir | default('/home/' + user_name) }}"
-        patterns: '.git*'
+        patterns: .git*
         file_type: any
         hidden: true
         recurse: false
       register: git_config_files
-    
+
     - name: Backup git Config Files
       ansible.builtin.copy:
-        src: "{{ item.path }}"
-        dest: "{{ item.path | split('-') | first }}-{{ ansible_date_time.iso8601_basic_short }}"
+        src: '{{ item.path }}'
+        dest: >
+          "{{ item.path  | split('-')  | first }}-{{
+            ansible_date_time.iso8601_basic_short
+          }}"
         remote_src: true
-      become_user: "{{ user_name }}"
-      loop: "{{ git_config_files.files | default([]) }}"
-    
+      become_user: '{{ user_name }}'
+      loop: '{{ git_config_files.files | default([]) }}'
+
     - name: Find git config links
       ansible.builtin.find:
         paths: "{{ user_homedir | default('/home/' + user_name) }}"
-        patterns: '.git*'
+        patterns: .git*
         hidden: true
         file_type: link
         recurse: false
       register: git_config_links
-    
-    - name: Delete Bash Config Files and Links
+
+    - name: Delete bash config files
       ansible.builtin.file:
-        path: "{{ item.path }}"
+        path: '{{ item.path }}'
         state: absent
-      become_user: "{{ user_name }}"
-      loop: "{{ git_config_files.files | default([]) + git_config_links.files | default([]) }}"
-    
+      become_user: '{{ user_name }}'
+      loop: '{{ git_config_files.files | default([]) }}'
     - name: Stow apply git config files
-      ansible.builtin.command: stow . --target "{{ user_homedir | default('/home/' + user_name) }}"
+      ansible.builtin.command: >
+        stow . --target "{{ user_homedir | default('/home/' + user_name) }}"
       args:
         chdir: "{{ user_homedir | default('/home/' + user_name) }}/dotfiles/git"
       register: result
       changed_when: 'result.stderr is search("LINK: ")'
-      become_user: "{{ user_name }}"
+      become_user: '{{ user_name }}'
       tags: skip_ansible_lint
   become: true
   when: git_dotfiles.files is defined and git_dotfiles.files | length
+
+- name: Add git to tools if not present
+  ansible.builtin.lineinfile:
+    path: "{{ user_homedir | default('/home/' + user_name) }}/.tool-versions"
+    regex: ^(git)\s+([0-9\.]+)$
+    line: \g<1> {{ git_version | default('latest') }}
+    backrefs: true
+    create: true
+  become: true
+  notify: "markfaine.net.handlers : asdf-install"

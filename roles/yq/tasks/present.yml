@@ -1,33 +1,18 @@
 ---
-# Get latest version URL
-- name: Get URL for latest release
-  ansible.builtin.shell: >
-    wget -q -O - "{{ yq_repo }}" | jq -r '.assets[] | select(.name=="{{ yq_arch }}").browser_download_url'
-  changed_when: false
-  register: yq_latest
-  tags: skip_ansible_lint
-
-# This is not canonical but should always get the latest version
-# which is more important for my needs
-- name: Install yq
-  ansible.builtin.command: wget -q -O "{{ yq_path }}" "{{ yq_latest.stdout }}"
-  args:
-    creates: "{{ yq_path }}"
-    executable: /usr/bin/bash
+- name: Remove yq package
+  ansible.builtin.apt:
+    name: yq
+    state: absent
   become: true
-  tags: skip_ansible_lint
+  environment:
+    - DEBIAN_FRONTEND: noninteractive
 
-- name: Stat yq
-  ansible.builtin.stat:
-    path: "{{ yq_path }}"
+- name: Add yq to tools if not present
+  ansible.builtin.lineinfile:
+    path: "{{ user_homedir | default('/home/' + user_name) }}/.tool-versions"
+    regex: ^(yq)\s+([0-9\.]+)$
+    line: \g<1> {{ yq_version | default('latest') }}
+    backrefs: true
+    create: true
   become: true
-  register: yq_cmd
-
-- name: Set yq executable
-  ansible.builtin.file:
-    path: "{{ yq_path }}"
-    owner: root
-    group: root
-    mode: '0755'
-  become: true
-  when: yq_cmd.stat.exists is defined and yq_cmd.stat.exists
+  notify: "markfaine.net.handlers : asdf-install"

@@ -1,5 +1,5 @@
 ---
-- name: Remove fzf package (out-of-date)
+- name: Remove fzf package
   ansible.builtin.apt:
     name: fzf
     state: absent
@@ -7,36 +7,12 @@
   environment:
     - DEBIAN_FRONTEND: noninteractive
 
-# Get latest version URL
-- name: Get URL for latest release
-  ansible.builtin.shell: >
-    wget -q -O - "{{ fzf_repo }}" | jq -r '.assets[] | select(.name | contains("{{ fzf_arch }}")).browser_download_url'
-  changed_when: false
-  register: fzf_latest
-  tags: skip_ansible_lint
-
-- name: Install fzf
-  ansible.builtin.unarchive:
-    src: "{{ fzf_latest.stdout }}"
-    dest: "{{ fzf_path | dirname }}"
-    remote_src: true
-    creates: "{{ fzf_path }}"
-    owner: root
-    group: root
-    mode: '0755'
+- name: Add fzf to tools if not present
+  ansible.builtin.lineinfile:
+    path: "{{ user_homedir | default('/home/' + user_name) }}/.tool-versions"
+    regex: ^(fzf)\s+([0-9\.]+)$
+    line: \g<1> {{ fzf_version | default('latest') }}
+    backrefs: true
+    create: true
   become: true
-
-- name: Stat fzf
-  ansible.builtin.stat:
-    path: "{{ fzf_path }}"
-  become: true
-  register: fzf_cmd
-
-- name: Set fzf executable
-  ansible.builtin.file:
-    path: "{{ fzf_path }}"
-    owner: root
-    group: root
-    mode: '0755'
-  become: true
-  when: fzf_cmd.stat.exists is defined and fzf_cmd.stat.exists
+  notify: "markfaine.net.handlers : asdf-install"

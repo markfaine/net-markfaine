@@ -1,77 +1,50 @@
 ---
-- name: Create nvim install directory
-  ansible.builtin.file:
-    path: "{{ user_homedir | default('/home/' + user_name) }}/{{ nvim_install_dir }}"
-    state: directory
-  become: true
-
-- name: Download nvim
-  ansible.builtin.unarchive:
-    src: "{{ nvim_download_url }}"
-    dest: "{{ user_homedir | default('/home/' + user_name) }}/{{ nvim_install_dir }}"
-    remote_src: true
-    extra_opts:
-      - --strip-components=1
-  become: true
-
-- name: Find files in dotfiles/nvim
+- name: Find files in dotfiles/neovim
   ansible.builtin.find:
-    paths: "{{ user_homedir | default('/home/' + user_name) }}/dotfiles/nvim/"
-    file_type: any
+    paths: "{{ user_homedir | default('/home/' + user_name) }}/dotfiles/neovim/"
+    use_regex: true
+    hidden: true
   become: true
-  become_user: "{{ user_name }}"
-  register: nvim_dotfiles
+  become_user: '{{ user_name }}'
+  register: neovim_dotfiles
 
 - name: Manage dotfiles
   block:
-    - name: Find nvim config files in home directory
+    - name: Find neovim config files in home directory
       ansible.builtin.find:
-        paths: "{{ user_homedir | default('/home/' + user_name) }}/.config/"
-        patterns: 'nvim'
-        file_type: directory
-        hidden: true
+        paths: "{{ user_homedir | default('/home/' + user_name) }}/.config"
+        patterns: nvim
+        file_type: file
         recurse: false
-      register: nvim_config_files
-    
-    - name: Backup nvim Config Files
-      ansible.builtin.copy:
-        src: "{{ item.path }}"
-        dest: "{{ item.path | split('-') | first }}-{{ ansible_date_time.iso8601_basic_short }}"
-        remote_src: true
-      become_user: "{{ user_name }}"
-      loop: "{{ nvim_config_files.files | default([]) }}"
-    
-    - name: Find nvim config links
-      ansible.builtin.find:
-        paths: "{{ user_homedir | default('/home/' + user_name) }}/.config/"
-        patterns: 'nvim'
-        hidden: true
-        file_type: link
-        recurse: false
-      register: nvim_config_links
-    
-    - name: Delete nvim config files and links
-      ansible.builtin.file:
-        path: "{{ item.path }}"
-        state: absent
-      become_user: "{{ user_name }}"
-      loop: "{{ nvim_config_files.files | default([]) + nvim_config_links.files | default([]) }}"
- 
-    - name: Ensure .config directory exists in home directory
-      ansible.builtin.file:
-        path: "{{ user_homedir | default('/home/' + user_name) }}/.config"
-        state: directory
-        owner: "{{ user_name }}"
-        group: "{{ user_group | default(user_name) }}"
-        mode: '0750'
+      register: neovim_config_files
 
-    - name: Stow apply nvim config files
-      ansible.builtin.command: stow . --target "{{ user_homedir | default('/home/' + user_name) }}/.config/"
+    - name: Backup neovim Config Files
+      ansible.builtin.copy:
+        src: '{{ item.path }}'
+        dest: >
+          "{{ item.path  | split('-')  | first }}-{{
+            ansible_date_time.iso8601_basic_short
+          }}"
+        remote_src: true
+      become_user: '{{ user_name }}'
+      loop: '{{ neovim_config_files.files | default([]) }}'
+
+    - name: Stow apply neovim config files
+      ansible.builtin.command: >
+        stow . --target "{{ user_homedir | default('/home/' + user_name) }}/.config"
       args:
-        chdir: "{{ user_homedir | default('/home/' + user_name) }}/dotfiles/nvim"
-      register: result
+        chdir: "{{ user_homedir | default('/home/' + user_name) }}/dotfiles/neovim"
       changed_when: 'result.stderr is search("LINK: ")'
-      become_user: "{{ user_name }}"
+      become_user: '{{ user_name }}'
       tags: skip_ansible_lint
   become: true
-  when: nvim_dotfiles.files is defined and nvim_dotfiles.files | length
+
+- name: Add neovim to tools if not present
+  ansible.builtin.lineinfile:
+    path: "{{ user_homedir | default('/home/' + user_name) }}/.tool-versions"
+    regex: ^(neovimjs)\s+([0-9\.]+)$
+    line: \g<1> {{ neovim_version | default('latest') }}
+    backrefs: true
+    create: true
+  become: true
+  notify: "markfaine.net.handlers : asdf-install"

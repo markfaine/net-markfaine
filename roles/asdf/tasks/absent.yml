@@ -4,3 +4,9 @@
     path: "{{ user_homedir | default('/home/' + user_name) }}/.asdf"
     state: absent
   become: true
+
+- name: Delete the asdf binary
+  ansible.builtin.file:
+    path: "/usr/local/bin/asdf"
+    state: absent
+  become: true

@@ -1,15 +1,15 @@
 ---
-- name: Update apt cache and install required packages 
+- name: Update apt cache and install required packages
   ansible.builtin.apt:
-    name: "{{ apt_packages }}"
+    name: '{{ apt_packages }}'
     update_cache: true
   become: true
   environment:
     - DEBIAN_FRONTEND: noninteractive
 
-- name: Remove OS provided neovim packages (out-of-date)
+- name: Remove OS provided packages
   ansible.builtin.apt:
-    name: nvim
+    name: '{{ apt_packages_uninstall }}'
     state: absent
   become: true
   environment:

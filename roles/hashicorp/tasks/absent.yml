@@ -1,8 +1,12 @@
 ---
-- name: Remove packages 
-  ansible.builtin.apt:
-    name: "{{ apt_packages }}"
-    state: absent
+- name: Remove packer
+  ansible.builtin.command: asdf plugin remove packer
+  changed_when: false
   become: true
-  environment:
-    - DEBIAN_FRONTEND: noninteractive
+  tags: skip_ansible_lint
+
+- name: Remove terraform
+  ansible.builtin.command: asdf plugin remove terraform
+  changed_when: false
+  become: true
+  tags: skip_ansible_lint

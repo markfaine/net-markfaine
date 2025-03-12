@@ -16,41 +16,12 @@ TODO: update from WSL installation to incorporate recent changes
     dest: "/mnt/c/Users/{{ user_name }}/.wslconfig"
   notify: restart-msg
 
-- name: Make vpnkit directory
-  ansible.builtin.file:
-    path: "{{ user_homedir | default('/home/' + user_name) }}/vpnkit" 
-    owner: "{{ user_name }}"
-    group: "{{ user_group | default(user_name) }}"
-    mode: '0755'
-  become: true
-
-# Disable resolved
-- name: Disable and stop resolved
-  ansible.builtin.systemd_service:
-    name: systemd-resolved
-    enabled: false
-    state: stopped
-    daemon_reload: true
-  become: true
-  notify: restart-network-manager
-
-- name: Create resolve.conf
-  ansible.builtin.template:
-    src: resolv.conf.j2 
-    dest: /etc/resolv.conf
-    owner: root
-    group: root
-    mode: '0644'
-  become: true
-  notify: 
-    - restart-msg
-    - restart-network-manager
-
 # Get latest version URL
 - name: Get URL for latest release
   ansible.builtin.shell: |
     set -o pipefail
-    wget -q -O - "{{ wsl_vpnkit_api_url }}" | jq -r '.assets[] | select(.name=="wsl-vpnkit.tar.gz").browser_download_url'
+    wget -q -O - "{{ wsl_vpnkit_api_url }}" | jq -r '.assets[] \
+    | select(.name=="wsl-vpnkit.tar.gz").browser_download_url'
   args:
     executable: /usr/bin/bash
   changed_when: false
@@ -58,14 +29,28 @@ TODO: update from WSL installation to incorporate recent changes
   tags: skip_ansible_lint
 
 - name: Download wsl-vpnkit
-  ansible.builtin.unarchive:
+  ansible.builtin.get_url:
     src: "{{ wsl_vpnkit_latest.stdout }}"
-    dest: "{{ user_homedir | default('/home/' + user_name) }}/vpnkit"
-    remote_src: true
-    extra_opts:
-      - --strip-components=1
+    dest: "/mnt/c/Users/{{ user_name }}/{{ wsl_vpnkit_latest.stdout | urlsplit('path') | basename }}"
+    owner: "{{ user_name }}"
+    group: "{{ user_name }}"
+    mode: '0644'
   become: true
   become_user: "{{ user_name }}"
+
+- name: Check for existing distro
+  ansible.builtin.command: wsl.exe --list
+  register: wsl_distro_list
+  become: true
+  become_user: "{{ user_name }}"
+
+- name: Import wsl-vpnkit distro
+  ansible.builtin.command: >
+    powershell.exe -Command "& 'wsl.exe' '--import' 'wsl-vpnkit'
+    '--version' '2' 'C:\Users\{{ user_name }}\wsl-vpnkit' 'C:\Users\{{ user_name }}\wsl-vpnkit.tar.gz'"
+  become: true
+  become_user: "{{ user_name }}"
+  when: wsl_distro_list.stdout is defined and 'wsl-vpnkit' not in wsl_distro_list.stdout
 
 - name: Install wsl-vpnkit.service from template
   ansible.builtin.template:
@@ -75,17 +60,6 @@ TODO: update from WSL installation to incorporate recent changes
     group: root
     mode: '0644'
   become: true
-  notify: 
+  notify:
    - restart-msg
    - start-wsl-vpnkit
-
-# Get latest version URL for win32yank
-- name: Get URL for latest win32yank release
-  ansible.builtin.shell: |
-    set -o pipefail
-    wget -q -O - "{{ wsl_win32yank_url }}" | jq -r '.assets[] | select(.name=="").browser_download_url'
-  args:
-    executable: /usr/bin/bash
-  changed_when: false
-  register: wsl_vpnkit_latest
-  tags: skip_ansible_lint

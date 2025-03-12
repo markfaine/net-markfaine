@@ -1,4 +1,26 @@
 ---
+- name: Remove node
+  ansible.builtin.command: asdf plugin remove nodejs
+  changed_when: false
+  become: true
+  tags: skip_ansible_lint
+
+- name: Find node config links in home directory
+  ansible.builtin.find:
+    paths: "{{ user_homedir | default('/home/' + user_name) }}"
+    patterns: '.node*'
+    file_type: link
+    hidden: true
+    recurse: false
+  register: node_config_links
+
+- name: Delete node config files
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  become_user: "{{ user_name }}"
+  loop: "{{ node_config_links.files | default([]) }}"
+
 - name: Remove nvm directory
   ansible.builtin.file:
     path: "{{ user_homedir | default('/home/' + user_name)/.nvm"

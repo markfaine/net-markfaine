@@ -5,11 +5,19 @@
     key: "{{ user_name }}"
   become: true
 
-- name: Add user group
+- name: Set uid
+  ansible.builtin.set_fact:
+    uid: "{{ ansible_facts.getent_passwd[user_name][1] }}"
+
+- name: Set gid
+  ansible.builtin.set_fact:
+    gid: "{{ ansible_facts.getent_passwd[user_name][2] }}"
+
+- name: Ensure install user group exists
   ansible.builtin.group:
     name: "{{ user_name }}"
     state: present
-    gid: "{{ user_gid }}"
+    gid: "{{ gid | default(user_group_id|default(1000))  }}"
   become: true
 
 - name: Add the user
@@ -20,13 +28,12 @@
     shell: "{{ user_shell | default('/bin/bash') }}"
     group: "{{ user_group | default(user_name) }}"
     groups: "{{ user_groups | default('sudo') }}"
-    password: "{{ user_password | default(lookup('ansible.builtin.password', '/dev/null', seed=ansible_hostname.replace('-', ''))) }}"
+    password: "{{ user_password | default(lookup('ansible.builtin.password', '/dev/null', seed=user_password_salt) | password_hash('sha512', user_password_salt)) }}"
     append: true
-    update_password: "on_create"
+    update_password: "always"
     state: present
   become: true
 
-# This is only needed in the case that no authorized keys are imported
 - name: Ensure .ssh directory exists
   ansible.builtin.file:
     path: "{{ user_homedir | default('/home/' + user_name) }}/.ssh"
@@ -43,6 +50,16 @@
     validate_certs: false
   ignore_errors: true
 
+- name: Create SSH key
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ user_homedir | default('/home/' + user_name) }}/.ssh/{{ item | basename }}"
+    owner: "{{ user_name }}"
+    group: "{{ user_group | default(user_name) }}"
+    mode: '0600'
+  become: true
+  loop: "{{ user_ssh_keys | default([]) }}"
+
 - name: Configure sudo
   ansible.builtin.copy:
     content: |
@@ -54,23 +71,17 @@
     mode: '0640'
   become: true
 
-- name: Stat dotfiles
-  ansible.builtin.stat:
-    path: "{{ user_homedir | default('/home/' + user_name) }}/dotfiles" 
-  register: dotfiles_dir
-
+# This will fail if there is no SSH key
 - name: Clone dotfiles
   ansible.builtin.git:
     repo: "{{ stow_dotfiles_repo }}"
     dest: "{{ user_homedir | default('/home/' + user_name) }}/dotfiles"
     accept_newhostkey: true
-    single_branch: yes
-    depth: 1
+    key_file: "{{ user_homedir | default('/home/' + user_name) }}/.ssh/id_rsa"
   become: true
   become_user: "{{ user_name }}"
-  when: dotfiles_dir.stat.exists is defined and not dotfiles_dir.stat.exists
 
-- name: Install CA Certificates
+- name: Copy CA Certificates
   ansible.builtin.copy:
     src: "{{ item }}"
     dest: "/usr/local/share/ca-certificates/{{ item | basename }}"
@@ -79,6 +90,8 @@
     mode: '0644'
   become: true
   loop: "{{ lookup('ansible.builtin.fileglob', user_homedir | default('/home/' + user_name) + '/dotfiles/ca/*.crt', wantlist=True) }}"
-  when: is_wsl is defined and is_wsl
-  notify: update-ca
+
+- name: Update CA Certificates
+  ansible.builtin.command: update-ca-certificates
+  changed_when: false
   become: true

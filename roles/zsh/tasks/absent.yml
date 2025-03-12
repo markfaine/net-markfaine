@@ -15,7 +15,7 @@
     recurse: false
   register: zsh_config_links
 
-- name: Delete Bash Config Files and Links
+- name: Delete dotfiles
   ansible.builtin.file:
     path: "{{ item.path }}"
     state: absent

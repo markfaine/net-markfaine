@@ -1,6 +1,6 @@
 ---
 - name: Remove fzf
-  ansible.builtin.file:
-    path: "{{ fzf_path }}"
-    state: absent
+  ansible.builtin.command: asdf plugin remove fzf
+  changed_when: false
   become: true
+  tags: skip_ansible_lint

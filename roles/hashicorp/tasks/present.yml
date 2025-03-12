@@ -1,40 +1,20 @@
 ---
-- name: Stat hashicorp keyring
-  ansible.builtin.stat:
-    path: /usr/share/keyrings/hashicorp-archive-keyring.gpg
-  register: hashicorp_keyring
+- name: Add packer to tools if not present
+  ansible.builtin.lineinfile:
+    path: "{{ user_homedir | default('/home/' + user_name) }}/.tool-versions"
+    regex: ^(packer)\s+([0-9\.]+)$
+    line: \g<1> {{ packer_version | default('latest') }}
+    backrefs: true
+    create: true
   become: true
+  notify: "markfaine.net.handlers : asdf-install"
 
-- name: Get hashicorp keyring
-  ansible.builtin.shell: 
-    set -o pipefail
-    wget -O- https://apt.releases.hashicorp.com/gpg | \
-    gpg --dearmor | tee /usr/share/keyrings/hashicorp-archive-keyring.gpg
-  args:
-    executable: /bin/bash
+- name: Add terraform to tools if not present
+  ansible.builtin.lineinfile:
+    path: "{{ user_homedir | default('/home/' + user_name) }}/.tool-versions"
+    regex: ^(terraform)\s+([0-9\.]+)$
+    line: \g<1> {{ terraform_version | default('latest') }}
+    backrefs: true
+    create: true
   become: true
-  when: hashicorp_keyring.stat.exists is defined and not hashicorp_keyring.stat.exists
-
-- name: Stat hashicorp keyring
-  ansible.builtin.stat:
-    path: /etc/apt/sources.list.d/hashicorp.list
-  register: hashicorp_list
-  become: true
-
-- name: Configure apt
-  ansible.builtin.shell: 
-    set -o pipefail
-    echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | \
-    tee /etc/apt/sources.list.d/hashicorp.list
-  args:
-    executable: /bin/bash
-  become: true
-  when: hashicorp_list.stat.exists is defined and not hashicorp_list.stat.exists
-
-- name: Install packages 
-  ansible.builtin.apt:
-    name: "{{ apt_packages }}"
-    update_cache: true
-  become: true
-  environment:
-    - DEBIAN_FRONTEND: noninteractive
+  notify: "markfaine.net.handlers : asdf-install"

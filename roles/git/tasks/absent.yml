@@ -1,4 +1,10 @@
 ---
+- name: Remove git
+  ansible.builtin.command: asdf plugin remove git
+  changed_when: false
+  become: true
+  tags: skip_ansible_lint
+
 - name: Find git config links in home directory
   ansible.builtin.find:
     paths: "{{ user_homedir | default('/home/' + user_name) }}"

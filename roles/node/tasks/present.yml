@@ -1,54 +1,11 @@
 ---
-- name: Get nvm installer url
-  ansible.builtin.shell: |
-    set -o pipefail
-    wget -q -O - {{ nvm_api_url }} | jq -r '.name'
-  args:
-    executable: /usr/bin/bash
-  register: nvm_latest_version_url
-  tags: skip_ansible_lint
-
-- name: Download nvm installer script 
-  ansible.builtin.shell: >
-    curl -o - "{{ nvm_install_url }}/{{ nvm_latest_version_url.stdout }}/{{ nvm_install_file }}" | bash
-  args:
-    creates: "{{ user_homedir | default('/home/' + user_name) }}/.nvm/nvm.sh"
-  become: true
-  become_user: "{{ user_name }}"
-  tags: skip_ansible_lint
-
-- name: Install Node 
-  ansible.builtin.shell: > 
-    source "$NVM_DIR/nvm.sh" && nvm install {{ node_version | default('node') }}
-  args:
-    executable: /usr/bin/bash
-  environment:
-    NVM_DIR: "{{ user_homedir | default('/home/' + user_name) }}/.nvm"
-  changed_when: false
-  become: true
-  become_user: "{{ user_name }}"
-  tags: skip_ansible_lint
-
-- name: Install node modules
-  ansible.builtin.shell: >
-    source "$NVM_DIR/nvm.sh" && npm install -g {{ item }}
-  args:
-    executable: /usr/bin/bash
-  environment:
-    NVM_DIR: "{{ user_homedir | default('/home/' + user_name) }}/.nvm"
-  changed_when: false
-  become: true
-  become_user: "{{ user_name }}"
-  loop: "{{ node_modules | default([]) }}"
-  tags: skip_ansible_lint
-
 - name: Find files in dotfiles/node
   ansible.builtin.find:
     paths: "{{ user_homedir | default('/home/' + user_name) }}/dotfiles/node/"
     use_regex: true
     hidden: true
   become: true
-  become_user: "{{ user_name }}"
+  become_user: '{{ user_name }}'
   register: node_dotfiles
 
 - name: Manage dotfiles
@@ -56,43 +13,57 @@
     - name: Find node config files in home directory
       ansible.builtin.find:
         paths: "{{ user_homedir | default('/home/' + user_name) }}"
-        patterns: '.npm*,.node*'
-        file_type: file
+        patterns: .node*
+        file_type: any
         hidden: true
         recurse: false
       register: node_config_files
-    
+
     - name: Backup node Config Files
       ansible.builtin.copy:
-        src: "{{ item.path }}"
-        dest: "{{ item.path | split('-') | first }}-{{ ansible_date_time.iso8601_basic_short }}"
+        src: '{{ item.path }}'
+        dest: >
+          "{{ item.path  | split('-')  | first }}-{{
+            ansible_date_time.iso8601_basic_short
+          }}"
         remote_src: true
-      become_user: "{{ user_name }}"
-      loop: "{{ node_config_files.files | default([]) }}"
-    
+      become_user: '{{ user_name }}'
+      loop: '{{ node_config_files.files | default([]) }}'
+
     - name: Find node config links
       ansible.builtin.find:
         paths: "{{ user_homedir | default('/home/' + user_name) }}"
-        patterns: '.npm*,.node*'
+        patterns: .node*
         hidden: true
         file_type: link
         recurse: false
       register: node_config_links
-    
-    - name: Delete Bash Config Files and Links
+
+    - name: Delete dotfiles
       ansible.builtin.file:
-        path: "{{ item.path }}"
+        path: '{{ item.path }}'
         state: absent
-      become_user: "{{ user_name }}"
-      loop: "{{ node_config_files.files | default([]) + node_config_links.files | default([]) }}"
-    
+      become_user: '{{ user_name }}'
+      loop: '{{ node_config_files.files | default([]) }}'
+
     - name: Stow apply node config files
-      ansible.builtin.command: stow . --target "{{ user_homedir | default('/home/' + user_name) }}"
+      ansible.builtin.command: >
+        stow . --target "{{ user_homedir | default('/home/' + user_name) }}"
       args:
         chdir: "{{ user_homedir | default('/home/' + user_name) }}/dotfiles/node"
       register: result
       changed_when: 'result.stderr is search("LINK: ")'
-      become_user: "{{ user_name }}"
+      become_user: '{{ user_name }}'
       tags: skip_ansible_lint
   become: true
   when: node_dotfiles.files is defined and node_dotfiles.files | length
+
+- name: Add node to tools if not present
+  ansible.builtin.lineinfile:
+    path: "{{ user_homedir | default('/home/' + user_name) }}/.tool-versions"
+    regex: ^(nodejs)\s+([0-9\.]+)$
+    line: \g<1> {{ node_version | default('latest') }}
+    backrefs: true
+    create: true
+  become: true
+  notify: "markfaine.net.handlers : asdf-install"

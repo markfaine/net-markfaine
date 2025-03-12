@@ -1,5 +1,1 @@
 ---
-# yq
-yq_arch: yq_linux_amd64
-yq_repo: https://api.github.com/repos/mikefarah/yq/releases/latest
-yq_path: /usr/local/bin/yq

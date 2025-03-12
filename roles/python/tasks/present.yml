@@ -18,7 +18,7 @@
         hidden: true
         recurse: false
       register: python_config_files
-    
+
     - name: Backup python Config Files
       ansible.builtin.copy:
         src: "{{ item.path }}"
@@ -26,7 +26,7 @@
         remote_src: true
       become_user: "{{ user_name }}"
       loop: "{{ python_config_files.files | default([]) }}"
-    
+
     - name: Find python config links
       ansible.builtin.find:
         paths: "{{ user_homedir | default('/home/' + user_name) }}"
@@ -35,14 +35,14 @@
         file_type: link
         recurse: false
       register: python_config_links
-    
-    - name: Delete Bash Config Files and Links
+
+    - name: Delete dotfiles
       ansible.builtin.file:
         path: "{{ item.path }}"
         state: absent
       become_user: "{{ user_name }}"
-      loop: "{{ python_config_files.files | default([]) + python_config_links.files | default([]) }}"
-    
+      loop: "{{ python_config_files.files | default([]) }}"
+
     - name: Stow apply python config files
       ansible.builtin.command: stow . --target "{{ user_homedir | default('/home/' + user_name) }}"
       args:

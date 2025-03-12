@@ -1,9 +1,1 @@
 ---
-python_modules:
-  - click
-  - requests
-  - ansible-lint
-  - docker
-  - python-gitlab
-  - passlib
-  - virtualenv>=20.26.6
