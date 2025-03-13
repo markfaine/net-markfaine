@@ -2,7 +2,7 @@
 - name: Create .asdf directory
   ansible.builtin.file:
     path: "{{ user_homedir | default('/home/' + user_name) }}/.asdf"
-    state: present
+    state: directory
   become: true
   become_user: "{{ user_name }}"
 
@@ -15,10 +15,19 @@
   register: asdf_latest
   tags: skip_ansible_lint
 
+- name: Ensure /usr/local/bin exists
+  ansible.builtin.file:
+    path: /usr/local/bin
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  become: true
+
 - name: Install asdf
   ansible.builtin.unarchive:
     src: "{{ asdf_latest.stdout }}"
-    dest: "{{ asdf_path }}"
+    dest: /usr/local/bin
     owner: root
     group: root
     mode: "0755"
@@ -68,8 +77,7 @@
       ansible.builtin.command: >
         stow . --target "{{ user_homedir | default('/home/' + user_name) }}"
       args:
-        chdir: >
-          "{{ user_homedir | default('/home/' + user_name) }}/dotfiles/asdf"
+        chdir: "{{ user_homedir | default('/home/' + user_name) }}/dotfiles/asdf"
       register: result
       changed_when: 'result.stderr is search("LINK: ")'
       become: true

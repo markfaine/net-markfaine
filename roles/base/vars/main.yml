@@ -12,6 +12,7 @@ apt_packages:
   - iproute2
   - iptables
   - iputils-ping
+  - jq
   - libcurl4-openssl-dev
   - libffi-dev
   - libreadline-dev
@@ -34,7 +35,6 @@ apt_packages_uninstall:
   - bat
   - direnv
   - gnupg
-  - jq
   - yq
   - ripgrep
   - tldr

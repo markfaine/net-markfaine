@@ -42,11 +42,10 @@
       ansible.builtin.copy:
         src: '{{ item.path }}'
         dest: >
-          "{{ item.path
+          {{ item.path
            | split('-') | first }}-{{ ansible_date_time.iso8601_basic_short
-           }}"
+          }}
         remote_src: true
-      become: true
       become_user: '{{ user_name }}'
       loop: '{{ bash_config_files.files | default([]) }}'
     - name: Find bash config links
@@ -60,21 +59,18 @@
 
     - name: Delete dotfiles
       ansible.builtin.file:
-        path: '{{ item.path }}'
+        path: "{{ item.path }}"
         state: absent
-      become: true
       become_user: '{{ user_name }}'
       loop: '{{ bash_config_files.files | default([]) }}'
 
     - name: Stow apply bash config files
-      ansible.builtin.command: >
+      ansible.builtin.command: >-
         stow . --target "{{ user_homedir | default('/home/' + user_name) }}"
       args:
-        chdir: >
-          "{{ user_homedir | default('/home/' + user_name) }}/dotfiles/bash"
+        chdir: "{{ user_homedir | default('/home/' + user_name) }}/dotfiles/bash"
       register: result
       changed_when: 'result.stderr is search("LINK: ")'
-      become: true
       become_user: '{{ user_name }}'
 
   become: true

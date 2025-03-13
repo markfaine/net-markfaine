@@ -3,6 +3,10 @@
   hosts: all
   tasks:
     - ansible.builtin.include_role:
+        name: net.markfaine.handlers
+      tags: always 
+
+    - ansible.builtin.include_role:
         name: net.markfaine.base
       tags: 
         - base

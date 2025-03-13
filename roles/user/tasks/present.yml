@@ -3,32 +3,35 @@
   ansible.builtin.getent:
     database: passwd
     key: "{{ user_name }}"
+    fail_key: false
   become: true
-
+ 
 - name: Set uid
   ansible.builtin.set_fact:
-    uid: "{{ ansible_facts.getent_passwd[user_name][1] }}"
+    uid: "{{ ansible_facts.getent_passwd[user_name][1] | default(1001) }}"
+  when: ansible_facts.getent_passwd is defined and ansible_facts.getent_passwd | length
 
 - name: Set gid
   ansible.builtin.set_fact:
-    gid: "{{ ansible_facts.getent_passwd[user_name][2] }}"
+    gid: "{{ ansible_facts.getent_passwd[user_name][2] | default(1001) }}"
+  when: ansible_facts.getent_passwd is defined and ansible_facts.getent_passwd | length
 
 - name: Ensure install user group exists
   ansible.builtin.group:
     name: "{{ user_name }}"
     state: present
-    gid: "{{ gid | default(user_group_id|default(1000))  }}"
+    gid: "{{ gid | default(user_group_id|default(1001))  }}"
   become: true
 
 - name: Add the user
   ansible.builtin.user:
     name: "{{ user_name }}"
     comment: "{{ user_comment | default('Default User') }}"
-    uid: "{{ uid | default(user_uid|default(1000)) }}"
+    uid: "{{ uid | default(user_uid|default(1001)) }}"
     shell: "{{ user_shell | default('/bin/bash') }}"
     group: "{{ user_group | default(user_name) }}"
     groups: "{{ user_groups | default('sudo') }}"
-    password: "{{ user_password | default(lookup('ansible.builtin.password', '/dev/null', seed=user_password_salt) | password_hash('sha512', user_password_salt)) }}"
+    password: "{{ user_password | default(lookup('ansible.builtin.password', '/dev/null', seed=inventory_hostname) | password_hash('sha512', inventory_hostname)) }}"
     append: true
     update_password: "always"
     state: present
@@ -37,6 +40,7 @@
 - name: Ensure .ssh directory exists
   ansible.builtin.file:
     path: "{{ user_homedir | default('/home/' + user_name) }}/.ssh"
+    state: directory
     owner: "{{ user_name }}"
     group: "{{ user_group | default(user_name) }}"
     mode: '0700'
@@ -46,7 +50,7 @@
   ansible.posix.authorized_key:
     user: "{{ user_name }}"
     state: present
-    key: "https://gitlab.enms.ndc.nasa.gov/{{ user_name }}.keys"
+    key: "https://github.com/{{ github_username }}.keys"
     validate_certs: false
   ignore_errors: true
 

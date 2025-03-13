@@ -8,6 +8,15 @@
   become_user: '{{ user_name }}'
   register: neovim_dotfiles
 
+- name: Ensure .config directory exists
+  ansible.builtin.file:
+    path: "{{ user_homedir | default('/home/' + user_name) }}/.config"
+    state: directory
+    owner: "{{ user_name }}"
+    group: "{{ user_name }}"
+    mode: '0700'
+  become: true
+
 - name: Manage dotfiles
   block:
     - name: Find neovim config files in home directory
