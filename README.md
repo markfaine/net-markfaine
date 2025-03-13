@@ -1,6 +1,6 @@
 # net.markfaine
 
-## Overview 
+## Overview
 This project contains an Ansible collection for Ubuntu that is used to configure a user environment and to install dotfiles.
 
 - bash with bash-it
@@ -8,7 +8,7 @@ This project contains an Ansible collection for Ubuntu that is used to configure
 - git
 - fzf
 - nvim with NVChad
-- node/npm 
+- node/npm
 - python3 (libraries)
 - ruby
 - tmux
@@ -16,9 +16,9 @@ This project contains an Ansible collection for Ubuntu that is used to configure
 - wsl vpn-kit (for WSL2 environments)
 - zsh with zim
 - zoxide
-- fonts from NerdFonts 
+- fonts from NerdFonts
 
-**Note:** I am assuming the commands below will be all executed as the root user and the ansible `remote_user` will also be root. 
+**Note:** I am assuming the commands below will be all executed as the root user and the ansible `remote_user` will also be root.
 
 ## Instructions
 See [Setup a new computer](https://gist.github.com/markfaine/ba7468b0d81d1914ac1a7f97e2998606) for the files referenced below.
@@ -79,7 +79,7 @@ chmod -R u+rwX,g+rX,o+rX /tmp/venv
 . /tmp/venv/bin/activate
 python3 -m pip install ansible passlib
 ```
-6. Run `bootstrap.sh` 
+6. Run `bootstrap.sh`
 ```sh
 chmod +x bootstrap.sh
 ./bootstrap.sh
@@ -92,7 +92,7 @@ ansible-galaxy collection install git+https://github.com/markfaine/net-markfaine
 8. Run the playbook
 ```sh
 ansible-playbook -l <HOSTNAME> \
-  ~/.ansible/collections/ansible_collections/net/markfaine/playbooks/playbook.yml 
+  ~/.ansible/collections/ansible_collections/net/markfaine/playbooks/playbook.yml
 ```
 10. Logout and login as the non-root user
 
@@ -116,7 +116,7 @@ ansible-playbook -l <HOSTNAME> \
 
 # You may want to run with connection=local if SSH is not available
 ansible-playbook -l <HOSTNAME> --connection=local \
-  ~/.ansible/collections/ansible_collections/net/markfaine/playbooks/playbook.yml -t wsl 
+  ~/.ansible/collections/ansible_collections/net/markfaine/playbooks/playbook.yml -t wsl
 ```
 
 ### Shutdown WSL
