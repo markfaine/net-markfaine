@@ -2,7 +2,6 @@
 - name: Site playbook
   hosts: all
   gather_facts: false
-  tasks:
 
 - name: Import packages playbook
   ansible.builtin.import_playbook: packages.yml
@@ -11,14 +10,14 @@
     - packages
  
 - name: Import user playbook
-   ansible.builtin.import_playbook: user.yml
-   tags: user
+  ansible.builtin.import_playbook: user.yml
+  tags: user
  
 - name: Import mise playbook
-   ansible.builtin.import_playbook: mise.yml
-   tags: 
-     - mise
-     - packages
+  ansible.builtin.import_playbook: mise.yml
+  tags: 
+    - mise
+    - packages
   
 - name: Import wsl playbook
   ansible.builtin.import_playbook: wsl.yml
