@@ -7,7 +7,7 @@
     shell: "{{ target_shell }}"
     group: "{{ target_group }}"
     groups: "{{ target_extra_groups | default(['sudo']) }}"
-    password: "{{ user_password | default(lookup('ansible.builtin.password', '/dev/null', seed=inventory_hostname) | password_hash('sha512', inventory_hostname)) }}"
+    password: "{{ target_password | default(lookup('ansible.builtin.password', '/dev/null', seed=inventory_hostname) | password_hash('sha512', inventory_hostname)) }}"
     append: true
     update_password: "on_create"
     state: present
@@ -18,7 +18,7 @@
     path: "{{ target_home_path }}/.ssh"
     state: directory
     owner: "{{ target_username }}"
-    group: "{{ target_group }}"
+    group: "{{ target_group | default(target_username) }}"
     mode: '0700'
   become: true
 
@@ -27,18 +27,8 @@
     user: "{{ target_username }}"
     state: present
     key: "https://github.com/{{ target_github_username }}.keys"
-    validate_certs: false
+  when: target_github_username is defined
   ignore_errors: true
-
-- name: Create SSH key
-  ansible.builtin.copy:
-    src: "{{ item }}"
-    dest: "{{ target_home_path }}/.ssh/{{ item | basename }}"
-    owner: "{{ target_username }}"
-    group: "{{ user_group | default(target_username) }}"
-    mode: '0600'
-  become: true
-  loop: "{{ user_ssh_keys | default([]) }}"
 
 - name: Configure sudo
   ansible.builtin.copy:
@@ -51,12 +41,11 @@
     mode: '0640'
   become: true
 
-# This will fail if there is no SSH key
 - name: Clone dotfiles
   ansible.builtin.git:
-    repo: "{{ target_dotfiles_repo }}"
-    dest: "{{ target_home_path }}/dotfiles"
+    repo: "https://github.com/{{ target_github_username }}/dotfiles.git"
+    dest: "{{ target_home_path }}/.config/dotfiles"
     accept_newhostkey: true
-    key_file: "{{ target_home_path }}/.ssh/id_rsa"
   become: true
   become_user: "{{ target_username }}"
+  when: target_github_username is defined
