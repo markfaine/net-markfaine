@@ -66,7 +66,7 @@
           register: target_user_uid_prompt
         - name: Set a fact for uid
           ansible.builtin.set_fact:
-            target_uid: "{{ target_user_uid_prompt['user_input'] if target_user_uid_prompt['user_input'] != '' else target_user['uid'] }}"
+            target_uid: "{{ target_user_uid_prompt['user_input'] }}"
       when: target_uid is not defined
     
     - name: Check for group
@@ -120,7 +120,7 @@
     - name: Check for groups
       block:
         - name: Get user existing target groups
-          ansible.builtin.shell: "groups mfaine | cut -d':' -f2 | sed -r 's/mfaine//g' | xargs | tr ' ' ','"
+          ansible.builtin.shell: "groups {{ target_username }} | cut -d':' -f2 | sed -r 's/{{ target_username }}//g' | xargs | tr ' ' ','"
           # become: true
           register: target_user_groups
           tags:
@@ -128,7 +128,7 @@
     
         - name: Prompt for extra groups
           ansible.builtin.pause:
-            prompt: "Enter extra group memberships [{{ target_user_groups.stdout if 'stdout' in target_user_groups else '' }}]"
+            prompt: "Enter extra group memberships [{{ target_user_groups.stdout if 'stdout' in target_user_groups else 'sudo' }}]"
           register: target_user_groups_prompt
     
         - name: Set a fact for group
