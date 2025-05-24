@@ -10,24 +10,6 @@ if [[ "$EUID" -ne 0 ]]; then
     exit 1
 fi
 
-# Functions
-debug() {
-    if [[ "$DEBUG" == "true" ]]; then
-        printf "DEBUG ===> %s\n" "$*"
-    fi
-}
-
-usage() {
-    cat <<-EOF
-          Usage: $0 [-d|--debug] [-h|--help] [COLLECTION_DIR]
-          Args:
-          --debug         Enable debug output
-          --help          Show this message
-          COLLECTION_DIR  The collection directory
-EOF
-    exit
-}
-
 # A prompt function
 function ask() {
     local ans
@@ -41,21 +23,21 @@ function ask() {
     done
 }
 
-function prompt(){
-    local prompt ans default
+function user_prompt(){
+    local prompt default
     prompt="${1:-None}"
     default="${2:-''}"
     while true; do
         printf "\n%s: [%s]" "$prompt" "$default"
-        read -r ans
-        if [[ "${ans:-}" == "" ]]; then
+        read -r result
+        if [[ "${result:-}" == "" ]]; then
+            result="$default"
             break
         fi
-        if ask "You entered '$ans', is this correct"; then
+        if ask "You entered '$result', is this correct"; then
             break
         fi
     done
-    echo "$ans"
 }
 
 
@@ -78,9 +60,9 @@ uvx --from ansible-core ansible-galaxy collection install -f git+https://github.
 playbook_cmd=(uvx --from ansible-core ansible-playbook)
 
 # Set target host
-hostname="$(prompt "Target Hostname" "localhost")"
-playbook_cmd+=(-l "$hostname")
-if [[ "${hostname:-}" == "localhost" ]]; then
+user_prompt "Target Hostname" "localhost"
+playbook_cmd+=(-l "$result")
+if [[ "${result:-}" == "localhost" ]]; then
     playbook_cmd+=(--connection local)
 fi
 
@@ -88,7 +70,7 @@ roles=(packages user mise wsl docker fonts)
 run_roles=()
 for role in "${roles[@]}"; do
     if ask "Run the $role role"; then
-        run_roles+=($role) 
+        run_roles+=($role)
     fi
 done
 tags="$(IFS=','; echo "${run_roles[*]}")"
@@ -96,4 +78,5 @@ playbook_cmd+=(-t "$tags")
 playbook_cmd+=(~/.ansible/collections/ansible_collections/net/markfaine/playbooks/playbook.yml)
 
 printf "Run playbooks\n"
+echo "${playbook_cmd[*]}"
 "${playbook_cmd[@]}"

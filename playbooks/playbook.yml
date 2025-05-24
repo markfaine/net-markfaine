@@ -5,35 +5,29 @@
   tasks:
 
     - name: Import packages playbook
-      ansible.builtin.include_playbook
-        name: packages.yml
+      ansible.builtin.import_playbook: packages.yml
       tags: 
         - apt
         - packages
 
    - name: Import user playbook
-      ansible.builtin.include_role:
-        name: user.yml
+      ansible.builtin.import_role: user.yml
       tags: user
 
    - name: Import mise playbook
-      ansible.builtin.include_playbook
-        name: mise.yml
+      ansible.builtin.import_playbook: mise.yml
       tags: 
         - mise
         - packages
  
    - name: Import wsl playbook
-     ansible.builtin.include_role:
-       name: wsl.yml
+     ansible.builtin.import_role: wsl.yml
      tags: wsl
 
    - name: Import fonts playbook
-     ansible.builtin.include_role:
-       name: fonts.yml
+     ansible.builtin.import_role: fonts.yml
      tags: fonts
 
    - name: Import docker playbook
-     ansible.builtin.include_role:
-       name: docker.yml
+     ansible.builtin.import_role: docker.yml
      tags: docker
