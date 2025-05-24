@@ -61,10 +61,24 @@ playbook_cmd=(uvx --from ansible-core ansible-playbook)
 
 # Set target host
 user_prompt "Target Hostname" "localhost"
-playbook_cmd+=(-l "$result")
 if [[ "${result:-}" == "localhost" ]]; then
+    playbook_cmd+=(-i /tmp/inventory.yml)
+    playbook_cmd+=(-l localhost)
     playbook_cmd+=(--connection local)
+    cat <<EOF > /tmp/inventory.yml
+---
+hosts:
+  all:
+    localhost:
+      vars:
+        ansible_connection: local
+        ansible_python_interpreter: "{{ansible_playbook_python}}"
+EOF
+else
+    playbook_cmd+=(-l "$result")
 fi
+
+
 
 roles=(packages user mise wsl docker fonts)
 run_roles=()
