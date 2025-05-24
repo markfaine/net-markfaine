@@ -70,9 +70,8 @@ if [[ "${result:-}" == "localhost" ]]; then
 hosts:
   all:
     localhost:
-      vars:
-        ansible_connection: local
-        ansible_python_interpreter: "{{ansible_playbook_python}}"
+      ansible_connection: local
+      ansible_python_interpreter: "{{ ansible_playbook_python }}"
 EOF
 else
     playbook_cmd+=(-l "$result")
