@@ -177,6 +177,7 @@
     - name: Stat inventory file
       ansible.builtin.stat:
         path: "{{ lookup('ansible.builtin.env', 'HOME') }}/{{ target_username }}.yml"
+      become: true
       register: user_inventory_file  
 
     - name: Check for inventory file
@@ -204,6 +205,7 @@
             owner: "{{ lookup('ansible.builtin.env', 'USER') }}"
             owner: "{{ lookup('ansible.builtin.env', 'USER') }}"
             mode: '0600'
+      become: true
       when: user_inventory_file.stat.exists is not defined or not user_inventory_file.stat.exists  
 
     - ansible.builtin.include_role:
