@@ -2,7 +2,6 @@
 - name: Site playbook
   hosts: all
   gather_facts: false
-  tasks:
 
     - name: Import packages playbook
       ansible.builtin.import_playbook: packages.yml
