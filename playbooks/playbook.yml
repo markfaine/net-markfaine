@@ -102,7 +102,7 @@
     
         - name: Set a fact for home directory path
           ansible.builtin.set_fact:
-            target_home_path: "{{ target_user_home_prompt['user_input'] if target_user_home_prompt['user_input'] != '' else target_user['home'] }}"
+            target_home_path: "{{ target_user_home_prompt['user_input'] }}"
       when: target_home_path is not defined
     
     - name: Check for shell
