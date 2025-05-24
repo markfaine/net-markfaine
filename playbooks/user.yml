@@ -2,64 +2,64 @@
 - name: Create/update user
   hosts: all
   gather_facts: false
-    pre_tasks:
-      - block
-            - ansible.builtin.pause:
-                prompt: "Enter username"
-              register: out
-            - ansible.builtin.set_fact:
-                prompt_username: "{{ out.user_input | default('mfaine') }}"
+  pre_tasks:
+    - block
+        - ansible.builtin.pause:
+            prompt: "Enter username"
+          register: out
+        - ansible.builtin.set_fact:
+            prompt_username: "{{ out.user_input | default('mfaine') }}"
 
-            - ansible.builtin.pause:
-                prompt: "Enter Github username"
-              register: out
-            - ansible.builtin.set_fact:
-                prompt_github_username: "{{ out.user_input | default('markfaine') }}"
+        - ansible.builtin.pause:
+            prompt: "Enter Github username"
+          register: out
+        - ansible.builtin.set_fact:
+            prompt_github_username: "{{ out.user_input | default('markfaine') }}"
 
-            - ansible.builtin.pause:
-                prompt: "Enter user uid"
-              register: out
-            - ansible.builtin.set_fact:
-                prompt_uid: "{{ out.user_input | default('1001') }}"
+        - ansible.builtin.pause:
+            prompt: "Enter user uid"
+          register: out
+        - ansible.builtin.set_fact:
+            prompt_uid: "{{ out.user_input | default('1001') }}"
 
-            - ansible.builtin.pause:
-                prompt: "Enter user gid"
-              register: out
-            - ansible.builtin.set_fact:
-                prompt_gid: "{{ out.user_input | default('1002') }}"
+        - ansible.builtin.pause:
+            prompt: "Enter user gid"
+          register: out
+        - ansible.builtin.set_fact:
+            prompt_gid: "{{ out.user_input | default('1002') }}"
 
-            - ansible.builtin.pause:
-                prompt: "Enter extra groups"
-              register: out
-            - ansible.builtin.set_fact:
-                prompt_groups: "{{ out.user_input | default('sudo') }}"
+        - ansible.builtin.pause:
+            prompt: "Enter extra groups"
+          register: out
+        - ansible.builtin.set_fact:
+            prompt_groups: "{{ out.user_input | default('sudo') }}"
 
-            - ansible.builtin.pause:
-                prompt: "Enter user home path"
-              register: out
-            - ansible.builtin.set_fact:
-                prompt_home: "{{ out.user_input | default('/home/mfaine') }}"
+        - ansible.builtin.pause:
+            prompt: "Enter user home path"
+          register: out
+        - ansible.builtin.set_fact:
+            prompt_home: "{{ out.user_input | default('/home/mfaine') }}"
 
-            - ansible.builtin.pause:
-                prompt: "Enter user comment"
-              register: out
-            - ansible.builtin.set_fact:
-                prompt_comment: "{{ out.user_input | default('Mark Faine') }}"
+        - ansible.builtin.pause:
+            prompt: "Enter user comment"
+          register: out
+        - ansible.builtin.set_fact:
+            prompt_comment: "{{ out.user_input | default('Mark Faine') }}"
 
-            - ansible.builtin.pause:
-                prompt: "Enter shell"
-              register: out
-            - ansible.builtin.set_fact:
-                prompt_shell: "{{ out.user_input | default('/usr/bin/zsh') }}"
+        - ansible.builtin.pause:
+            prompt: "Enter shell"
+          register: out
+        - ansible.builtin.set_fact:
+            prompt_shell: "{{ out.user_input | default('/usr/bin/zsh') }}"
 
-            - ansible.builtin.pause:
-                prompt: "Enter password"
-              register: out
-            - ansible.builtin.set_fact:
-                prompt_password: "{{ out.user_input | password_hash('sha256', prompt_username | replace(' ', '') ) }}"
-        run_once: true
-        tags: user
-    tasks:
+        - ansible.builtin.pause:
+            prompt: "Enter password"
+          register: out
+        - ansible.builtin.set_fact:
+            prompt_password: "{{ out.user_input | password_hash('sha256', prompt_username | replace(' ', '') ) }}"
+      run_once: true
+      tags: user
+  tasks:
     - ansible.builtin.include_role:
         name: net.markfaine.user
       tags: user
