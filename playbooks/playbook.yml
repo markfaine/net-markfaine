@@ -176,7 +176,7 @@
   
     - name: Stat inventory file
       ansible.builtin.stat:
-        path: "{{ lookup('os.builtin.env', 'HOME') }}/{{ target_username }}.yml"
+        path: "{{ lookup('ansible.builtin.env', 'HOME') }}/{{ target_username }}.yml"
       register: user_inventory_file  
 
     - name: Check for inventory file
@@ -200,9 +200,9 @@
           ansible.builtin.copy:
             content: | 
               {{ {"all": {"hosts": {inventory_hostname: inventory_data }}} | to_nice_yaml(indent=2) }}
-            dest: "{{ lookup('os.builtin.env', 'HOME') }}/{{ target_username }}.yml"
-            owner: "{{ lookup('os.builtin.env', 'USER') }}"
-            owner: "{{ lookup('os.builtin.env', 'USER') }}"
+            dest: "{{ lookup('ansible.builtin.env', 'HOME') }}/{{ target_username }}.yml"
+            owner: "{{ lookup('ansible.builtin.env', 'USER') }}"
+            owner: "{{ lookup('ansible.builtin.env', 'USER') }}"
             mode: '0600'
       when: user_inventory_file.stat.exists is not defined or not user_inventory_file.stat.exists  
 
