@@ -128,7 +128,7 @@
     
         - name: Prompt for extra groups
           ansible.builtin.pause:
-            prompt: "Enter extra group memberships [{{ target_user_groups.stdout if 'stdout' in target_user_groups else 'sudo' }}]"
+            prompt: "Enter extra group memberships [{{ target_user_groups.stdout if 'stdout' in target_user_groups and target_user_groups.stdout != '' else 'sudo' }}]"
           register: target_user_groups_prompt
     
         - name: Set a fact for group
