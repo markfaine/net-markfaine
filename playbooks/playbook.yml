@@ -78,7 +78,7 @@
     
         - name: Set a fact for group
           ansible.builtin.set_fact:
-            target_group: "{{ target_user_group_prompt['user_input'] if target_user_group_prompt['user_input'] != '' else target_user['group'] }}"
+            target_group: "{{ target_user_group_prompt['user_input'] }}"
       when: target_group is not defined
 
     - name: Check for comment
@@ -90,7 +90,7 @@
     
         - name: Set a fact for comment
           ansible.builtin.set_fact:
-            target_comment: "{{ target_user_comment_prompt['user_input'] if target_user_comment_prompt['user_input'] != '' else target_user['comment'] }}"
+            target_comment: "{{ target_user_comment_prompt['user_input'] }}"
       when: target_comment is not defined
     
     - name: Check for home directory
@@ -114,7 +114,7 @@
     
         - name: Set a fact for shell 
           ansible.builtin.set_fact:
-            target_shell: "{{ target_user_shell_prompt['user_input'] if target_user_shell_prompt['user_input'] != '' else target_user['shell'] }}"
+            target_shell: "{{ target_user_shell_prompt['user_input'] }}"
       when: target_shell is not defined
     
     - name: Check for groups
@@ -133,7 +133,7 @@
     
         - name: Set a fact for group
           ansible.builtin.set_fact:
-            target_extra_groups: "{{ target_user_groups_prompt['user_input'] if target_user_groups_prompt['user_input'] != '' else target_user_groups.stdout }}"
+            target_extra_groups: "{{ target_user_groups_prompt['user_input'] }}"
       when: target_extra_groups is not defined
     
     - name: Check for groups
@@ -145,7 +145,7 @@
     
         - name: Set a fact for Github username
           ansible.builtin.set_fact:
-            target_github_username: "{{ target_github_username_prompt['user_input'] if target_github_username_prompt['user_input'] != '' else target_user['name'] }}"
+            target_github_username: "{{ target_github_username_prompt['user_input'] }}"
       when: target_github_username is not defined
     
     - name: Check for groups
@@ -157,7 +157,7 @@
     
         - name: Set a fact for the dotfiles repo
           ansible.builtin.set_fact:
-            target_dotfiles_repo: "{{ target_dotfiles_repo_prompt['user_input'] if target_dotfiles_repo_prompt['user_input'] != '' else 'git@github.com:' + target_github_username + '/dotfiles.git' | trim }}"
+            target_dotfiles_repo: "{{ target_dotfiles_repo_prompt['user_input'] }}"
       when: target_dotfiles_repo is not defined
     
     - name: Debug
