@@ -13,12 +13,6 @@
   ansible.builtin.import_playbook: user.yml
   tags: user
  
-- name: Import mise playbook
-  ansible.builtin.import_playbook: mise.yml
-  tags: 
-    - mise
-    - packages
-  
 - name: Import wsl playbook
   ansible.builtin.import_playbook: wsl.yml
   tags: wsl
