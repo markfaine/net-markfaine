@@ -1,0 +1,52 @@
+---
+- name: Get target host
+  hosts: localhost 
+  gather_facts: false
+  tasks:
+
+    - name: Get user on target host
+      ansible.builtin.user:
+        name: "{{ target_username }}"
+        state: present
+      check_mode: true
+      register: user_info
+      become: true
+      delegate_to: "{{ target_host }}"
+      delegate_facts: true
+
+    - ansible.builtin.include_role:
+        name: net.markfaine.apt
+      tags: 
+        - apt
+        - packages
+
+    - ansible.builtin.include_role:
+        name: net.markfaine.user
+      tags: user
+      when: 'changed' in user_info and user_info.changed
+
+    - ansible.builtin.include_role:
+        name: net.markfaine.mise
+      tags: 
+        - mise
+        - packages
+
+    - name: Stat /etc/wsl.conf
+      ansible.builtin.stat:
+        path: /etc/wsl.conf
+      become: true
+      register: wsl_conf
+      tags: wsl
+    
+    - ansible.builtin.include_role:
+        name: net.markfaine.wsl
+      when: wsl_conf.stat.exists is defined and wsl_conf.stat.exists
+      tags: wsl
+
+    - ansible.builtin.include_role:
+        name: net.markfaine.fonts
+      tags: fonts
+
+    - ansible.builtin.include_role:
+        name: net.markfaine.docker
+      tags: docker

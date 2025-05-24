@@ -1,249 +1,39 @@
 ---
-- name: Get target host
-  hosts: localhost 
+- name: Site playbook
+  hosts: all
   gather_facts: false
-  vars_prompt:
-    - name: username
-      prompt: "Enter username"
-      default: "mfaine"
-      private: false
-    - name: target_host
-      prompt: "Enter hostname"
-      default: "localhost"
-      private: false
-  tasks:
-    - name: Add the host
-      ansible.builtin.add_host:
-        name: "{{ target_host }}"
-        groups: "target_host_group"
-      when: "target_host != 'localhost'"
-
-    - name: Add the host (localhost)
-      ansible.builtin.add_host:
-        name: localhost
-        groups: "target_host_group"
-        ansible_connection: local
-      when: "target_host == 'localhost'"
-
-    - name: Get user on target host
-      ansible.builtin.user:
-        name: "{{ username }}"
-        state: present
-      check_mode: true
-      register: user_info
-      become: true
-      delegate_to: "{{ target_host }}"
-      delegate_facts: true
-
-    - name: Set a fact for the username
-      ansible.builtin.set_fact:
-        target_username: "{{ username }}"
-      delegate_to: "{{ target_host }}"
-      delegate_facts: true
-
-    - name: Set a fact for the hostname
-      ansible.builtin.set_fact:
-        target_user: "{{ user_info }}"
-      when: target_host is defined
-      delegate_to: "{{ target_host }}"
-      delegate_facts: true
-
-- name: Get target configuration
-  hosts: target_host_group
-  gather_facts: false
-
   tasks:
 
-    - name: Debug
-      ansible.builtin.debug:
-        var: target_uid
-
-    - name: Check for uid
-      block:
-        - name: Prompt for uid
-          ansible.builtin.pause:
-            prompt: "Enter uid directory [{{ target_user['uid'] if target_user is defined and 'uid' in target_user else '1000' }}]"
-          register: target_user_uid_prompt
-        - name: Set a fact for uid
-          ansible.builtin.set_fact:
-            target_uid: "{{ target_user_uid_prompt['user_input'] }}"
-      when: target_uid is not defined
-    
-    - name: Check for group
-      block:
-        - name: Prompt for group
-          ansible.builtin.pause:
-            prompt: "Enter user group [{{ target_user['group'] if target_user is defined and 'group' in target_user else '1000' }}]"
-          register: target_user_group_prompt
-    
-        - name: Set a fact for group
-          ansible.builtin.set_fact:
-            target_group: "{{ target_user_group_prompt['user_input'] }}"
-      when: target_group is not defined
-
-    - name: Check for comment
-      block:
-        - name: Prompt for comment
-          ansible.builtin.pause:
-            prompt: "Enter user comment [{{ target_user['comment'] if target_user is defined and 'comment' in target_user else '' }}]"
-          register: target_user_comment_prompt
-    
-        - name: Set a fact for comment
-          ansible.builtin.set_fact:
-            target_comment: "{{ target_user_comment_prompt['user_input'] }}"
-      when: target_comment is not defined
-    
-    - name: Check for home directory
-      block:
-        - name: Prompt for home directory path
-          ansible.builtin.pause:
-            prompt: "Enter user home directory [{{ target_user['home'] if target_user is defined and 'home' in target_user else '/home/' + target_username }}]"
-          register: target_user_home_prompt
-    
-        - name: Set a fact for home directory path
-          ansible.builtin.set_fact:
-            target_home_path: "{{ target_user_home_prompt['user_input'] }}"
-      when: target_home_path is not defined
-    
-    - name: Check for shell
-      block:
-        - name: Prompt for the user shell
-          ansible.builtin.pause:
-            prompt: "Enter user shell [{{ target_user['shell'] if target_user is defined and 'shell' in target_user else '/usr/bin/zsh' }}]"
-          register: target_user_shell_prompt
-    
-        - name: Set a fact for shell 
-          ansible.builtin.set_fact:
-            target_shell: "{{ target_user_shell_prompt['user_input'] }}"
-      when: target_shell is not defined
-    
-    - name: Check for groups
-      block:
-        - name: Get user existing target groups
-          ansible.builtin.shell: "groups {{ target_username }} | cut -d':' -f2 | sed -r 's/{{ target_username }}//g' | xargs | tr ' ' ','"
-          # become: true
-          register: target_user_groups
-          tags:
-            - skip_ansible_lint
-    
-        - name: Prompt for extra groups
-          ansible.builtin.pause:
-            prompt: "Enter extra group memberships [{{ target_user_groups.stdout if 'stdout' in target_user_groups and target_user_groups.stdout != '' else 'sudo' }}]"
-          register: target_user_groups_prompt
-    
-        - name: Set a fact for group
-          ansible.builtin.set_fact:
-            target_extra_groups: "{{ target_user_groups_prompt['user_input'] }}"
-      when: target_extra_groups is not defined
-    
-    - name: Check for groups
-      block:
-        - name: Prompt for Github username
-          ansible.builtin.pause:
-            prompt: "Enter Github username [{{ target_user['name'] if target_user is defined and 'name' in target_user else '' }}]"
-          register: target_github_username_prompt
-    
-        - name: Set a fact for Github username
-          ansible.builtin.set_fact:
-            target_github_username: "{{ target_github_username_prompt['user_input'] }}"
-      when: target_github_username is not defined
-    
-    - name: Check for groups
-      block:
-        - name: Prompt for dotfiles repo
-          ansible.builtin.pause:
-            prompt: "Enter dotfiles repo [git@github.com:{{ target_github_username }}/dotfiles.git]"
-          register: target_dotfiles_repo_prompt
-    
-        - name: Set a fact for the dotfiles repo
-          ansible.builtin.set_fact:
-            target_dotfiles_repo: "{{ target_dotfiles_repo_prompt['user_input'] }}"
-      when: target_dotfiles_repo is not defined
-    
-    - name: Debug
-      ansible.builtin.debug:
-        msg: "{{ item }}"
-      loop:
-        - "{{ target_uid }}"
-        - "{{ target_group }}"
-        - "{{ target_home_path }}"
-        - "{{ target_shell }}"
-        - "{{ target_comment }}"
-        - "{{ target_extra_groups }}"
-        - "{{ target_github_username }}"
-        - "{{ target_dotfiles_repo }}"
-
-  
-    - name: Stat inventory file
-      ansible.builtin.stat:
-        path: "{{ lookup('ansible.builtin.env', 'HOME') }}/{{ target_username }}.yml"
-      become: true
-      register: user_inventory_file  
-
-    - name: Check for inventory file
-      block:
-        - name: Set inventory data as a fact
-          ansible.builtin.set_fact:
-              inventory_data: >
-                {{ inventory_data | default({}) | combine(item) }}
-          loop:
-            - username: "{{ target_username}}"
-            - target_uid: "{{ target_uid }}"
-            - target_group: "{{ target_group }}"
-            - target_home_path: "{{ target_home_path }}"
-            - target_shell: "{{ target_shell }}"
-            - target_comment: "{{ target_comment }}"
-            - target_extra_groups: "{{ target_extra_groups }}"
-            - target_github_username: "{{ target_github_username }}"
-            - target_dotfiles_repo: "{{ target_dotfiles_repo }}"
-             
-        - name: Write inventory
-          ansible.builtin.copy:
-            content: | 
-              {{ {"all": {"hosts": {inventory_hostname: inventory_data }}} | to_nice_yaml(indent=2) }}
-            dest: "{{ lookup('ansible.builtin.env', 'HOME') }}/{{ target_username }}.yml"
-            owner: "{{ lookup('ansible.builtin.env', 'USER') }}"
-            owner: "{{ lookup('ansible.builtin.env', 'USER') }}"
-            mode: '0600'
-      become: true
-      when: user_inventory_file.stat.exists is not defined or not user_inventory_file.stat.exists  
-
-    - ansible.builtin.include_role:
-        name: net.markfaine.dotfiles
-      tags: dotfiles
-
-    - ansible.builtin.include_role:
-        name: net.markfaine.apt
+    - name: Import packages playbook
+      ansible.builtin.include_playbook
+        name: packages.yml
       tags: 
         - apt
         - packages
 
-    - ansible.builtin.include_role:
-        name: net.markfaine.user
+   - name: Import user playbook
+      ansible.builtin.include_role:
+        name: user.yml
       tags: user
 
-    # - name: Stat /etc/wsl.conf
-    #   ansible.builtin.stat:
-    #     path: /etc/wsl.conf
-    #   become: true
-    #   register: wsl_conf
-    #   tags: wsl
-    #
-    # - ansible.builtin.include_role:
-    #     name: net.markfaine.wsl
-    #   when: wsl_conf.stat.exists is defined and wsl_conf.stat.exists
-    #   tags: wsl
-
-    - ansible.builtin.include_role:
-        name: net.markfaine.mise
+   - name: Import mise playbook
+      ansible.builtin.include_playbook
+        name: mise.yml
       tags: 
         - mise
         - packages
+ 
+   - name: Import wsl playbook
+     ansible.builtin.include_role:
+       name: wsl.yml
+     tags: wsl
 
-    - ansible.builtin.include_role:
-        name: net.markfaine.dotfiles
-      tags: dotfiles
+   - name: Import fonts playbook
+     ansible.builtin.include_role:
+       name: fonts.yml
+     tags: fonts
 
-    - ansible.builtin.include_role:
-        name: net.markfaine.fonts
-      tags: fonts
+   - name: Import docker playbook
+     ansible.builtin.include_role:
+       name: docker.yml
+     tags: docker

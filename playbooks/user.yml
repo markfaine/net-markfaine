@@ -1,0 +1,44 @@
+---
+- name: Create/update user
+  hosts: all
+  gather_facts: false
+  vars_prompt:
+    - name: username
+      prompt: "Enter username"
+      default: "mfaine"
+      private: false
+    - name: target_github_username
+      default: "markfaine"
+    - name: target_host
+      prompt: "Enter hostname"
+      default: "localhost"
+      private: false
+    - name: target_uid
+      prompt: "Enter user uid"
+      default: '1001'
+      private: false
+    - name: target_gid
+      prompt: "Enter group uid"
+      default: '1002'
+      private: false
+    - name: target_groups
+      prompt: "Enter extra groups"
+      default: ['sudo']
+      private: false
+    - name: target_home_path
+      default: "/home/mfaine"
+      private: false
+    - name: target_comment
+      default: "Mark Faine"
+      private: false
+    - name: target_shell
+      default: "/usr/bin/zsh"
+      private: false
+    - name: target_password
+      private: true
+      confirm: true
+
+  tasks:
+    - ansible.builtin.include_role:
+        name: net.markfaine.user
+      tags: user
