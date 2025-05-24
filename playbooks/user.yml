@@ -3,7 +3,7 @@
   hosts: all
   gather_facts: false
   pre_tasks:
-    - block
+    - block:
         - ansible.builtin.pause:
             prompt: "Enter username"
           register: out
