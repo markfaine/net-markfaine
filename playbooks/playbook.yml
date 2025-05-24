@@ -11,7 +11,7 @@
        - packages
 
    - name: Import user playbook
-      ansible.builtin.import_role: user.yml
+      ansible.builtin.import_playbook: user.yml
       tags: user
 
    - name: Import mise playbook
@@ -21,13 +21,13 @@
         - packages
  
    - name: Import wsl playbook
-     ansible.builtin.import_role: wsl.yml
+     ansible.builtin.import_playbook: wsl.yml
      tags: wsl
 
    - name: Import fonts playbook
-     ansible.builtin.import_role: fonts.yml
+     ansible.builtin.import_playbook: fonts.yml
      tags: fonts
 
    - name: Import docker playbook
-     ansible.builtin.import_role: docker.yml
+     ansible.builtin.import_playbook: docker.yml
      tags: docker
