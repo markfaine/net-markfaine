@@ -4,11 +4,11 @@
   gather_facts: false
   tasks:
 
-    - name: Import packages playbook
-      ansible.builtin.import_playbook: packages.yml
-      tags: 
-        - apt
-        - packages
+   - name: Import packages playbook
+     ansible.builtin.import_playbook: packages.yml
+     tags: 
+       - apt
+       - packages
 
    - name: Import user playbook
       ansible.builtin.import_role: user.yml
