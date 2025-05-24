@@ -212,8 +212,6 @@
         name: net.markfaine.dotfiles
       tags: dotfiles
 
-    - meta: end_play
-
     - ansible.builtin.include_role:
         name: net.markfaine.apt
       tags: 
