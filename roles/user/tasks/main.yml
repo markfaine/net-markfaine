@@ -1,11 +1,62 @@
 ---
-- name: Include task for state
-  ansible.builtin.include_tasks:
-    file: "{{ state | default('present') }}.yml"
-    apply:
-      tags: user
-  when:
-    - ansible_os_family is defined and ansible_os_family == "Debian"
-    - state is not defined or state in ['present', 'absent']
-  tags: always
+- name: Update/Create the user
+  ansible.builtin.user:
+    name: "{{ target_username }}"
+    comment: "{{ target_comment }}"
+    uid: "{{ target_uid }}"
+    shell: "{{ target_shell }}"
+    group: "{{ target_group }}"
+    groups: "{{ target_extra_groups | default(['sudo']) }}"
+    password: "{{ user_password | default(lookup('ansible.builtin.password', '/dev/null', seed=inventory_hostname) | password_hash('sha512', inventory_hostname)) }}"
+    append: true
+    update_password: "on_create"
+    state: present
+  become: true
 
+- name: Ensure .ssh directory exists
+  ansible.builtin.file:
+    path: "{{ target_home_path }}/.ssh"
+    state: directory
+    owner: "{{ target_username }}"
+    group: "{{ target_group }}"
+    mode: '0700'
+  become: true
+
+- name: Set authorized keys taken from gitlab
+  ansible.posix.authorized_key:
+    user: "{{ target_username }}"
+    state: present
+    key: "https://github.com/{{ target_github_username }}.keys"
+    validate_certs: false
+  ignore_errors: true
+
+- name: Create SSH key
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ target_home_path }}/.ssh/{{ item | basename }}"
+    owner: "{{ target_username }}"
+    group: "{{ user_group | default(target_username) }}"
+    mode: '0600'
+  become: true
+  loop: "{{ user_ssh_keys | default([]) }}"
+
+- name: Configure sudo
+  ansible.builtin.copy:
+    content: |
+      {{ target_username }} ALL=(ALL) NOPASSWD: ALL
+      Defaults:{{ target_username }} !requiretty
+    dest: "/etc/sudoers.d/{{ target_username }}"
+    owner: root
+    group: root
+    mode: '0640'
+  become: true
+
+# This will fail if there is no SSH key
+- name: Clone dotfiles
+  ansible.builtin.git:
+    repo: "{{ target_dotfiles_repo }}"
+    dest: "{{ target_home_path }}/dotfiles"
+    accept_newhostkey: true
+    key_file: "{{ target_home_path }}/.ssh/id_rsa"
+  become: true
+  become_user: "{{ target_username }}"

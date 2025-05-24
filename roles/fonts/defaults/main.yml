@@ -1,2 +1,7 @@
 ---
- 
+user_font_list:
+  - 'FiraCode'
+  - 'Lilex'
+  - 'Monoid'
+  - 'CascadiaCode'
+  - 'CascadiaMono'

@@ -1,6 +1,0 @@
----
-- name: Remove zoxide
-  ansible.builtin.command: asdf plugin remove zoxide
-  changed_when: false
-  become: true
-  tags: skip_ansible_lint

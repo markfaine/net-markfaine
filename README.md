@@ -50,7 +50,9 @@ all:
       user_groups: ['sudo']
       user_shell: /usr/bin/zsh
       user_font_list: ['Meslo'] # Optional list of fonts to install from NerdFonts or ['all'] to install them all
+      dotfiles_dir:  
       stow_dotfiles_repo: 'git@github.com:markfaine/dotfiles.git'
+      stow_dotfiles_repo_branch: experimental
 ```
 4. Create `~/ansible.cfg` with the following contents:
 ```

@@ -1,10 +1,15 @@
 ---
-- name: Include task for state
-  ansible.builtin.include_tasks:
-    file: "{{ state | default('present') }}.yml"
-    apply:
-      tags: zsh
-  when:
-    - ansible_os_family is defined and ansible_os_family == "Debian"
-    - state is not defined or state in ['present', 'absent']
-  tags: always
+- name: Create zim_home directory
+  ansible.builtin.file:
+    path: "{{ target_home_path }}/.zim"
+    state: directory
+  become: true
+  become_user: '{{ target_username }}'
+
+- name: Download zimfw
+  ansible.builtin.command: >
+    curl -fsSL -o "$ZIM_HOME/zimfw.zsh" "{{ zimfw_download_url }}"
+  environment:
+    ZIM_HOME: "{{ target_home_path }}/.zim"
+  become: true
+  become_user: '{{ target_username }}'

@@ -1,5 +1,0 @@
----
-asdf_repo: https://api.github.com/repos/asdf-vm/asdf/releases/latest
-asdf_ruby_gems: [tmuxinator]
-asdf_arch: linux-amd64
-asdf_path: /usr/local/bin/asdf

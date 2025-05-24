@@ -1,0 +1,16 @@
+---
+
+- name: Verify
+  hosts: all
+  environment:
+    - SMDEV_CONTAINER_OFF: "true"
+  vars_files:
+    - ../../defaults/main.yml
+    - ../../vars/main.yml
+    - ../../../base/vars/global.yml
+    - ../../../base/vars/vault.yml
+
+  tasks:
+    - name: Include test_mise
+      ansible.builtin.include_role:
+        name: test_mise

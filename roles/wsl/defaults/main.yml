@@ -1,4 +1,1 @@
 ---
-# wsl_user: mfaine # if not defined user_name will be used
-# wsl_hostname: wsl # if not defined default is 'wsl'
-

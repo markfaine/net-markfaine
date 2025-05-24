@@ -1,0 +1,59 @@
+---
+- name: Create
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars_files:
+    - vars.yml
+  no_log: "{{ molecule_no_log | default(true) }}"
+  tasks:
+    - name: Create vm from template
+      vmware_guest:
+        hostname: "{{ vcenter_hostname }}"
+        username: "{{ vcenter_username }}"
+        password: "{{ vcenter_password }}"
+        validate_certs: "{{ vcenter_validate_certs | default(false) }}"
+        datacenter: "{{ vcenter_datacenter }}"
+        name: "{{ item.name }}"
+        cluster: "{{ vcenter_cluster }}"
+        folder: "{{ vcenter_folder }}"
+        template: "nats-{{ item.vm_rhel_version }}-base"
+        state: poweredon
+        proxy_host: 192.100.9.85
+        proxy_port: 3128
+        hardware:
+          memory_mb: "{{ item.vm_memory }}"
+          num_cpus: "{{ item.vm_cpu_cores }}"
+          scsi: paravirtual
+        networks: >
+          {{ item.vm_networks }}
+        customization:
+          hostname: "{{ item.name.split('.')[0] }}"
+        wait_for_ip_address: true
+        wait_for_customization: true
+      register: server
+      delegate_to: localhost
+      loop: "{{ molecule_yml.platforms }}"
+
+    - when: server.changed | default(false) | bool
+      block:
+        - name: Populate instance config dict
+          set_fact:
+            instance_conf_dict: {
+              'instance': "{{ item.item.name }}",
+              'address': "{{ item.instance.ipv4 }}",
+              'user': "{{ item.item.vm_user }}",
+              'port': "{{ item.item.vm_port }}", }
+          with_items: "{{ server.results }}"
+          register: instance_config_dict
+
+        - name: Convert instance config dict to a list
+          set_fact:
+            instance_conf: "{{ instance_config_dict.results | map(attribute='ansible_facts.instance_conf_dict') | list }}"
+
+        - name: Dump instance config
+          copy:
+            content: |
+              # Molecule managed
+              {{ instance_conf | to_json | from_json | to_yaml }}
+            dest: "{{ molecule_instance_config }}"
