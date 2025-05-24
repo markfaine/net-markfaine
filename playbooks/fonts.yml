@@ -1,9 +1,8 @@
 ---
-- name: Get target host
-  hosts: localhost 
+- name: Install fonts
+  hosts: all
   gather_facts: false
   tasks:
-
     - ansible.builtin.include_role:
         name: net.markfaine.fonts
       tags: fonts

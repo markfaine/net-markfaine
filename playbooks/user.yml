@@ -37,7 +37,6 @@
     - name: target_password
       private: true
       confirm: true
-
   tasks:
     - ansible.builtin.include_role:
         name: net.markfaine.user
