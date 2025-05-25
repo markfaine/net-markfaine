@@ -22,7 +22,7 @@
     state: started
   listen: docker-start
   become: true
-  when: ansible_facts.services['docker.service']['state'] != 'running'
+  #when: ansible_facts.services['docker.service']['state'] != 'running'
 
 - name: docker-stop
   ansible.builtin.service:
@@ -42,7 +42,7 @@
     state: restarted
   listen: docker-start
   become: true
-  when: ansible_facts.services['docker.service']['state'] == 'running'
+  #when: ansible_facts.services['docker.service']['state'] == 'running'
 
 - name: docker-start
   ansible.builtin.command: /bin/true

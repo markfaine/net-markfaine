@@ -67,7 +67,7 @@
 
 - name: Set permissions on dotfiles directory
   ansible.builtin.file:
-    path: "{{ home }}/.config/dotfiles"
+    path: "{{ home }}/.config"
     state: directory
     owner: "{{ username }}"
     group: "{{ group_name | default(username) }}"
