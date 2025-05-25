@@ -24,15 +24,6 @@ doppler setup
 ```
 See: `doppler --help` for more information.
 
-### Tuckr
-[Tuckr](https://github.com/RaphGL/Tuckr) is like [GNU Stow](https://www.gnu.org/software/stow/) and will install dotfiles.  The dotfiles come from a [dotfiles repo](https://github.com/markfaine/dotfiles/tree/experimental) and are using the layout required by Tuckr.  The Ansible inventory file contains a variable that points to the dotfiles repo.
-
-```sh
-cd "$HOME/.config/dotfiles"
-tuckr add \*
-```
-See `tuckr --help` for more information.
-
 ### Mise
 [Mise (mise-en-place)](https://mise.jdx.dev/) will install the tools configured from  `~/.config/mise/config.toml` installed from the dotfiles repo by Mise.
 An `.env` file containing no secret values as well as *mounted* secret files can also be utilized by mise in a manner similar to `direnv`
@@ -40,4 +31,13 @@ An `.env` file containing no secret values as well as *mounted* secret files can
 mise up
 ```
 
+### Tuckr
+[Tuckr](https://github.com/RaphGL/Tuckr) is like [GNU Stow](https://www.gnu.org/software/stow/) and will install dotfiles.  The dotfiles come from a [dotfiles repo](https://github.com/markfaine/dotfiles/tree/experimental) and are using the layout required by Tuckr.  The Ansible inventory file contains a variable that points to the dotfiles repo.  Since rust isn't installed until after Mise is installed but mise doesn't have any configuration file until Tuckr symlinks the dotfiles I have to get creative here.
 
+```sh
+mise use -g rust
+cargo install tuckr
+cd "$HOME/.config/dotfiles"
+tuckr add \* # A pre-hook script will remove "$HOME/.config/mise/config.toml" if it exists and is a regular file
+```
+See `tuckr --help` for more information.
