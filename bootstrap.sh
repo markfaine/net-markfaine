@@ -46,13 +46,8 @@ fi
 playbook_cmd=("$UV_INSTALL_DIR/uvx" --with passlib --from ansible-core ansible-playbook)
 
 # Add inventory
-inventory="${1:-}"
-if [[ "$inventory" == "" ]]; then
-    cp -f "$DIR/inventory.yml" "$UV_INSTALL_DIR/inventory.yml"
-    playbook_cmd+=(-i "$UV_INSTALL_DIR/inventory.yml" -l localhost --connection local)
-else
-    playbook_cmd+=(-i "$inventory")
-fi
+inventory="${1:-"$UV_INSTALL_DIR/inventory.yml"})"
+playbook_cmd+=(-i "$inventory")
 playbook_cmd+=(~/.ansible/collections/ansible_collections/net/markfaine/playbooks/playbook.yml)
 
 printf "\nEdit the inventory and then run this command:\n\n"
