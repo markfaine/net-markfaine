@@ -57,7 +57,7 @@ printf "Installing collection\n"
 uvx --from ansible-core ansible-galaxy collection install -f git+https://github.com/markfaine/net-markfaine.git,experimental &>/dev/null
 
 # Set base command
-playbook_cmd=(uvx --from ansible-core ansible-playbook)
+playbook_cmd=(uvx --from ansible-core --with passlib ansible-playbook)
 
 # Set target host
 user_prompt "Target Hostname" "localhost"
