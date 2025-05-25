@@ -51,6 +51,12 @@
     mode: '0640'
   become: true
 
+- name: Set safe directory
+  ansible.builtin.command: git config --global --add safe.directory "{{ home }}/.config/dotfiles"
+  changed_when: false
+  become: true
+  tags: skip_ansible_lint
+
 - name: Clone dotfiles
   ansible.builtin.git:
     repo: "https://github.com/{{ github_username }}/dotfiles.git"
