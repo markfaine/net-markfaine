@@ -25,8 +25,9 @@
         owner: root
         group: root
         mode: '0640'
+        force: true
     - name: Dearmor key
-      ansible.builtin.command: gpg --dearmor /tmp/mise.asc
+      ansible.builtin.shell: cat /tmp/mise.asc | gpg --dearmor > /tmp/mise.asc.gpg
       args:
         chdir: /tmp
       tags: skip_ansible_lint
