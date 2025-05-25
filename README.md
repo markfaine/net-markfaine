@@ -6,8 +6,8 @@ This project contains tools for installing/updating my tools and dotfiles across
 ```sh
 # To setup on a stock ubuntu
 apt-get update && apt-get install -y curl
-curl -o bootstrap.sh https://raw.githubusercontent.com/markfaine/net-markfaine/refs/heads/experimental/bootstrap.sh
-bash bootstrap.sh
+curl https://raw.githubusercontent.com/markfaine/net-markfaine/refs/heads/experimental/bootstrap.sh | bash
+
 ```
 The above will output an `ansible-playbook` command. Edit the inventory file located at `/tmp/uv/inventory.yml` and then run the `ansible-playbook` command.
 
