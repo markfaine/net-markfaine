@@ -36,7 +36,6 @@
     mode: '0640'
     remote_src: true
   become: true
-  become_user: "{{ username }}"
   loop: "{{ font_map | selectattr('name', 'in', fonts) }}"
   when:
     - fonts is defined and fonts | length
@@ -51,7 +50,6 @@
     mode: '0640'
     remote_src: true
   become: true
-  become_user: "{{ username }}"
   loop: "{{ font_map }}"
   when: 
     - fonts is defined and fonts | length
