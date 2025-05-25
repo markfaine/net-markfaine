@@ -28,7 +28,7 @@
     path: "{{ home }}/.ssh"
     state: directory
     owner: "{{ username }}"
-    group: "{{ group | default(username) }}"
+    group: "{{ group_name | default(username) }}"
     mode: '0700'
   become: true
 
