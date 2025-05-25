@@ -25,21 +25,25 @@
         owner: root
         group: root
         mode: '0640'
-      become: true
+    - name: Dearmor key
+      ansible.buitin.command: gpg --dearmor /tmp/mise.asc
+      args:
+        chdir: /tmp
+      tags: skip_ansible_lint
     - name: Create a keyring
       ansible.builtin.command: >
-        gpg --no-default-keyring --keyring /tmp/mise-keyring.gpg --import /tmp/mise.asc
+        gpg --no-default-keyring --keyring /tmp/mise-keyring.gpg --import /tmp/mise.asc.gpg
     - name: Extract and install key 
       ansible.builtin.shell: >
-        gpg --no-default-keyring --keyring /tmp/mise-keyring.gpg --export > /etc/apt/trusted.gpg.d/mise-keyring.gpg
+        gpg --no-default-keyring --keyring /tmp/mise-keyring.gpg --export > /etc/apt/keyrings/mise-keyring.gpg
     - name: Install repo
       ansible.builtin.copy:
-        content: "deb [signed-by=/etc/apt/keyrings/mise-archive-keyring.gpg arch=amd64] https://mise.jdx.dev/deb stable main"
+        content: "deb [signed-by=/etc/apt/keyrings/mise-keyring.gpg arch=amd64] https://mise.jdx.dev/deb stable main"
         dest: "/etc/apt/sources.list.d/mise.list" 
         owner: root
         group: root
         mode: '0644'
-      become: true
+  become: true
 
 - name: Install packages
   ansible.builtin.apt:
