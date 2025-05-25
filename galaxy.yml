@@ -42,7 +42,10 @@ tags:
 # collection label 'namespace.name'. The value is a version range
 # L(specifiers,https://python-semanticversion.readthedocs.io/en/latest/#requirement-specification). Multiple version
 # range specifiers can be set and are separated by ','
-dependencies: {}
+dependencies: 
+  ansible.posix: ">=1.6.2"
+  community.general: ">=10.6.0"
+  community.crypto: ">=2.26.0"
 
 # The URL of the originating SCM repository
 repository: http://github.com/markfaine/dotfiles
