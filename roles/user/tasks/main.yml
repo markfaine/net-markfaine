@@ -1,6 +1,6 @@
 ---
 - name: Update/Create the group for the user
-  ansible.builtin.user:
+  ansible.builtin.group:
     name: "{{ group_name }}"
     state: present
     gid: "{{ gid | default(uid) }}"
