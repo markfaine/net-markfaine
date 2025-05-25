@@ -52,19 +52,9 @@
     update_cache: true
   become: true
 
-- name: Create bash completions directory
-  ansible.builtin.file:
-    path:  "{{ target_home_path  }}/.local/share/bash-completion"
-    state: directory
-    owner: "{{ target_username }}"
-    group: "{{ target_group }}"
-    mode: '0750'
-  become: true
-
 - name: Install bash completions
-  ansible.builtin.shell: /usr/bin/mise completion bash --include-bash-completion-lib > "{{ target_home_path }}/.local/share/bash-completion/mise"
+  ansible.builtin.shell: /usr/bin/mise completion bash --include-bash-completion-lib > /etc/bash_completin.d/_mise
   become: true
-  become_user: "{{ target_username }}"
   tags: skip_ansible_lint
 
 - name: Install zsh completions
@@ -74,8 +64,11 @@
 
 - name: Set permissions on mise completions
   ansible.builtin.file:
-    path: /usr/local/share/zsh/site-functions/_mise
+    path: "{{ item }}"
     owner: root
     group: root
     mode: '0755'
   become: true
+  loop:
+    - /etc/bash_completin.d/_mise
+    - /usr/local/share/zsh/site-functions/_mise
