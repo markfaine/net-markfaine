@@ -3,6 +3,8 @@
 ## Overview
 This project contains tools for installing/updating my tools and dotfiles across multiple Ubuntu (and maybe Debian) environments. It uses Ansible, Doppler, Tuckr, and Mise to Install tooling and dotfiles.
 
+Note: The script below need to be run with a privileged user account.
+
 ```sh
 # To setup on a stock ubuntu
 apt-get update && apt-get install -y curl
