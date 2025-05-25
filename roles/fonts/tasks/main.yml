@@ -31,9 +31,11 @@
   ansible.builtin.unarchive:
     src: "{{ item.url }}"
     dest: "{{ home }}/.fonts"
+    owner: "{{ username }}"
+    group: "{{ group_name | default(username) }}"
+    mode: '0640'
     remote_src: true
   become: true
-  become_user: "{{ username }}"
   loop: "{{ font_map | selectattr('name', 'in', fonts) }}"
   when:
     - fonts is defined and fonts | length
@@ -43,9 +45,11 @@
   ansible.builtin.unarchive:
     src: "{{ item.url }}"
     dest: "{{ home }}/.fonts"
+    owner: "{{ username }}"
+    group: "{{ group_name | default(username) }}"
+    mode: '0640'
     remote_src: true
   become: true
-  become_user: "{{ username }}"
   loop: "{{ font_map }}"
   when: 
     - fonts is defined and fonts | length
