@@ -20,34 +20,34 @@
 
 - name: Make sure fonts directory exists
   ansible.builtin.file:
-    path: "{{ target_home_path }}/.fonts"
+    path: "{{ home }}/.fonts"
     state: directory
-    owner: "{{ target_username }}"
-    group: "{{ user_group | default(target_username) }}"
+    owner: "{{ username }}"
+    group: "{{ group | default(username) }}"
     mode: '0750'
   become: true
-  become_user: "{{ target_username }}"
+  become_user: "{{ username }}"
 
 - name: Install individual fonts
   ansible.builtin.unarchive:
     src: "{{ item.url }}"
-    dest: "{{ target_home_path }}/.fonts"
+    dest: "{{ home }}/.fonts"
     remote_src: true
   become: true
-  become_user: "{{ target_username }}"
-  loop: "{{ font_map | selectattr('name', 'in', user_font_list) }}"
+  become_user: "{{ username }}"
+  loop: "{{ font_map | selectattr('name', 'in', fonts) }}"
   when:
-    - user_font_list is defined and user_font_list | length
-    - "'all' not in user_font_list"
+    - fonts is defined and fonts | length
+    - "'all' not in fonts"
 
 - name: Install all fonts
   ansible.builtin.unarchive:
     src: "{{ item.url }}"
-    dest: "{{ target_home_path }}/.fonts"
+    dest: "{{ home }}/.fonts"
     remote_src: true
   become: true
-  become_user: "{{ target_username }}"
+  become_user: "{{ username }}"
   loop: "{{ font_map }}"
   when: 
-    - user_font_list is defined and user_font_list | length
-    - "'all' in user_font_list"
+    - fonts is defined and fonts | length
+    - "'all' in fonts"

@@ -38,6 +38,9 @@ apt_packages:
   - make
   - ncurses-dev
   - openssl
+  - openssh-client
+  - openssh-server
+  - ssh-askpass
   - pass
   - pkg-config
   - python3

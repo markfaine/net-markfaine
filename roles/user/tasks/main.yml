@@ -1,13 +1,14 @@
 ---
 - name: Update/Create the user
   ansible.builtin.user:
-    name: "{{ target_username }}"
-    comment: "{{ target_comment }}"
-    uid: "{{ target_uid }}"
-    shell: "{{ target_shell }}"
-    group: "{{ target_group }}"
-    groups: "{{ target_extra_groups | default(['sudo']) }}"
-    password: "{{ target_password | default(lookup('ansible.builtin.password', '/dev/null', seed=inventory_hostname) | password_hash('sha512', inventory_hostname)) }}"
+    name: "{{ username }}"
+    comment: "{{ comment }}"
+    uid: "{{ uid }}"
+    shell: "{{ shell }}"
+    group: "{{ group }}"
+    groups: "{{ extra_groups | default(['sudo', 'users']) }}"
+    home: "{{ home }}"
+    password: "{{ password | default(lookup('ansible.builtin.password', '/dev/null', seed=username) | password_hash('sha512', username)) }}"
     append: true
     update_password: "on_create"
     state: present
@@ -15,27 +16,27 @@
 
 - name: Ensure .ssh directory exists
   ansible.builtin.file:
-    path: "{{ target_home_path }}/.ssh"
+    path: "{{ home }}/.ssh"
     state: directory
-    owner: "{{ target_username }}"
-    group: "{{ target_group | default(target_username) }}"
+    owner: "{{ username }}"
+    group: "{{ group | default(username) }}"
     mode: '0700'
   become: true
 
-- name: Set authorized keys taken from gitlab
+- name: Set authorized keys taken from github
   ansible.posix.authorized_key:
-    user: "{{ target_username }}"
+    user: "{{ username }}"
     state: present
-    key: "https://github.com/{{ target_github_username }}.keys"
-  when: target_github_username is defined
+    key: "https://github.com/{{ github_username }}.keys"
+  when: github_username is defined
   ignore_errors: true
 
 - name: Configure sudo
   ansible.builtin.copy:
     content: |
-      {{ target_username }} ALL=(ALL) NOPASSWD: ALL
-      Defaults:{{ target_username }} !requiretty
-    dest: "/etc/sudoers.d/{{ target_username }}"
+      {{ username }} ALL=(ALL) NOPASSWD: ALL
+      Defaults:{{ username }} !requiretty
+    dest: "/etc/sudoers.d/{{ username }}"
     owner: root
     group: root
     mode: '0640'
@@ -43,9 +44,9 @@
 
 - name: Clone dotfiles
   ansible.builtin.git:
-    repo: "https://github.com/{{ target_github_username }}/dotfiles.git"
-    dest: "{{ target_home_path }}/.config/dotfiles"
+    repo: "https://github.com/{{ github_username }}/dotfiles.git"
+    dest: "{{ home }}/.config/dotfiles"
     accept_newhostkey: true
   become: true
-  become_user: "{{ target_username }}"
-  when: target_github_username is defined
+  become_user: "{{ username }}"
+  when: github_username is defined

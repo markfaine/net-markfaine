@@ -5,7 +5,6 @@
     state: present
     update_cache: true
   become: true
-  environment: "{{ proxy_env | default({}) }}"
 
 - name: Ensure that /etc/apt/keyrings exists 
   ansible.builtin.file:
@@ -27,15 +26,19 @@
         group: root
         mode: '0640'
       become: true
+    - name: Dearmor key
+      ansible.builtin.shell: cat /tmp/docker.asc | gpg --dearmor > /tmp/docker.asc.gpg
+      args:
+        chdir: /tmp
     - name: Create a keyring
       ansible.builtin.command: >
-        gpg --no-default-keyring --keyring /tmp/docker-keyring.gpg --import /tmp/docker.asc
+        gpg --no-default-keyring --keyring /tmp/docker-keyring.gpg --import /tmp/docker.asc.gpg
     - name: Extract and install key 
       ansible.builtin.shell: >
-        gpg --no-default-keyring --keyring /tmp/docker-keyring.gpg --export > /etc/apt/trusted.gpg.d/docker-keyring.gpg
+        gpg --no-default-keyring --keyring /tmp/docker-keyring.gpg --export > /etc/apt/keyrings/docker-keyring.gpg
     - name: Install repo
       ansible.builtin.copy:
-        content: "deb [arch=amd64] {{ docker_repo_baseurl }} {{ ansible_distribution_release }} stable"
+        content: "deb [signed-by=/etc/apt/keyrings/docker-keyring.gpg arch=amd64] {{ docker_repo_baseurl }} {{ ansible_distribution_release }} stable"
         dest: "/etc/apt/sources.list.d/docker.list" 
         owner: root
         group: root
@@ -119,14 +122,14 @@
 
 - name: Add the user to the group 'docker'
   ansible.builtin.user:
-    name: "{{ user_name }}"
+    name: "{{ username }}"
     groups: docker
     append: true
   become: true
 
 - name: Install docker credential helper
   ansible.builtin.get_url:
-    url: 'https://github.com/docker/docker-credential-helpers/releases/download/v0.8.2/docker-credential-pass-v0.8.2.linux-amd64'
+    url: 'https://github.com/docker/docker-credential-helpers/releases/download/v0.9.3/docker-credential-pass-v0.9.3.linux-amd64'
     dest: /usr/local/bin/docker-credential-pass
     checksum: sha256:cd22b15fe2ce1b58c5098f541edc3dd84af17bcf3f63abbeef47e5d4ad53e5ee
     owner: root

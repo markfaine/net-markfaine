@@ -4,92 +4,50 @@ set -euo pipefail
 
 # Configure a barebones environment for running tooling to configure full development environment
 # Recommend running as a user other than the target user, for example root
+# Running against a host other than localhost will require ssh public key access to the host
 
-if [[ "$EUID" -ne 0 ]]; then
-    printf "You should run this script as the root user\n"
-    exit 1
-fi
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+DEPENDENCIES=(curl wget)
+UV_INSTALL_DIR=/tmp/uv
+UV_INSTALL_SCRIPT="https://astral.sh/uv/install.sh"
+COLLECTION="git+https://github.com/markfaine/net-markfaine.git"
+COLLECTION_BRANCH="experimental"
 
-# A prompt function
-function ask() {
-    local ans
-    while true; do
-        printf "\n%s [y|N] ? " "$@"
-        read -r ans
-        case "$ans" in
-        y* | Y*) return 0 ;;
-        *) return 1 ;;
-        esac
-    done
+function install_dependencies() {
+    local tags
+    printf "Installing dependencies\n"
+    tags="$(IFS=' '; echo "${dependencies[*]}")"
+    apt install -y "${tag[@]}"
 }
 
-function user_prompt(){
-    local prompt default
-    prompt="${1:-None}"
-    default="${2:-''}"
-    while true; do
-        printf "\n%s: [%s]" "$prompt" "$default"
-        read -r result
-        if [[ "${result:-}" == "" ]]; then
-            result="$default"
-            break
-        fi
-        if ask "You entered '$result', is this correct"; then
-            break
-        fi
-    done
+function install_uv(){
+    printf "Installing and configuring uv\n"
+    curl -LsSf "$UV_INSTALL_SCRIPT" | env UV_INSTALL_DIR="$UV_INSTALL_DIR" sh &>/dev/null
+    mkdir -p $UV_INSTALL_DIR
 }
 
+function install_collection(){
+    printf "Installing collection\n"
+    uvx --from ansible-core ansible-galaxy collection install -f "$COLLECTION,$COLLECTION_BRANCH" &>/dev/null
+}
 
-# Install curl
-if ! command -v curl &>/dev/null; then
-    printf "Installing curl\n"
-    apt install -y curl
-fi
-
-# Install uv
-printf "Installing and configuring uv\n"
-curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR="/tmp/uv" sh &>/dev/null
-mkdir -p /tmp/bootstrap
-pushd /tmp/bootstrap &>/dev/null || exit 1
-
-printf "Installing collection\n"
-uvx --from ansible-core ansible-galaxy collection install -f git+https://github.com/markfaine/net-markfaine.git,experimental &>/dev/null
+pushd $UV_INSTALL_DIR &>/dev/null || exit 1
 
 # Set base command
-playbook_cmd=(uvx --from ansible-core --with passlib ansible-playbook)
+playbook_cmd=(uvx --with passlib --from ansible-core ansible-playbook)
 
-# Set target host
-user_prompt "Target Hostname" "localhost"
-if [[ "${result:-}" == "localhost" ]]; then
-    playbook_cmd+=(-i /tmp/inventory.yml)
-    playbook_cmd+=(-l localhost)
-    playbook_cmd+=(--connection local)
-    cat <<EOF > /tmp/inventory.yml
----
-hosts:
-  all:
-    localhost:
-      ansible_connection: local
-      ansible_python_interpreter: "{{ ansible_playbook_python }}"
-EOF
+# Add inventory
+inventory="$1"
+if [[ "${inventory:-}" == "" ]]; then
+    cp -f "$DIR/inventory.yml" "$UV_INSTALL_DIR/inventory.yml"
+    playbook_cmd+=(-i "$UV_INSTALL_DIR/inventory.yml" -l localhost --connection local)
 else
-    playbook_cmd+=(-l "$result")
+    playbook_cmd+=(-i "$inventory")
 fi
 
-
-
-roles=(packages user mise wsl docker fonts)
-run_roles=()
-for role in "${roles[@]}"; do
-    if ask "Run the $role role"; then
-        run_roles+=($role)
-    fi
-done
-tags="$(IFS=','; echo "${run_roles[*]}")"
-playbook_cmd+=(-t "$tags")
 playbook_cmd+=(~/.ansible/collections/ansible_collections/net/markfaine/playbooks/playbook.yml)
 
-printf "Run playbooks\n"
+printf "Running playbooks\n"
 echo "${playbook_cmd[*]}"
+
 "${playbook_cmd[@]}"

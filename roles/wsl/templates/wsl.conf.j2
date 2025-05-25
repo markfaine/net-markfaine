@@ -2,7 +2,7 @@
 # ## {{ ansible_managed }}
 
 [user]
-default={{ wsl_user | default(user_name) }}
+default={{ wsl_user | default(username) }}
 
 [network]
 generateResolvConf = true
