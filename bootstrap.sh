@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 #shellcheck shell=bash
 set -euo pipefail
-set -x
 # Configure a barebones environment for running tooling to configure full development environment
 # Recommend running as a user other than the target user, for example root
 # Running against a host other than localhost will require ssh public key access to the host
@@ -50,7 +49,7 @@ inventory="${1:-"$UV_INSTALL_DIR/inventory.yml"})"
 playbook_cmd+=(-i "$inventory")
 playbook_cmd+=(~/.ansible/collections/ansible_collections/net/markfaine/playbooks/playbook.yml)
 
-printf "\nEdit the inventory and then run this command:\n\n"
+printf "\nEdit the inventory at '%s' and then run this command:\n\n" "$UV_INSTALL_DIR/inventory.yml"
 
 echo "${playbook_cmd[*]}"
 
