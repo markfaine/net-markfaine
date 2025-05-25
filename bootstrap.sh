@@ -17,7 +17,7 @@ pushd "$DIR" &>/dev/null || exit 1
 
 function install_dependencies() {
     printf "Installing dependencies\n"
-    apt install -y curl wget
+    apt install -y curl wget git
 }
 
 function install_uv(){
@@ -27,7 +27,7 @@ function install_uv(){
 
 function install_collection(){
     printf "Installing collection\n"
-    uvx --from ansible-core ansible-galaxy collection install -f "$COLLECTION,$COLLECTION_BRANCH" &>/dev/null
+    "$UV_INSTALL_DIR/uvx" --from ansible-core ansible-galaxy collection install -f "$COLLECTION,$COLLECTION_BRANCH" &>/dev/null
 }
 
 mkdir -p "$UV_INSTALL_DIR"
@@ -35,16 +35,15 @@ install_dependencies
 install_uv
 
 pushd "$UV_INSTALL_DIR"
-export PATH=".:$PATH"
 install_collection
 
 # If no inventory, use default inventory
-if [[ ! f "$UV_INSTALL_DIR/inventory.yml" ]]; then
+if [[ ! -f "$UV_INSTALL_DIR/inventory.yml" ]]; then
     cp -f "$HOME/.ansible/collections/ansible_collections/net/markfaine/inventory.yml" "$UV_INSTALL_DIR"
 fi
 
 # Set base command
-playbook_cmd=(uvx --with passlib --from ansible-core ansible-playbook)
+playbook_cmd=("$UV_INSTALL_DIR/uvx" --with passlib --from ansible-core ansible-playbook)
 
 # Add inventory
 inventory="${1:-}"
