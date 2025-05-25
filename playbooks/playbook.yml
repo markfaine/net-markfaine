@@ -22,6 +22,11 @@
   ansible.builtin.import_playbook: wsl.yml
   tags: wsl
 
+# Install doppler
+- name: Import doppler playbook
+  ansible.builtin.import_playbook: doppler.yml
+  tags: doppler
+
 # Install nerdfonts
 - name: Import fonts playbook
   ansible.builtin.import_playbook: fonts.yml

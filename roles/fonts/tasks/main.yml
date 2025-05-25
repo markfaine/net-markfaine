@@ -23,10 +23,9 @@
     path: "{{ home }}/.fonts"
     state: directory
     owner: "{{ username }}"
-    group: "{{ group | default(username) }}"
+    group: "{{ group_name | default(username) }}"
     mode: '0750'
   become: true
-  become_user: "{{ username }}"
 
 - name: Install individual fonts
   ansible.builtin.unarchive:
