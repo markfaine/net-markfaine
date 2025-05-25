@@ -1,11 +1,20 @@
 ---
+- name: Update/Create the group for the user
+  ansible.builtin.user:
+    name: "{{ group_name }}"
+    state: present
+    gid: "{{ gid | default(uid) }}"
+    state: present
+  become: true
+  when: group_name is defined
+
 - name: Update/Create the user
   ansible.builtin.user:
     name: "{{ username }}"
     comment: "{{ comment }}"
     uid: "{{ uid }}"
     shell: "{{ shell }}"
-    group: "{{ group }}"
+    group: "{{ group_name | default('users') }}"
     groups: "{{ extra_groups | default(['sudo', 'users']) }}"
     home: "{{ home }}"
     password: "{{ password | default(lookup('ansible.builtin.password', '/dev/null', seed=username) | password_hash('sha512', username)) }}"

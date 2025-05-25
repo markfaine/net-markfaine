@@ -10,7 +10,8 @@ all:
       comment: 'Mark Faine'
       home: '/home/{{ username }}'
       uid: '1001'
-      group: '1002'
+      group: 'mfaine' # if not set it will default to 'users'
+      gid: '1002' # if not set it will be the same as uid
       extra_groups: ['sudo']
       shell: '/usr/bin/zsh'
       github_username: 'markfaine'
