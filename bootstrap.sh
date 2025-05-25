@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 #shellcheck shell=bash
 set -euo pipefail
+
 # Configure a barebones environment for running tooling to configure full development environment
 # Recommend running as a user other than the target user, for example root
 # Running against a host other than localhost will require ssh public key access to the host
