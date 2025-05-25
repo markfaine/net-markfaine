@@ -81,6 +81,7 @@
     owner: root
     group: root
     mode: '0755'
+    state: present
   become: true
   loop:
     - /etc/bash_completin.d/_mise
