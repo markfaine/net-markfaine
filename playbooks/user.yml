@@ -5,55 +5,55 @@
   pre_tasks:
     - block:
         - ansible.builtin.pause:
-            target: "Enter username"
+            prompt: "Enter username"
           register: out
         - ansible.builtin.set_fact:
             target_username: "{{ out.user_input | default('mfaine') }}"
 
         - ansible.builtin.pause:
-            target: "Enter Github username"
+            prompt: "Enter Github username"
           register: out
         - ansible.builtin.set_fact:
             target_github_username: "{{ out.user_input | default('markfaine') }}"
 
         - ansible.builtin.pause:
-            target: "Enter user uid"
+            prompt: "Enter user uid"
           register: out
         - ansible.builtin.set_fact:
             target_uid: "{{ out.user_input | default('1001') }}"
 
         - ansible.builtin.pause:
-            target: "Enter user gid"
+            prompt: "Enter user gid"
           register: out
         - ansible.builtin.set_fact:
             target_gid: "{{ out.user_input | default('1002') }}"
 
         - ansible.builtin.pause:
-            target: "Enter extra groups"
+            prompt: "Enter extra groups"
           register: out
         - ansible.builtin.set_fact:
             target_groups: "{{ out.user_input | default('sudo') }}"
 
         - ansible.builtin.pause:
-            target: "Enter user home path"
+            prompt: "Enter user home path"
           register: out
         - ansible.builtin.set_fact:
             target_home_path: "{{ out.user_input | default('/home/mfaine') }}"
 
         - ansible.builtin.pause:
-            target: "Enter user comment"
+            prompt: "Enter user comment"
           register: out
         - ansible.builtin.set_fact:
             target_comment: "{{ out.user_input | default('Mark Faine') }}"
 
         - ansible.builtin.pause:
-            target: "Enter shell"
+            prompt: "Enter shell"
           register: out
         - ansible.builtin.set_fact:
             target_shell: "{{ out.user_input | default('/usr/bin/zsh') }}"
 
         - ansible.builtin.pause:
-            target: "Enter password"
+            prompt: "Enter password"
           register: out
         - ansible.builtin.set_fact:
             target_password: "{{ out.user_input | password_hash('sha256', target_username | replace(' ', '') ) }}"
