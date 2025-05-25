@@ -46,7 +46,7 @@ fi
 playbook_cmd=("$UV_INSTALL_DIR/uvx" --with passlib --from ansible-core ansible-playbook)
 
 # Add inventory
-inventory="${1:-"$UV_INSTALL_DIR/inventory.yml"})"
+inventory="${1:-"$UV_INSTALL_DIR/inventory.yml"}"
 playbook_cmd+=(-i "$inventory")
 playbook_cmd+=(~/.ansible/collections/ansible_collections/net/markfaine/playbooks/playbook.yml)
 
