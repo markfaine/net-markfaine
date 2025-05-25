@@ -52,8 +52,20 @@
     update_cache: true
   become: true
 
+- name: Ensure completion directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  become: true
+  loop:
+    - /etc/bash_completion.d
+    - /usr/local/share/zsh/site-functions
+
 - name: Install bash completions
-  ansible.builtin.shell: /usr/bin/mise completion bash --include-bash-completion-lib > /etc/bash_completin.d/_mise
+  ansible.builtin.shell: /usr/bin/mise completion bash --include-bash-completion-lib > /etc/bash_completion.d/_mise
   become: true
   tags: skip_ansible_lint
 
