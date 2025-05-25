@@ -21,7 +21,7 @@
       ansible.builtin.get_url:
         url: 'https://packages.doppler.com/public/cli/gpg.DE2A7741A397C129.key'
         dest: /tmp/doppler.asc
-        checksum: "7b9552d5da3f8c8706b77ecc41ea37b86f5242e2e2913d53de6caf8346140154"
+        checksum: "sha256:7b9552d5da3f8c8706b77ecc41ea37b86f5242e2e2913d53de6caf8346140154"
         owner: root
         group: root
         mode: '0640'
