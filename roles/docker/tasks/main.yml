@@ -131,7 +131,7 @@
   ansible.builtin.get_url:
     url: 'https://github.com/docker/docker-credential-helpers/releases/download/v0.9.3/docker-credential-pass-v0.9.3.linux-amd64'
     dest: /usr/local/bin/docker-credential-pass
-    checksum: "sha256:dc2d864f5f4e4ddfb23ef8e2193626f5f26eee5be1e49ff2a9ba40d4298392e"
+    checksum: "sha256:dc2d864f5f4e4ddfb23ef8e2193626f5f26eee5be1e49ff2a9ba40d4298392e0"
     owner: root
     group: root
     mode: '0755'
