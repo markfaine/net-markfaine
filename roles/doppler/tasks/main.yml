@@ -52,11 +52,3 @@
     state: "{{ doppler_state | default('latest') }}"
     update_cache: true
   become: true
-
-- name: Show Instructions
-  ansible.builtin.debug:
-    msg: >
-      Setup your doppler project and environment:
-      cd ~
-      doppler login
-      doppler setup

@@ -52,5 +52,8 @@ playbook_cmd+=(~/.ansible/collections/ansible_collections/net/markfaine/playbook
 
 printf "\nEdit the inventory at '%s' and then run this command:\n\n" "$UV_INSTALL_DIR/inventory.yml"
 
+export ANSIBLE_SHELL_ALLOW_WORLD_READABLE_TEMP="true"
+export ANSIBLE_REMOTE_TEMP="/tmp/.ansible/tmp"
+export ANSIBLE_PIPELINING="true"
 echo "${playbook_cmd[*]}"
 

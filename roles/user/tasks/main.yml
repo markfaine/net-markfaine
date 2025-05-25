@@ -55,16 +55,18 @@
   ansible.builtin.git:
     repo: "https://github.com/{{ github_username }}/dotfiles.git"
     dest: "{{ home }}/.config/dotfiles"
-    accept_newhostkey: true
+    ssh_opts: 'StrictHostKeyChecking=accept-new'
   become: true
+  become_user: "{{ username }}"
   when: github_username is defined
 
-- name: Set permissions on dotfiles directory
-  ansible.builtin.file:
-    path: "{{ home }}/.config/dotfiles"
-    state: directory
-    owner: "{{ username }}"
-    group: "{{ group_name | default(username) }}"
-    recurse: true
-    mode: 'u+rwX,g+rX,o-rwX'
-  become: true
+# - name: Set permissions on dotfiles directory
+#   ansible.builtin.file:
+#     path: "{{ home }}/.config/dotfiles"
+#     state: directory
+#     owner: "{{ username }}"
+#     group: "{{ group_name | default(username) }}"
+#     recurse: true
+#     mode: 'u+rwX,g+rX,o-rwX'
+#   become: true
+#   become_user: "{{ username }}"
