@@ -84,5 +84,5 @@
     state: file
   become: true
   loop:
-    - /etc/bash_completin.d/_mise
+    - /etc/bash_completion.d/_mise
     - /usr/local/share/zsh/site-functions/_mise
