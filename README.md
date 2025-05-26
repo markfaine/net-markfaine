@@ -44,7 +44,7 @@ See `tuckr --help` for more information.
 [Mise (mise-en-place)](https://mise.jdx.dev/) will install the tools configured from  `~/.config/mise/config.toml` installed from the dotfiles repo by Mise.
 
 ```sh
-mise ls --no-header | cut -d' ' -f1 | xargs -I{} mise use "{}"
+mise install
 ```
 
 ### Restart
@@ -52,5 +52,15 @@ Some of the configuration chagnes won't take effect until the shell restarts.
 
 ```sh
 exec zsh
+```
+
+### Neovim
+The first time neovim is opened it will need to download some tools with Mason.  Later, I will try to make it use the tools installed by Mise.
+
+Note: This neovim config is based on [kickstart.nvim](https://github.com/nvim-lua/kickstart.nvim) and is absolutely a work in progress.
+
+```sh
+nvim
+# wait for it to finish and then exit
 ```
 
