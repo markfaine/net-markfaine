@@ -64,3 +64,15 @@ nvim
 # wait for it to finish and then exit
 ```
 
+### Setting Default Tool Paths
+
+#### Python
+This may be later added to the role but for now run this command to set the default python
+
+```sh
+sudo update-alternatives --install /usr/bin/python python "$HOME/.local/share/mise/installs/python/latest" 1
+sudo update-alternatives --config python # select 0 or 1
+```
+
+
+
