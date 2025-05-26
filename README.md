@@ -48,7 +48,7 @@ mise install
 ```
 
 ### Restart
-Some of the configuration chagnes won't take effect until the shell restarts.
+Some of the configuration changes won't take effect until the shell restarts.
 
 ```sh
 exec zsh
