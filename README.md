@@ -54,6 +54,14 @@ Some of the configuration changes won't take effect until the shell restarts.
 exec zsh
 ```
 
+### Updating dotfiles
+Since the point is to be able to manage shared dotfiles (and tools) it's necessary to update the remote for the repository once everything is working so that dotfile updates can easily be pushed back to the remote.  This is because the Ansible role uses an http remote since other users may wish to use this as a starting point for thier own projects. If so, replace the repo below with your repository remote.
+
+```sh
+cd ~/.config/dotfiles
+git remote set-url origin git@github.com:markfaine/dotfiles.git
+```
+
 ### Neovim
 The first time neovim is opened it will need to download some tools with Mason.  Later, I will try to make it use the tools installed by Mise.
 
