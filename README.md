@@ -20,8 +20,9 @@ The above will output an `ansible-playbook` command. Edit the inventory file loc
 However you can just add a `.env` file to your `$HOME` directory and it will also be sourced.  The benefit of using Doppler here is that it allows me to deploy different environment 
 variables and secrets for different environments without duplicating files. It's also free for up to 3 users.
 ```sh
-doppler login
+doppler login # Open a browser and login
 doppler setup
+doppler secrets download --no-file --format env > ~/.env
 ...
 ```
 See: `doppler --help` for more information.
@@ -46,14 +47,6 @@ See `tuckr --help` for more information.
 mise ls --no-header | cut -d' ' -f1 | xargs -I{} mise use "{}"
 ```
 
-### Doppler
-[Doppler](https://doppler.com) is a secrets management service that I'm using to manage `.env` files for different environmentes.  The env files contain can be sourced by Mise in a manner similar to `direnv`
-
-```sh
-doppler login # Open a browser and login
-doppler setup
-doppler secrets download --no-file --format env > ~/.env
-```
 ### Restart
 Some of the configuration chagnes won't take effect until the shell restarts.
 
