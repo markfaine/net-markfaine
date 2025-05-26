@@ -41,7 +41,23 @@ See `tuckr --help` for more information.
 
 ### Mise
 [Mise (mise-en-place)](https://mise.jdx.dev/) will install the tools configured from  `~/.config/mise/config.toml` installed from the dotfiles repo by Mise.
-An `.env` file containing no secret values as well as *mounted* secret files can also be utilized by mise in a manner similar to `direnv`
-```sh
 
+```sh
+mise ls --no-header | cut -d' ' -f1 | xargs -I{} mise use "{}"
 ```
+
+### Doppler
+[Doppler](https://doppler.com) is a secrets management service that I'm using to manage `.env` files for different environmentes.  The env files contain can be sourced by Mise in a manner similar to `direnv`
+
+```sh
+doppler login # Open a browser and login
+doppler setup
+doppler secrets download --no-file --format env > ~/.env
+```
+### Restart
+Some of the configuration chagnes won't take effect until the shell restarts.
+
+```sh
+exec zsh
+```
+
