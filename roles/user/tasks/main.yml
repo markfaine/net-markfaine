@@ -61,6 +61,7 @@
   ansible.builtin.git:
     repo: "https://github.com/{{ github_username }}/dotfiles.git"
     dest: "{{ home }}/.config/dotfiles"
+    version: "{{ dotfiles_branch }}"
     ssh_opts: 'StrictHostKeyChecking=accept-new'
   become: true
   when: github_username is defined

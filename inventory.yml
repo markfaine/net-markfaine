@@ -15,7 +15,8 @@ all:
       extra_groups: ['sudo']
       shell: '/usr/bin/zsh'
       github_username: 'markfaine'
-      dotfiles_repo: 'git+https://github.com/{{ github_username }}/dotfiles,experimental'
+      dotfiles_repo: 'git+https://github.com/{{ github_username }}/dotfiles'
+      dotfiles_branch: 'experimental'
       run_user_role: true # The user must already exist if this is false
       run_docker_role: true # if false or unset the role doesn't run
       fonts: ['FiraCode', 'Lilex', 'Monoid', 'CascadiaCode', 'CascadiaMono'] # if unset or empty the role doesn't run
