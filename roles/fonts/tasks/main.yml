@@ -1,12 +1,56 @@
 ---
-- name: Include task for state
-  ansible.builtin.include_tasks:
-    file: "{{ state | default('present') }}.yml"
-    apply:
-      tags: fonts
-  when:
-    - ansible_os_family is defined and ansible_os_family == "Debian"
-    - state is not defined or state in ['present', 'absent']
-    - user_font_list is defined and user_font_list | length
-  tags: always
+- name: Get URLs for latest release of fonts
+  ansible.builtin.shell: |
+    set -o pipefail
+    wget -q -O - https://api.github.com/repos/ryanoasis/nerd-fonts/releases/latest \
+    | jq -r '.assets[] | .browser_download_url | select(contains(".tar.xz"))'
+  args:
+    executable: /bin/bash
+  changed_when: false
+  register: fonts_url_list
+  tags: skip_ansible_lint
 
+- name: Create a font map
+  ansible.builtin.set_fact:
+    font_map: >-
+      {{ font_map 
+      | default([]) + [{'name': item | split('/') | last | split('.') 
+      | first, 'url': item}] }}
+  loop: "{{ fonts_url_list.stdout_lines }}"
+
+- name: Make sure fonts directory exists
+  ansible.builtin.file:
+    path: "{{ home }}/.fonts"
+    state: directory
+    owner: "{{ username }}"
+    group: "{{ group_name | default(username) }}"
+    mode: '0750'
+  become: true
+
+- name: Install individual fonts
+  ansible.builtin.unarchive:
+    src: "{{ item.url }}"
+    dest: "{{ home }}/.fonts"
+    owner: "{{ username }}"
+    group: "{{ group_name | default(username) }}"
+    mode: '0640'
+    remote_src: true
+  become: true
+  loop: "{{ font_map | selectattr('name', 'in', fonts) }}"
+  when:
+    - fonts is defined and fonts | length
+    - "'all' not in fonts"
+
+- name: Install all fonts
+  ansible.builtin.unarchive:
+    src: "{{ item.url }}"
+    dest: "{{ home }}/.fonts"
+    owner: "{{ username }}"
+    group: "{{ group_name | default(username) }}"
+    mode: '0640'
+    remote_src: true
+  become: true
+  loop: "{{ font_map }}"
+  when: 
+    - fonts is defined and fonts | length
+    - "'all' in fonts"

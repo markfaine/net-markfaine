@@ -4,5 +4,9 @@
 **/*.key
 **/.vault
 **/*.log
-ansible.cfg
-
+**/ansible.cfg
+**/icons
+**/lib
+**/*.tar.gz
+**/easybashgui.lib
+**/easybashlib

@@ -1,4 +1,0 @@
----
-- name: Removal of base packages is not supported
-  ansible.builtin.debug:
-    msg: "Removal of base packages is not supported"

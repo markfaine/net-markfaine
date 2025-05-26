@@ -1,4 +1,0 @@
----
-- name: asdf-install
-  ansible.builtin.include_tasks: >-
-    '{{ role_path }}/handlers/asdf_install.yml'

@@ -1,0 +1,8 @@
+---
+- name: Install/Configure docker
+  hosts: all
+  gather_facts: true
+  tasks:
+    - ansible.builtin.include_role:
+        name: net.markfaine.docker
+      tags: docker

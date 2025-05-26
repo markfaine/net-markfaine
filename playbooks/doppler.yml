@@ -1,0 +1,12 @@
+---
+- name: Install doppler
+  hosts: all
+  gather_facts: false
+  tasks:
+
+    - ansible.builtin.include_role:
+        name: net.markfaine.doppler
+      tags: 
+        - doppler
+        - env
+        - secrets

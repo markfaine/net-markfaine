@@ -1,0 +1,23 @@
+---
+# Edit to your requirements
+all:
+  hosts:
+    localhost:
+      ansible_connection: local
+      ansible_python_interpreter: "{{ ansible_playbook_python }}"
+      username: 'mfaine'
+      # password: # if unset this will be set to a random password, but only on creation of the user, never after.
+      comment: 'Mark Faine'
+      home: '/home/{{ username }}'
+      uid: '1001'
+      group_name: 'mfaine' # if not set it will default to 'users', gid will be ignored.
+      gid: '1002' # if not set it will be the same as uid
+      extra_groups: ['sudo']
+      shell: '/usr/bin/zsh'
+      github_username: 'markfaine'
+      dotfiles_repo: 'git+https://github.com/{{ github_username }}/dotfiles'
+      dotfiles_branch: 'experimental'
+      run_user_role: true # The user must already exist if this is false
+      run_docker_role: true # if false or unset the role doesn't run
+      fonts: ['FiraCode', 'Lilex', 'Monoid', 'CascadiaCode', 'CascadiaMono'] # if unset or empty the role doesn't run
+      # wsl_state: absent # to reset wsl configuration to default, default will configure wsl with some sane defaults

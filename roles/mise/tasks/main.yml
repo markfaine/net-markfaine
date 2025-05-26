@@ -1,0 +1,88 @@
+---
+- name: Install gpg
+  ansible.builtin.apt:
+    name: ['gpg', 'sudo', 'wget', 'curl']
+    state: present
+    update_cache: true
+  become: true
+
+- name: Ensure that /etc/apt/keyrings exists 
+  ansible.builtin.file:
+    path: /etc/apt/keyrings 
+    state: directory 
+    owner: root
+    group: root
+    mode: '0755'
+  become: true
+
+- name: Install mise official gpg key 
+  block:
+    - name: Get repo key
+      ansible.builtin.get_url:
+        url: https://mise.jdx.dev/gpg-key.pub
+        dest: /tmp/mise.asc
+        checksum: "sha256:91c72340c5cc84ae2ba98c1070083feacf789b0a4a3d34b2416147769e475d96"
+        owner: root
+        group: root
+        mode: '0640'
+        force: true
+    - name: Dearmor key
+      ansible.builtin.shell: cat /tmp/mise.asc | gpg --dearmor > /tmp/mise.asc.gpg
+      args:
+        chdir: /tmp
+      tags: skip_ansible_lint
+    - name: Create a keyring
+      ansible.builtin.command: >
+        gpg --no-default-keyring --keyring /tmp/mise-keyring.gpg --import /tmp/mise.asc.gpg
+    - name: Extract and install key 
+      ansible.builtin.shell: >
+        gpg --no-default-keyring --keyring /tmp/mise-keyring.gpg --export > /etc/apt/keyrings/mise-keyring.gpg
+    - name: Install repo
+      ansible.builtin.copy:
+        content: "deb [signed-by=/etc/apt/keyrings/mise-keyring.gpg arch=amd64] https://mise.jdx.dev/deb stable main"
+        dest: "/etc/apt/sources.list.d/mise.list" 
+        owner: root
+        group: root
+        mode: '0644'
+  become: true
+
+- name: Install packages
+  ansible.builtin.apt:
+    name: mise
+    state: "{{ mise_state | default('latest') }}"
+    update_cache: true
+  become: true
+
+- name: Ensure completion directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  become: true
+  loop:
+    - /etc/bash_completion.d
+    - /usr/local/share/zsh/site-functions
+
+- name: Install bash completions
+  ansible.builtin.shell: /usr/bin/mise completion bash --include-bash-completion-lib > /etc/bash_completion.d/_mise
+  become: true
+  tags: skip_ansible_lint
+
+- name: Install zsh completions
+  ansible.builtin.shell: /usr/bin/mise completion zsh  > /usr/local/share/zsh/site-functions/_mise
+  become: true
+  tags: skip_ansible_lint
+
+- name: Set permissions on mise completions
+  ansible.builtin.file:
+    path: "{{ item }}"
+    owner: root
+    group: root
+    mode: '0755'
+    state: file
+  become: true
+  loop:
+    - /etc/bash_completion.d/_mise
+    - /usr/local/share/zsh/site-functions/_mise

@@ -1,7 +1,7 @@
 ---
 - name: Include task for state
   ansible.builtin.include_tasks:
-    file: "{{ state | default('present') }}.yml"
+    file: "{{ wsl_state | default('present') }}.yml"
     apply:
       tags: wsl
   when:
