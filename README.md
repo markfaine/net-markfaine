@@ -63,7 +63,9 @@ git remote set-url origin git@github.com:markfaine/dotfiles.git
 ```
 
 ### Neovim
-The first time neovim is opened it will need to download some tools with Mason.  Later, I will try to make it use the tools installed by Mise.
+The first time neovim is opened it may need to download some tools with Mason.  
+
+**Update**: Mise now manages all of the tools required by neovim plugins, with the exception of `ansible-language-server` which I've yet to find a way to install using Mise.
 
 Note: This neovim config is based on [kickstart.nvim](https://github.com/nvim-lua/kickstart.nvim) and is absolutely a work in progress.
 
