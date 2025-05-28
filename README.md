@@ -13,6 +13,31 @@ curl https://raw.githubusercontent.com/markfaine/net-markfaine/refs/heads/experi
 ```
 The above will output an `ansible-playbook` command. Edit the inventory file located at `/tmp/uv/inventory.yml` and then run the `ansible-playbook` command.
 
+Note:  You may want to create a simple `ansible.cfg` file at `/tmp/uv/ansible.cfg` prior to running the ansible playbook.
+
+```ini
+[defaults]
+action_warnings=False
+deprecation_warnings=False
+ansible_managed = This file is managed by Ansible, all changes will be lost.
+debug=False
+forks=10
+gathering = smart
+host_key_checking = False
+interpreter_python=auto_silent
+log_path=~/ansible.log
+nocolor=False
+nocows=True
+retry_files_enabled = False
+timeout=60
+transport=ssh
+verbosity=0
+[ssh_connection]
+pipelining = True
+scp_if_ssh = True
+```
+
+
 ## Post Ansible
 
 ### Doppler

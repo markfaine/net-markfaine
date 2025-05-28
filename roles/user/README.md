@@ -1,13 +1,22 @@
-# net.markfaine.apt
+# net.markfaine.user
 
 ## Overview
 
-This role installs operating packages that are either used as development tools or dependencies for tools.
+This role installs and configures a user account.  It also clones a dotfiles repository from Github.
 
-It also removes operating system tools that are already installed by Mise.  
+### Required variables
 
-The general idea is that there is only one version of the tool and it is preferably managed by Mise or a tool that was installed by Mise, such as npx or pipx.
-
-See the `apt_packages` variable for operating system packages installed by this role.
-
-See the `apt_packages_uninstall` variable for operating system packages uninstalled by this role.
+```yaml
+username: 'mfaine'
+# password: # if unset this will be set to a random password, but only on creation of the user, never after.
+comment: 'Mark Faine'
+home: '/home/{{ username }}'
+uid: '1001'
+group_name: 'mfaine' # if not set it will default to 'users', gid will be ignored.
+gid: '1002' # if not set it will be the same as uid
+extra_groups: ['sudo']
+shell: '/usr/bin/zsh'
+github_username: 'markfaine'
+dotfiles_repo: 'git+https://github.com/{{ github_username }}/dotfiles'
+dotfiles_branch: 'main'
+```
