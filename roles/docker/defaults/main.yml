@@ -1,6 +1,5 @@
 ---
 # ## Role: docker
-# docker_state: present
 # # Docker config, this is just converted directly to json in /etc/docker/daemon.json
 # docker_config:
 #   ipv6: false
@@ -9,7 +8,6 @@
 #   no-new-privileges: false
 #   experimental: true
 #   selinux-enabled: false
-#   dns:
-#     - 192.149.141.11
-#     - 192.112.230.47
+#   dns: []
+run_docker_role: true # if false or unset the role doesn't run
 # ## End role: docker

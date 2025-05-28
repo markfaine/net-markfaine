@@ -1,38 +1,13 @@
-Role Name
-=========
+# net.markfaine.apt
 
-A brief description of the role goes here.
+## Overview
 
-Requirements
-------------
+This role installs operating packages that are either used as development tools or dependencies for tools.
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+It also removes operating system tools that are already installed by Mise.  
 
-Role Variables
---------------
+The general idea is that there is only one version of the tool and it is preferably managed by Mise or a tool that was installed by Mise, such as npx or pipx.
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+See the `apt_packages` variable for operating system packages installed by this role.
 
-Dependencies
-------------
-
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
-
-Example Playbook
-----------------
-
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
-
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
-
-License
--------
-
-BSD
-
-Author Information
-------------------
-
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+See the `apt_packages_uninstall` variable for operating system packages uninstalled by this role.

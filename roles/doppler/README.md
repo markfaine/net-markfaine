@@ -1,11 +1,6 @@
----
-# mise 
+# net.markfaine.doppler
 
-### Full documentation and instructions:
+## Overview
 
-1. Go to <a href="https://nasa.sharepoint.com/:f:/t/NICSSystemAdministrators/EjcVbjd-FcBHimFIZAkT3KgBeXCz1F6H9bnv4TIm6a_v0A?e=fCuvLX" target="_blank">SharePoint Ansible Team</a>
-
-1. Navigate to Ansible/Collections/NaTS Default/Roles
-
-1. Open `mise.html`
+This role installs the [Doppler](https://www.doppler.com/) CLI
 
