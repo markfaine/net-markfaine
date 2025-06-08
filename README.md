@@ -8,7 +8,7 @@ Note: The script below need to be run with a privileged user account.
 ```sh
 # To setup on a stock ubuntu
 apt-get update && apt-get install -y curl
-curl https://raw.githubusercontent.com/markfaine/net-markfaine/refs/heads/experimental/bootstrap.sh | bash
+curl https://raw.githubusercontent.com/markfaine/net-markfaine/refs/heads/main/bootstrap.sh | bash
 
 ```
 The above will output an `ansible-playbook` command. Edit the inventory file located at `/tmp/uv/inventory.yml` and then run the `ansible-playbook` command.
@@ -53,7 +53,7 @@ doppler secrets download --no-file --format env > ~/.env
 See: `doppler --help` for more information.
 
 ### Tuckr/Mise
-[Tuckr](https://github.com/RaphGL/Tuckr) is like [GNU Stow](https://www.gnu.org/software/stow/) and will install dotfiles.  The dotfiles come from a [dotfiles repo](https://github.com/markfaine/dotfiles/tree/experimental) and are using the layout required by Tuckr.  The Ansible inventory file contains a variable that points to the dotfiles repo.  Since rust isn't installed until after Mise is installed but mise doesn't have any configuration file until Tuckr symlinks the dotfiles I have to get creative here.
+[Tuckr](https://github.com/RaphGL/Tuckr) is like [GNU Stow](https://www.gnu.org/software/stow/) and will install dotfiles.  The dotfiles come from a [dotfiles repo](https://github.com/markfaine/dotfiles/tree/main) and are using the layout required by Tuckr.  The Ansible inventory file contains a variable that points to the dotfiles repo.  Since rust isn't installed until after Mise is installed but mise doesn't have any configuration file until Tuckr symlinks the dotfiles I have to get creative here.
 
 ```sh
 eval "$(mise activate zsh)"
