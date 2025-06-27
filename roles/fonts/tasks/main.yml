@@ -40,6 +40,7 @@
   when:
     - fonts is defined and fonts | length
     - "'all' not in fonts"
+  notify: fc-cache
 
 - name: Install all fonts
   ansible.builtin.unarchive:
@@ -54,3 +55,20 @@
   when: 
     - fonts is defined and fonts | length
     - "'all' in fonts"
+  notify: fc-cache
+
+# Required by Tokyo-nights tmux theme
+- name: Install Noto Sans Symbols
+  ansible.builtin.unarchive:
+    src: https://font.download/dl/font/noto-sans-symbols-2.zip 
+    dest: "{{ home }}/.fonts/NotoSansSymbols2-Regular.ttf"
+    owner: "{{ username }}"
+    group: "{{ group_name | default(username) }}"
+    mode: '0640'
+    remote_src: true
+  become: true
+  loop: "{{ font_map }}"
+  when: 
+    - fonts is defined and fonts | length
+    - "'all' in fonts"
+  notify: fc-cache

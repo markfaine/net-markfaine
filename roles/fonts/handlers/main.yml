@@ -1,1 +1,5 @@
 ---
+- name: fc-cache
+  ansible.builtin.command: fc-cache
+  changed_when: false
+  tags: skip_ansible_lint

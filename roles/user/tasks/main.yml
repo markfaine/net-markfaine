@@ -2,7 +2,6 @@
 - name: Update/Create the group for the user
   ansible.builtin.group:
     name: "{{ group_name }}"
-    state: present
     gid: "{{ gid | default(uid) }}"
     state: present
   become: true
@@ -11,12 +10,12 @@
 - name: Update/Create the user
   ansible.builtin.user:
     name: "{{ username }}"
-    comment: "{{ comment }}"
+    comment: "{{ comment | default(omit) }}"
     uid: "{{ uid }}"
-    shell: "{{ shell }}"
+    shell: "{{ shell | default('/usr/bin/bash') }}"
     group: "{{ group_name | default('users') }}"
-    groups: "{{ extra_groups | default(['sudo', 'users']) }}"
-    home: "{{ home }}"
+    groups: "{{ extra_groups | default([]) }}"
+    home: "{{ home | default('/home/' + username) }}"
     password: "{{ password | default(lookup('ansible.builtin.password', '/dev/null', seed=username) | password_hash('sha512', username)) }}"
     append: true
     update_password: "on_create"
@@ -49,29 +48,4 @@
     owner: root
     group: root
     mode: '0640'
-  become: true
-
-- name: Set safe directory
-  ansible.builtin.command: git config --global --add safe.directory "{{ home }}/.config/dotfiles"
-  changed_when: false
-  become: true
-  tags: skip_ansible_lint
-
-- name: Clone dotfiles
-  ansible.builtin.git:
-    repo: "https://github.com/{{ github_username }}/dotfiles.git"
-    dest: "{{ home }}/.config/dotfiles"
-    version: "{{ dotfiles_branch }}"
-    ssh_opts: 'StrictHostKeyChecking=accept-new'
-  become: true
-  when: github_username is defined
-
-- name: Set permissions on dotfiles directory
-  ansible.builtin.file:
-    path: "{{ home }}/.config"
-    state: directory
-    owner: "{{ username }}"
-    group: "{{ group_name | default(username) }}"
-    recurse: true
-    mode: 'u+rwX,g+rX,o-rwX'
   become: true

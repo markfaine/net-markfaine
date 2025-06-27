@@ -1,0 +1,26 @@
+---
+- name: Set safe directory
+  ansible.builtin.command: git config --global --add safe.directory "{{ home | default('/home/' + username) }}/.config/dotfiles"
+  changed_when: false
+  become: true
+  tags: skip_ansible_lint
+
+- name: Clone dotfiles
+  ansible.builtin.git:
+    repo: "https://github.com/{{ github_username }}/dotfiles.git"
+    dest: "{{ home }}/.config/dotfiles"
+    version: "{{ dotfiles_branch | default('main') }}"
+    ssh_opts: 'StrictHostKeyChecking=accept-new'
+  become: true
+  when: github_username is defined
+  environment: "{{ proxy_env | default({}) }}"
+
+- name: Set permissions on dotfiles directory
+  ansible.builtin.file:
+    path: "{{ home }}/.config"
+    state: directory
+    owner: "{{ username }}"
+    group: "{{ group_name | default(username) }}"
+    recurse: true
+    mode: 'u+rwX,g+rX,o-rwX'
+  become: true
