@@ -6,26 +6,25 @@ set -euo pipefail
 # Recommend running as a user other than the target user, for example root
 # Running against a host other than localhost will require ssh public key access to the host
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 UV_INSTALL_DIR=/tmp/uv
 UV_INSTALL_SCRIPT="https://astral.sh/uv/install.sh"
 COLLECTION="git+https://github.com/markfaine/net-markfaine.git"
-COLLECTION_BRANCH="experimental"
+COLLECTION_BRANCH="main"
 
 pushd "$DIR" &>/dev/null || exit 1
-
 
 function install_dependencies() {
     printf "Installing dependencies\n"
     apt install -y curl wget git
 }
 
-function install_uv(){
+function install_uv() {
     printf "Installing and configuring uv\n"
     curl -LsSf "$UV_INSTALL_SCRIPT" | env UV_INSTALL_DIR="$UV_INSTALL_DIR" sh &>/dev/null
 }
 
-function install_collection(){
+function install_collection() {
     printf "Installing collection\n"
     "$UV_INSTALL_DIR/uvx" --from ansible-core ansible-galaxy collection install -f "$COLLECTION,$COLLECTION_BRANCH" &>/dev/null
 }
@@ -56,4 +55,3 @@ export ANSIBLE_SHELL_ALLOW_WORLD_READABLE_TEMP="true"
 export ANSIBLE_REMOTE_TEMP="/tmp/.ansible/tmp"
 export ANSIBLE_PIPELINING="true"
 echo "${playbook_cmd[*]}"
-
