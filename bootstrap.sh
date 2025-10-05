@@ -108,7 +108,7 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 # Get script directory
-DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
+DIR="$(cd "$(dirname "$0")" &>/dev/null && pwd)"
 
 # Change to script directory
 pushd "$DIR" &>/dev/null || exit 1
