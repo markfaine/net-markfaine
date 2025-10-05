@@ -1,0 +1,27 @@
+---
+# vim: set ft=yaml.ansible foldmethod=marker foldmarker=<<<,>>> foldlevel=99 syntax=on :
+# This file is managed by Ansible, all changes will be lost.
+# Role verification and testing <<<
+# Validate role functionality across Ubuntu platform
+- name: Verify
+  hosts: ubuntu
+  environment:
+    # SMDEV container configuration <<<
+    # Disable SMDEV container features for testing environment
+    SMDEV_CONTAINER_OFF: 'true'
+    # End SMDEV container configuration >>>
+  vars_files:
+    # Role variable sources <<<
+    # Load role defaults and variables for test validation
+    - ../../defaults/main.yml
+    - ../../vars/main.yml
+    # End Role variable sources >>>
+
+  tasks:
+    # Test execution <<<
+    # Execute comprehensive role tests
+    - name: Include test-absent.yml
+      ansible.builtin.include_tasks:
+        file: ../../tasks/tests/test-absent.yml
+    # End Test execution >>>
+# End Role verification and testing >>>

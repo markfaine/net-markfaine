@@ -3,9 +3,12 @@
   ansible.builtin.apt:
     name: '{{ apt_packages }}'
     update_cache: true
+    cache_valid_time: 3600
   become: true
   environment:
-    - DEBIAN_FRONTEND: noninteractive
+    DEBIAN_FRONTEND: noninteractive
+  tags:
+    - install
 
 - name: Remove OS provided packages
   ansible.builtin.apt:
@@ -13,4 +16,6 @@
     state: absent
   become: true
   environment:
-    - DEBIAN_FRONTEND: noninteractive
+    DEBIAN_FRONTEND: noninteractive
+  tags:
+    - uninstall

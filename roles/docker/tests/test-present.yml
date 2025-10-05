@@ -1,0 +1,42 @@
+---
+- name: Test docker role present state
+  hosts: localhost
+  gather_facts: true
+  vars:
+    users:
+      - name: testuser
+        docker_access: true
+    docker_state: present
+  tasks:
+    - name: Include docker role
+      ansible.builtin.include_role:
+        name: net.markfaine.docker
+      tags: test
+
+    - name: Verify Docker service is installed and running
+      ansible.builtin.service:
+        name: docker
+        state: started
+      become: true
+      tags: test
+
+    - name: Verify Docker CLI is available
+      ansible.builtin.command: docker --version
+      register: docker_version
+      changed_when: false
+      failed_when: docker_version.rc != 0
+      tags: test
+
+    - name: Test Docker functionality
+      ansible.builtin.command: docker run --rm hello-world
+      register: docker_test
+      changed_when: false
+      failed_when: docker_test.rc != 0
+      tags: test
+
+    - name: Verify user is in docker group
+      ansible.builtin.command: groups testuser
+      register: groups_check
+      changed_when: false
+      failed_when: "'docker' not in groups_check.stdout"
+      tags: test

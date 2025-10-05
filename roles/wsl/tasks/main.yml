@@ -1,4 +1,21 @@
 ---
+- name: Validate required variables
+  ansible.builtin.assert:
+    that:
+      - wsl_username is defined and wsl_username != ""
+    fail_msg: "Required variable 'wsl_username' must be set for WSL configuration"
+  tags: wsl, validation
+
+- name: Validate WSL environment
+  ansible.builtin.assert:
+    that:
+      - ansible_os_family is defined and ansible_os_family == "Debian"
+      - "'microsoft-standard-WSL2' in ansible_kernel"
+      - is_wsl is defined and is_wsl
+    fail_msg: 'This role can only run on Ubuntu systems under WSL2'
+  when: state is not defined or state in ['present', 'absent']
+  tags: wsl, validation
+
 - name: Include task for state
   ansible.builtin.include_tasks:
     file: "{{ wsl_state | default('present') }}.yml"

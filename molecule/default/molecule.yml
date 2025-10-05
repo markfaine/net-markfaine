@@ -1,0 +1,69 @@
+---
+# vim: set ft=yaml.ansible foldmethod=marker foldmarker=<<<,>>> foldlevel=99 syntax=on :
+# Code quality and linting <<<
+# Basic linting with yamllint and ansible-lint
+lint: |
+  set -e
+  yamllint -c .yamllint .
+  ansible-lint --exclude ./molecule
+# End Code quality and linting >>>
+# Test platform definitions <<<
+# Docker driver configuration
+driver:
+  name: docker
+# End Docker driver configuration >>>
+# Test platform definitions <<<
+# Ubuntu container configuration for Ansible testing
+platforms:
+  # Ubuntu test platform <<<
+  - name: ubuntu
+    image: geerlingguy/docker-ubuntu2404-ansible:latest
+    pre_build_image: true
+    # Container runs as root for provisioning
+    user: root
+  # End Ubuntu test platform >>>
+# End Test platform definitions >>>
+
+# Ansible provisioner configuration <<<
+# Provisioner settings with logging
+provisioner:
+  name: ansible
+  lint:
+    name: ansible-lint
+  inventory:
+    # Inline Molecule inventory for isolated testing <<<
+    hosts:
+      all:
+        hosts:
+          ubuntu:
+            ansible_python_interpreter: /usr/bin/python3
+    group_vars:
+      all:
+        users:
+          - name: 'testuser'
+            comment: 'Molecule Test User'
+            uid: '2000'
+            gid: '2000'
+            group_name: 'testuser'
+            home: '/home/testuser'
+            shell: '/usr/bin/bash'
+            extra_groups: ['sudo']
+            user_ssh_key_sources:
+              - 'https://github.com/markfaine.keys'
+            dotfiles_repo: 'https://github.com/markfaine/dotfiles.git'
+            dotfiles_branch: 'main'
+            docker_access: false
+            mise: false
+            doppler: false
+            state: 'present'
+    # End Inline Molecule inventory >>>
+  log: true
+  options:
+    vvv: true
+# End Ansible provisioner configuration >>>
+
+# Test verification <<<
+# Ansible-based verification for collection validation
+verifier:
+  name: ansible
+# End Test verification >>>

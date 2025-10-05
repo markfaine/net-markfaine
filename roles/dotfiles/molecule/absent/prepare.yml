@@ -1,0 +1,33 @@
+---
+# vim: set ft=yaml.ansible foldmethod=marker foldmarker={{{,}}} foldlevel=99 syntax=on :
+
+# This file is managed by Ansible, all changes will be lost.# Inventory validation {{{
+
+# Test environment preparation {{{
+# Prepare test instances and dependencies before main role execution
+- name: Prepare
+  hosts: ubuntu:latest
+
+  # Environment configuration {{{
+  # Configure development environment settings for consistent testing
+  environment:
+    # Disable SMDEV container mode for consistent testing
+    SMDEV_CONTAINER_OFF: 'true'
+  # End Environment configuration }}}
+
+  tasks:
+    # Pre-test role setup for absent scenarios {{{
+    # For absent scenarios, ensure the role is installed first so it can be removed
+
+    - name: Import net.markfaine.apt
+      ansible.builtin.import_role:
+        name: net.markfaine.apt
+      vars:
+        # Enable the role for preparation
+        apt_enabled: true
+        # Set to present state so there is something to remove in converge
+        apt_state: present
+      tags: apt
+
+    # End Pre-test role setup for absent scenarios }}}
+# End Test environment preparation }}}

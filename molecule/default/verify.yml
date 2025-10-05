@@ -1,0 +1,48 @@
+---
+# vim: set ft=yaml.ansible foldmethod=marker foldmarker=<<<,>>> foldlevel=99 syntax=on :
+# Collection verification and testing <<<
+# Validate all roles functionality
+- name: Verify all roles
+  hosts: ubuntu
+  environment:
+    # SMDEV container configuration <<<
+    # Disable SMDEV container features for testing environment
+    SMDEV_CONTAINER_OFF: 'true'
+    # End SMDEV container configuration >>>
+
+  tasks:
+    # Test execution <<<
+    # Execute comprehensive tests for all roles
+    - name: Include apt test-present.yml
+      ansible.builtin.include_tasks:
+        file: roles/apt/tests/test-present.yml
+
+    - name: Include user test-present.yml
+      ansible.builtin.include_tasks:
+        file: roles/user/tests/test-present.yml
+
+    - name: Include mise test-present.yml
+      ansible.builtin.include_tasks:
+        file: roles/mise/tests/test-present.yml
+
+    - name: Include doppler test-present.yml
+      ansible.builtin.include_tasks:
+        file: roles/doppler/tests/test-present.yml
+
+    - name: Include dotfiles test-present.yml
+      ansible.builtin.include_tasks:
+        file: roles/dotfiles/tests/test-present.yml
+
+    - name: Include fonts test-present.yml
+      ansible.builtin.include_tasks:
+        file: roles/fonts/tests/test-present.yml
+
+    - name: Include docker test-present.yml
+      ansible.builtin.include_tasks:
+        file: roles/docker/tests/test-present.yml
+
+    - name: Include wsl test-present.yml
+      ansible.builtin.include_tasks:
+        file: roles/wsl/tests/test-present.yml
+    # End Test execution >>>
+# End Collection verification and testing >>>

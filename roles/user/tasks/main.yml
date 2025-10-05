@@ -1,77 +1,14 @@
 ---
-- name: Update/Create the group for the user
-  ansible.builtin.group:
-    name: "{{ group_name }}"
-    state: present
-    gid: "{{ gid | default(uid) }}"
-    state: present
-  become: true
-  when: group_name is defined
+- name: Validate required variables
+  ansible.builtin.assert:
+    that:
+      - user_users | length > 0
+    fail_msg: "'user_users' list must be provided"
+  tags: user, validation
 
-- name: Update/Create the user
-  ansible.builtin.user:
-    name: "{{ username }}"
-    comment: "{{ comment }}"
-    uid: "{{ uid }}"
-    shell: "{{ shell }}"
-    group: "{{ group_name | default('users') }}"
-    groups: "{{ extra_groups | default(['sudo', 'users']) }}"
-    home: "{{ home }}"
-    password: "{{ password | default(lookup('ansible.builtin.password', '/dev/null', seed=username) | password_hash('sha512', username)) }}"
-    append: true
-    update_password: "on_create"
-    state: present
-  become: true
-
-- name: Ensure .ssh directory exists
-  ansible.builtin.file:
-    path: "{{ home }}/.ssh"
-    state: directory
-    owner: "{{ username }}"
-    group: "{{ group_name | default(username) }}"
-    mode: '0700'
-  become: true
-
-- name: Set authorized keys taken from github
-  ansible.posix.authorized_key:
-    user: "{{ username }}"
-    state: present
-    key: "https://github.com/{{ github_username }}.keys"
-  when: github_username is defined
-  ignore_errors: true
-
-- name: Configure sudo
-  ansible.builtin.copy:
-    content: |
-      {{ username }} ALL=(ALL) NOPASSWD: ALL
-      Defaults:{{ username }} !requiretty
-    dest: "/etc/sudoers.d/{{ username }}"
-    owner: root
-    group: root
-    mode: '0640'
-  become: true
-
-- name: Set safe directory
-  ansible.builtin.command: git config --global --add safe.directory "{{ home }}/.config/dotfiles"
-  changed_when: false
-  become: true
-  tags: skip_ansible_lint
-
-- name: Clone dotfiles
-  ansible.builtin.git:
-    repo: "https://github.com/{{ github_username }}/dotfiles.git"
-    dest: "{{ home }}/.config/dotfiles"
-    version: "{{ dotfiles_branch }}"
-    ssh_opts: 'StrictHostKeyChecking=accept-new'
-  become: true
-  when: github_username is defined
-
-- name: Set permissions on dotfiles directory
-  ansible.builtin.file:
-    path: "{{ home }}/.config"
-    state: directory
-    owner: "{{ username }}"
-    group: "{{ group_name | default(username) }}"
-    recurse: true
-    mode: 'u+rwX,g+rX,o-rwX'
-  become: true
+- name: Process users
+  ansible.builtin.include_tasks: process_user.yml
+  loop: '{{ user_users }}'
+  loop_control:
+    loop_var: user_item
+  tags: user

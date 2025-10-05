@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# {{ ansible_managed }}
+# Script to clone or update dotfiles repository
+# Generated for user: {{ user_item.name }}
+
+set -e
+
+# Set safe directory for git
+git config --global --add safe.directory "{{ user_item.home | default('/home/' + user_item.name) }}/.config/dotfiles"
+
+# Clone or update dotfiles repository
+if [ ! -d "{{ user_item.home | default('/home/' + user_item.name) }}/.config/dotfiles" ]; then
+    echo "Cloning dotfiles repository..."
+    git clone "{{ user_item.dotfiles_repo }}" "{{ user_item.home | default('/home/' + user_item.name) }}/.config/dotfiles"
+else
+    echo "Updating dotfiles repository..."
+    cd "{{ user_item.home | default('/home/' + user_item.name) }}/.config/dotfiles"
+    git pull
+fi
+
+# Set permissions on dotfiles directory
+chmod -R u+rwX,g+rX,o-rwX "{{ user_item.home | default('/home/' + user_item.name) }}/.config"
+
+# Verify dotfiles directory exists
+if [ -d "{{ user_item.home | default('/home/' + user_item.name) }}/.config/dotfiles" ]; then
+    echo "Dotfiles updated successfully"
+else
+    echo "Failed to update dotfiles"
+    exit 1
+fi

@@ -10,9 +10,11 @@
     mode: '0644'
   become: true
   notify: restart-msg
+  tags: wsl, wsl_config
 
 - name: Install .wslconfig from template
   ansible.builtin.file:
-    path: "/mnt/c/Users/{{ username }}/.wslconfig"
+    path: '/mnt/c/Users/{{ wsl_user | default(username) }}/.wslconfig'
     state: absent
   notify: restart-msg
+  tags: wsl, wsl_config

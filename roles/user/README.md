@@ -2,21 +2,67 @@
 
 ## Overview
 
-This role installs and configures a user account.  It also clones a dotfiles repository from Github.
+This role installs and configures user accounts on Debian/Ubuntu systems. It can create multiple users with specific UIDs, groups, SSH keys, and sudo privileges.
 
-### Required variables
+## Requirements
+
+- Ansible 2.16.1 or later
+- Debian or Ubuntu system
+- `ansible.posix.authorized_key` collection for SSH key management
+
+## Role Variables
+
+### Multi-user structure
 
 ```yaml
-username: 'mfaine'
-# password: # if unset this will be set to a random password, but only on creation of the user, never after.
-comment: 'Mark Faine'
-home: '/home/{{ username }}'
-uid: '1001'
-group_name: 'mfaine' # if not set it will default to 'users', gid will be ignored.
-gid: '1002' # if not set it will be the same as uid
-extra_groups: ['sudo']
-shell: '/usr/bin/zsh'
-github_username: 'markfaine'
-dotfiles_repo: 'git+https://github.com/{{ github_username }}/dotfiles'
-dotfiles_branch: 'main'
+users:
+  - name: 'mfaine'
+    comment: 'Mark Faine'
+    uid: '1000'
+    gid: '1000'
+    group_name: 'mfaine'
+    home: '/home/mfaine'
+    shell: '/usr/bin/zsh'
+    extra_groups: ['sudo', 'docker']
+    user_ssh_key_sources:
+      - 'https://git.example.com/users/mfaine.keys'
+    user_ssh_key_ignore_errors: true
+    user_sudo: true
+    user_ssh_keys: true
+    user_authorized_keys: []
+    docker_access: true  # For docker role compatibility
+    state: 'present'
 ```
+
+## Dependencies
+
+None
+
+## Example Playbook
+
+```yaml
+- hosts: servers
+  roles:
+    - role: net.markfaine.user
+      vars:
+        users:
+          - name: 'mfaine'
+            uid: '1000'
+            comment: 'Mark Faine'
+            extra_groups: ['sudo', 'docker']
+            user_ssh_key_sources:
+              - 'https://git.example.com/users/mfaine.keys'
+          - name: 'developer'
+            uid: '1001'
+            comment: 'Developer'
+            shell: '/usr/bin/bash'
+            extra_groups: ['sudo']
+```
+
+## License
+
+GPL-2.0-or-later
+
+## Author Information
+
+Mark Faine

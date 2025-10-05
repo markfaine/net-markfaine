@@ -9,5 +9,14 @@
 #   experimental: true
 #   selinux-enabled: false
 #   dns: []
-run_docker_role: true # if false or unset the role doesn't run
+docker_run_docker_role: true # if false or unset the role doesn't run
+
+# Legacy single user variable (for backward compatibility)
+docker_username: '' # User to add to docker group
+
+# New multi-user structure
+docker_users: [] # List of users, those with docker_access: true will be added to docker group
+  # Example:
+  # - name: 'username'
+  #   docker_access: true
 # ## End role: docker

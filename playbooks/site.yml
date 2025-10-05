@@ -1,0 +1,41 @@
+---
+- name: Complete system setup playbook
+  hosts: all
+  gather_facts: false
+
+# Install system packages, mise, and doppler
+- name: Import packages playbook
+  ansible.builtin.import_playbook: packages.yml
+  tags:
+    - apt
+    - packages
+    - mise
+    - doppler
+
+# Create and configure users
+- name: Import user playbook
+  ansible.builtin.import_playbook: user.yml
+  tags: user
+  when: run_user_role is not defined or run_user_role
+
+# Clone user dotfiles
+- name: Import dotfiles playbook
+  ansible.builtin.import_playbook: dotfiles.yml
+  tags: dotfiles
+
+# Install fonts for users
+- name: Import fonts playbook
+  ansible.builtin.import_playbook: fonts.yml
+  tags: fonts
+  when: fonts is defined and fonts | length
+
+# Install and configure Docker
+- name: Import docker playbook
+  ansible.builtin.import_playbook: docker.yml
+  tags: docker
+  when: run_docker_role is defined and run_docker_role
+
+# Configure WSL-specific settings (only runs on WSL)
+- name: Import wsl playbook
+  ansible.builtin.import_playbook: wsl.yml
+  tags: wsl

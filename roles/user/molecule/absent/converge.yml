@@ -1,0 +1,21 @@
+---
+# vim: set ft=yaml.ansible foldmethod=marker foldmarker={{{,}}} foldlevel=99 syntax=on :
+
+# This file is managed by Ansible, all changes will be lost.# Inventory validation {{{
+
+# Run role tests {{{
+- name: Converge
+  hosts: ubuntu
+
+  # Environment configuration {{{
+  # Configure development environment settings for consistent testing
+  environment:
+    # Disable SMDEV container mode for consistent testing
+    SMDEV_CONTAINER_OFF: 'true'
+  # End Environment configuration }}}
+
+  tasks:
+    - name: Import net.markfaine.user
+      ansible.builtin.import_role:
+        name: net.markfaine.user
+# End Run role tests }}}

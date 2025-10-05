@@ -10,4 +10,4 @@ Environment="HTTP_PROXY={{ proxy_env['http_proxy'] }}"
 Environment="HTTPS_PROXY={{ proxy_env['https_proxy'] }}"
 {% endif %}
 ExecStart=
-ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock 
+ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock

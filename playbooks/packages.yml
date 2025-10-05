@@ -1,18 +1,63 @@
 ---
 - name: Install packages
   hosts: all
-  gather_facts: false
+  gather_facts: true
+  pre_tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+      become: true
   tasks:
-
-    - ansible.builtin.include_role:
-        name: net.markfaine.apt
-      tags: 
-        - apt
-        - packages
-
-    - ansible.builtin.include_role:
+    - name: Include mise role
+      ansible.builtin.include_role:
         name: net.markfaine.mise
-      tags: 
+      tags:
         - mise
         - packages
- 
+
+    - name: Include doppler role
+      ansible.builtin.include_role:
+        name: net.markfaine.doppler
+      tags:
+        - doppler
+        - packages
+
+    - name: Include apt role
+      ansible.builtin.include_role:
+        name: net.markfaine.apt
+      tags:
+        - apt
+        - packages
+  post_tasks:
+    - name: Verify git is installed
+      ansible.builtin.command: git --version
+      register: git_check
+      failed_when: git_check.rc != 0
+      changed_when: false
+      tags: skip_ansible_lint
+    - name: Verify mise installation for users
+      ansible.builtin.command: mise --version
+      register: mise_check
+      failed_when: mise_check.rc != 0
+      changed_when: false
+      become: true
+      become_user: '{{ item.name }}'
+      environment:
+        HOME: "{{ item.home | default('/home/' + item.name) }}"
+        PATH: "{{ item.home | default('/home/' + item.name) }}/.local/bin:{{ ansible_env.PATH }}"
+      loop: "{{ users | default([]) | selectattr('mise', 'equalto', true) | list }}"
+      when: users | default([]) | length > 0
+      tags: validation, mise
+    - name: Verify doppler installation for users
+      ansible.builtin.command: doppler --version
+      register: doppler_check
+      failed_when: doppler_check.rc != 0
+      changed_when: false
+      become: true
+      become_user: '{{ item.name }}'
+      environment:
+        HOME: "{{ item.home | default('/home/' + item.name) }}"
+        PATH: "{{ item.home | default('/home/' + item.name) }}/.doppler/bin:{{ ansible_env.PATH }}"
+      loop: "{{ users | default([]) | selectattr('doppler', 'equalto', true) | list }}"
+      when: users | default([]) | length > 0
+      tags: validation, doppler

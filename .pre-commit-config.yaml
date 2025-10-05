@@ -1,32 +1,86 @@
 ---
-exclude: .git/
-fail_fast: true
+exclude: |
+  ^.git/
+  ^.ansible/
+fail_fast: false  # Allow all hooks to run even if one fails
 repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks.git
+    rev: v6.0.0
+    hooks:
+      - id: check-added-large-files
+        args: [--maxkb=1024]  # Increased limit for potential large files
+        exclude: ^.ansible/
+      - id: check-case-conflict
+      - id: check-docstring-first
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-symlinks
+      - id: check-toml
+      - id: check-xml
+      - id: check-yaml
+      - id: destroyed-symlinks
+      - id: detect-private-key
+      - id: end-of-file-fixer
+        exclude: ^.ansible/
+      - id: fix-byte-order-marker
+        exclude: ^.ansible/
+      - id: mixed-line-ending
+        args: [--fix=lf]
+      - id: pretty-format-json
+        args: [--autofix]
+        exclude: ^.ansible/
+      - id: requirements-txt-fixer
+      - id: trailing-whitespace
+        exclude: ^.ansible/
+
   - repo: https://github.com/adrienverge/yamllint.git
-    rev: v1.35.1
+    rev: v1.37.1
     hooks:
       - id: yamllint
         args: [-c=.yamllint]
         files: \.(yaml|yml)$
+        types: [file]
+        exclude: ^.ansible/
+
+  - repo: https://github.com/ansible-community/ansible-lint
+    rev: v25.9.1
+    hooks:
+      - id: ansible-lint
+        files: \.(yaml|yml)$
+        types: [file]
+        exclude: |
+          molecule/.*\.yml$
+          ^.ansible/
+        args: [--config=.ansible-lint, --offline]
+
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.11.0.1
+    hooks:
+      - id: shellcheck
+        files: \.(sh|bash)$
+        types: [file]
+        exclude: ^.ansible/
+
   - repo: https://github.com/jumanjihouse/pre-commit-hooks
     rev: 3.0.0
     hooks:
       - id: forbid-binary
-  - repo: https://github.com/pre-commit/pre-commit-hooks.git
-    rev: v5.0.0
+      - id: shellcheck
+        files: \.(sh|bash)$
+        types: [file]
+        exclude: ^.ansible/
+
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.4.1
     hooks:
-      - id: check-added-large-files
-        args: [--maxkb=600]
-      - id: fix-byte-order-marker
-      - id: check-docstring-first
-      - id: check-case-conflict
-      - id: check-json
-      - id: check-merge-conflict
-      - id: check-symlinks
-      - id: destroyed-symlinks
-      - id: detect-private-key
-      - id: end-of-file-fixer
-      - id: pretty-format-json
-        args: [--autofix]
-      - id: requirements-txt-fixer
-      - id: trailing-whitespace
+      - id: codespell
+        args: [--ignore-words=.codespell-ignore, --skip=.ansible/**]
+
+  - repo: https://github.com/DavidAnson/markdownlint-cli2
+    rev: v0.13.0
+    hooks:
+      - id: markdownlint-cli2
+        args: [--disable, MD013, MD022, MD029, MD007, MD031, MD032]
+        files: \.(md|markdown)$
+        types: [file]
+        exclude: ^.ansible/

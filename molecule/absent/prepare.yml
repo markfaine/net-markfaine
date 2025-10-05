@@ -1,0 +1,15 @@
+---
+- name: Prepare test environment for absent tests
+  hosts: ubuntu
+  gather_facts: true
+  tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+      become: true
+
+    - name: Install basic packages for testing
+      ansible.builtin.apt:
+        name: ['git', 'curl', 'wget']
+        state: present
+      become: true

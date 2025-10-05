@@ -1,0 +1,17 @@
+exclude_paths:
+  - .pre-commit-config.yaml
+  - '**/molecule/'
+
+warn_list:
+  - ANSIBLE0012 # Commands should not change things
+  - ANSIBLE0014 # Change default output must be false
+  - ANSIBLE0022 # Use of command instead of shell
+  - ANSIBLE0020 # Deprecated module
+  - yaml[truthy]
+profile: basic
+
+verbosity: 1
+
+parseable: false
+
+quiet: false

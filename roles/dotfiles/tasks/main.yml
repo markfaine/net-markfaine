@@ -1,0 +1,14 @@
+---
+- name: Validate required variables
+  ansible.builtin.assert:
+    that:
+      - dotfiles_users | length > 0
+    fail_msg: "'dotfiles_users' list must be provided"
+  tags: dotfiles, validation
+
+- name: Process dotfiles for users
+  ansible.builtin.include_tasks: process_dotfiles.yml
+  loop: "{{ dotfiles_users | selectattr('dotfiles_repo', 'defined') | list }}"
+  loop_control:
+    loop_var: user_item
+  tags: dotfiles

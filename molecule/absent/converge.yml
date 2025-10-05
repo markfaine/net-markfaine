@@ -1,0 +1,61 @@
+---
+# vim: set ft=yaml.ansible foldmethod=marker foldmarker={{{,}}} foldlevel=99 syntax=on :
+
+# Collection absent state test {{{
+- name: Test absent states
+  hosts: ubuntu
+
+  # Environment configuration {{{
+  # Configure development environment settings for consistent testing
+  environment:
+    # Disable SMDEV container mode for consistent testing
+    SMDEV_CONTAINER_OFF: 'true'
+  # End Environment configuration }}}
+
+  tasks:
+    # Import roles with absent states {{{
+    - name: Import net.markfaine.apt
+      ansible.builtin.import_role:
+        name: net.markfaine.apt
+
+    - name: Import net.markfaine.user
+      ansible.builtin.import_role:
+        name: net.markfaine.user
+
+    - name: Import net.markfaine.mise
+      ansible.builtin.import_role:
+        name: net.markfaine.mise
+      vars:
+        mise_state: absent
+
+    - name: Import net.markfaine.doppler
+      ansible.builtin.import_role:
+        name: net.markfaine.doppler
+      vars:
+        doppler_state: absent
+
+    - name: Import net.markfaine.dotfiles
+      ansible.builtin.import_role:
+        name: net.markfaine.dotfiles
+      vars:
+        dotfiles_state: absent
+
+    - name: Import net.markfaine.fonts
+      ansible.builtin.import_role:
+        name: net.markfaine.fonts
+      vars:
+        fonts_state: absent
+
+    - name: Import net.markfaine.docker
+      ansible.builtin.import_role:
+        name: net.markfaine.docker
+      vars:
+        docker_state: absent
+
+    - name: Import net.markfaine.wsl
+      ansible.builtin.import_role:
+        name: net.markfaine.wsl
+      vars:
+        wsl_state: absent
+    # End role imports }}}
+# End Collection absent state test }}}

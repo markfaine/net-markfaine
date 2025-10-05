@@ -1,0 +1,4 @@
+---
+- name: Fail the molecule test
+  ansible.builtin.fail:
+    msg: 'Container creation failed'

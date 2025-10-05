@@ -1,0 +1,45 @@
+---
+- name: Test fonts role present state
+  hosts: localhost
+  gather_facts: true
+  vars:
+    users:
+      - name: testuser
+        home: /home/testuser
+    fonts:
+      - FiraCode
+  tasks:
+    - name: Create test user
+      ansible.builtin.user:
+        name: testuser
+        state: present
+        create_home: true
+      become: true
+      tags: test
+
+    - name: Ensure required packages are installed
+      ansible.builtin.package:
+        name: ['wget', 'jq', 'unzip']
+        state: present
+      become: true
+      tags: test
+
+    - name: Include fonts role
+      ansible.builtin.include_role:
+        name: net.markfaine.fonts
+      tags: test
+
+    - name: Verify fonts directory exists
+      ansible.builtin.stat:
+        path: /home/testuser/.fonts
+      register: fonts_stat
+      failed_when: not fonts_stat.stat.exists
+      tags: test
+
+    - name: Verify fonts directory ownership
+      ansible.builtin.file:
+        path: /home/testuser/.fonts
+        owner: testuser
+        group: testuser
+      check_mode: true
+      tags: test

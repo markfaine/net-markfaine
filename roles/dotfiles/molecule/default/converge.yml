@@ -1,0 +1,34 @@
+---
+# vim: set ft=yaml.ansible foldmethod=marker foldmarker={{{,}}} foldlevel=99 syntax=on :
+
+# This file is managed by Ansible, all changes will be lost.# Inventory validation {{{
+# Verify that the molecule inventory group is properly configured
+- name: Fail if molecule group is missing
+  hosts: localhost
+  tasks:
+    - name: Print inventory groups for debugging
+      ansible.builtin.debug:
+        msg: 'Available groups: {{ groups }}'
+
+    - name: Assert molecule group exists
+      ansible.builtin.assert:
+        that: "'molecule' in groups"
+        fail_msg: |
+          molecule group was not found inside inventory groups: {{ groups }}
+# End Inventory validation }}}
+# Run role tests {{{
+- name: Converge
+  hosts: ubuntu
+
+  # Environment configuration {{{
+  # Configure development environment settings for consistent testing
+  environment:
+    # Disable SMDEV container mode for consistent testing
+    SMDEV_CONTAINER_OFF: 'true'
+  # End Environment configuration }}}
+
+  tasks:
+    - name: Import net.markfaine.dotfiles
+      ansible.builtin.import_role:
+        name: net.markfaine.dotfiles
+# End Run role tests }}}

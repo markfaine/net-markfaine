@@ -1,12 +1,23 @@
 ---
 - name: Install doppler
   hosts: all
-  gather_facts: false
+  gather_facts: true
+  pre_tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+      become: true
   tasks:
-
-    - ansible.builtin.include_role:
+    - name: Include doppler role
+      ansible.builtin.include_role:
         name: net.markfaine.doppler
-      tags: 
+      tags:
         - doppler
         - env
         - secrets
+  post_tasks:
+    - name: Verify doppler is installed
+      ansible.builtin.command: doppler --version
+      register: doppler_check
+      changed_when: false
+      failed_when: doppler_check.rc != 0

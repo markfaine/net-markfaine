@@ -1,0 +1,49 @@
+---
+# vim: set ft=yaml.ansible foldmethod=marker foldmarker={{{,}}} foldlevel=99 syntax=on :
+
+# Collection converge test {{{
+- name: Converge all roles
+  hosts: ubuntu
+
+  # Environment configuration {{{
+  # Configure development environment settings for consistent testing
+  environment:
+    # Disable SMDEV container mode for consistent testing
+    SMDEV_CONTAINER_OFF: 'true'
+  # End Environment configuration }}}
+
+  tasks:
+    # Import all roles in optimal order {{{
+    - name: Import net.markfaine.apt
+      ansible.builtin.import_role:
+        name: net.markfaine.apt
+
+    - name: Import net.markfaine.user
+      ansible.builtin.import_role:
+        name: net.markfaine.user
+
+    - name: Import net.markfaine.mise
+      ansible.builtin.import_role:
+        name: net.markfaine.mise
+
+    - name: Import net.markfaine.doppler
+      ansible.builtin.import_role:
+        name: net.markfaine.doppler
+
+    - name: Import net.markfaine.dotfiles
+      ansible.builtin.import_role:
+        name: net.markfaine.dotfiles
+
+    - name: Import net.markfaine.fonts
+      ansible.builtin.import_role:
+        name: net.markfaine.fonts
+
+    - name: Import net.markfaine.docker
+      ansible.builtin.import_role:
+        name: net.markfaine.docker
+
+    - name: Import net.markfaine.wsl
+      ansible.builtin.import_role:
+        name: net.markfaine.wsl
+    # End role imports }}}
+# End Collection converge test }}}

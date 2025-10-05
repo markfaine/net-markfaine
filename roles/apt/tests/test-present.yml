@@ -1,0 +1,30 @@
+---
+- name: Test apt role present state
+  hosts: localhost
+  gather_facts: true
+  vars:
+    apt_packages:
+      - git
+      - curl
+      - wget
+    apt_packages_uninstall:
+      - nano
+  tasks:
+    - name: Include apt role
+      ansible.builtin.include_role:
+        name: net.markfaine.apt
+      tags: test
+
+    - name: Verify required packages are installed
+      ansible.builtin.package:
+        name: "{{ item }}"
+        state: present
+      loop: "{{ apt_packages }}"
+      tags: test
+
+    - name: Verify packages to uninstall are removed
+      ansible.builtin.package:
+        name: "{{ item }}"
+        state: absent
+      loop: "{{ apt_packages_uninstall }}"
+      tags: test

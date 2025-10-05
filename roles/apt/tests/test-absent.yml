@@ -1,0 +1,17 @@
+---
+- name: Test apt role absent state (no-op test)
+  hosts: localhost
+  gather_facts: true
+  vars:
+    apt_packages: []
+    apt_packages_uninstall: []
+  tasks:
+    - name: Include apt role
+      ansible.builtin.include_role:
+        name: net.markfaine.apt
+      tags: test
+
+    - name: Verify apt role runs without errors
+      ansible.builtin.debug:
+        msg: "Apt role completed successfully"
+      tags: test

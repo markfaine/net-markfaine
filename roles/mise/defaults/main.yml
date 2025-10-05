@@ -1,1 +1,8 @@
 ---
+mise_state: latest
+
+# Multi-user structure
+mise_users: []
+  # Example:
+  # - name: 'username'
+  #   mise: true  # Whether to install mise for this user

@@ -1,0 +1,10 @@
+[env]
+# Ansible managed: see .github/co-pilot-instructions.md for compliance details
+_.python.venv = ".venv" # relative to this file's directory
+_.source = '.env'
+
+[tools]
+node = "24.3.0"
+"npm:vscode-langservers-extracted" = "4.10.0"
+pre-commit = "latest"
+python = "3.12"

@@ -1,1 +1,8 @@
 ---
+doppler_state: latest
+
+# Multi-user structure
+doppler_users: []
+  # Example:
+  # - name: 'username'
+  #   doppler: true  # Whether to install doppler for this user

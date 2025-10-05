@@ -1,0 +1,18 @@
+# Multi-user structure
+users:
+  - name: 'mfaine'
+    comment: 'Mark Faine'
+    uid: '1000'
+    gid: '1000'
+    group_name: 'mfaine'
+    home: '/home/mfaine'
+    shell: '/usr/bin/zsh'
+    extra_groups: ['sudo', 'docker']
+    user_ssh_key_sources:
+      - 'https://github.com/markfaine.keys'
+    dotfiles_repo: 'git+https://github.com/markfaine/dotfiles'
+    dotfiles_branch: 'main'
+    docker_access: true # Whether this user should be added to docker group
+    mise: true # Whether to install mise for this user
+    doppler: true # Whether to install doppler for this user
+    state: 'present' # present or absent

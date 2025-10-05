@@ -1,0 +1,15 @@
+#jinja2: lstrip_blocks: False, trim_blocks: False
+#!/usr/bin/env bash
+#shellcheck shell=bash
+set -euo pipefail
+
+# Setup doppler, provide token or open browser to authenticate
+{% if doppler_token %}
+echo '{{ doppler_token }}' | doppler configure set token --scope /
+{% else %}
+echo "Doppler token not provided. Opening browser for authentication..."
+doppler login
+{% endif %}
+doppler setup
+doppler secrets download --no-file --format env > ~/.env
+source ~/.env

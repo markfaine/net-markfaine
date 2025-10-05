@@ -1,1 +1,4 @@
 ---
+doppler_repo_gpgkey: https://packages.doppler.com/public/cli/gpg.DE2A7741A397C129.key
+doppler_repo_baseurl: https://packages.doppler.com/public/cli/deb/debian
+doppler_gpg_checksum: sha256:7b9552d5da3f8c8706b77ecc41ea37b86f5242e2e2913d53de6caf8346140154

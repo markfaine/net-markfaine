@@ -1,0 +1,109 @@
+---
+- name: 'User tasks for {{ user_item.name }}'
+  when: user_item.state | default('present') == 'present'
+  block:
+    - name: Update/Create the group for the user {{ user_item.name }}
+      ansible.builtin.group:
+        name: '{{ user_item.group_name | default(user_item.name) }}'
+        gid: '{{ user_item.gid | default(user_item.uid) }}'
+        state: present
+      become: true
+      when: user_item.group_name is defined or user_item.gid is defined
+      tags: user, user_group
+
+    - name: Update/Create the user {{ user_item.name }}
+      ansible.builtin.user:
+        name: '{{ user_item.name }}'
+        comment: '{{ user_item.comment | default(omit) }}'
+        uid: '{{ user_item.uid }}'
+        shell: "{{ user_item.shell | default('/usr/bin/bash') }}"
+        group: "{{ user_item.group_name | default('users') }}"
+        groups: '{{ user_item.extra_groups | default([]) }}'
+        home: "{{ user_item.home | default('/home/' + user_item.name) }}"
+        password: "{{ user_item.password | default(lookup('ansible.builtin.password', '/dev/null', seed=user_item.name) | password_hash('sha512', user_item.name)) }}"
+        append: true
+        update_password: 'on_create'
+        state: present
+      become: true
+      tags: user, user_account
+
+    - name: Ensure .ssh directory exists for {{ user_item.name }}
+      ansible.builtin.file:
+        path: "{{ user_item.home | default('/home/' + user_item.name) }}/.ssh"
+        state: directory
+        owner: '{{ user_item.name }}'
+        group: '{{ user_item.group_name | default(user_item.name) }}'
+        mode: '0700'
+      become: true
+      when: user_item.user_ssh_keys | default(true)
+      tags: user, user_ssh
+
+    - name: Determine SSH key sources for {{ user_item.name }}
+      ansible.builtin.set_fact:
+        user_ssh_key_sources_effective: >-
+          {{
+            (
+              [user_item.user_ssh_key_sources]
+              if user_item.user_ssh_key_sources is string
+              else user_item.user_ssh_key_sources
+            )
+            if user_item.user_ssh_key_sources is defined
+            else []
+          }}
+      tags: user, user_ssh
+
+    - name: Set authorized keys from sources for {{ user_item.name }}
+      ansible.posix.authorized_key:
+        user: '{{ user_item.name }}'
+        state: present
+        key: "{{ (item is match('^[a-zA-Z][a-zA-Z0-9+.-]*://')) | ternary(lookup('ansible.builtin.url', item), lookup('ansible.builtin.file', item)) }}"
+      loop: '{{ user_ssh_key_sources_effective | default([]) }}'
+      loop_control:
+        label: '{{ item }}'
+      when:
+        - user_item.user_ssh_keys | default(true)
+        - user_ssh_key_sources_effective | default([]) | length > 0
+      failed_when: not (user_item.user_ssh_key_ignore_errors | default(true))
+      tags: user, user_ssh, user_authorized_keys
+
+    - name: Set authorized keys for {{ user_item.name }}
+      ansible.posix.authorized_key:
+        user: '{{ user_item.name }}'
+        state: present
+        key: '{{ item }}'
+      with_items: '{{ user_item.user_authorized_keys | default([]) }}'
+      when:
+        - user_item.user_ssh_keys | default(true)
+        - user_item.user_authorized_keys is defined
+      tags: user, user_ssh, user_authorized_keys
+
+    - name: Configure sudo for {{ user_item.name }}
+      ansible.builtin.copy:
+        content: |
+          {{ user_item.name }} ALL=(ALL) NOPASSWD: ALL
+          Defaults:{{ user_item.name }} !requiretty
+        dest: '/etc/sudoers.d/{{ user_item.name }}'
+        owner: root
+        group: root
+        mode: '0640'
+      become: true
+      when: user_item.user_sudo | default(true)
+      tags: user, user_sudo
+
+- name: 'Remove user tasks for {{ user_item.name }}'
+  when: user_item.state | default('present') == 'absent'
+  block:
+    - name: Remove the user {{ user_item.name }}
+      ansible.builtin.user:
+        name: '{{ user_item.name }}'
+        state: absent
+        remove: '{{ user_item.remove_home_on_delete | default(false) }}'
+      become: true
+      tags: user, user_remove
+
+    - name: Remove sudoers file for {{ user_item.name }}
+      ansible.builtin.file:
+        path: '/etc/sudoers.d/{{ user_item.name }}'
+        state: absent
+      become: true
+      tags: user, user_sudo_remove

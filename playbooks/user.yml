@@ -1,8 +1,40 @@
 ---
 - name: Create/update user
   hosts: all
-  gather_facts: false
+  gather_facts: true
+  pre_tasks:
+    - name: Validate Ansible version
+      ansible.builtin.assert:
+        that: ansible_version.full is version('2.16.1', '>=')
+        fail_msg: 'Ansible version 2.16.1 or higher is required'
+      tags: validation
+
+    - name: Validate required variables for user role
+      ansible.builtin.assert:
+        that:
+          - users | length > 0
+        fail_msg: 'Required variable "users" list must be provided'
+      tags: validation, user
+
   tasks:
-    - ansible.builtin.include_role:
+    - name: Include user role
+      ansible.builtin.include_role:
         name: net.markfaine.user
       tags: user
+
+  post_tasks:
+    - name: Verify users were created
+      ansible.builtin.command: id {{ item.name }}
+      register: user_check
+      changed_when: false
+      failed_when: user_check.rc != 0
+      loop: "{{ users | selectattr('state', 'undefined') | list | union(users | selectattr('state', 'equalto', 'present') | list) }}"
+      tags: validation, user
+
+    - name: Verify users were removed
+      ansible.builtin.command: id {{ item.name }}
+      register: user_check
+      changed_when: false
+      failed_when: user_check.rc == 0
+      loop: "{{ users | selectattr('state', 'equalto', 'absent') | list }}"
+      tags: validation, user

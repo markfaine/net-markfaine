@@ -4,7 +4,7 @@
 # ## The Ubuntu specific installation information
 docker_repo_baseurl: https://download.docker.com/linux/ubuntu
 docker_repo_gpgkey: https://download.docker.com/linux/ubuntu/gpg
-docker_cred_helper_url: https://github.com/docker/docker-credential-helpers/releases/download/v0.8.2/docker-credential-pass-v0.8.2.linux-amd64
+docker_cred_helper_url: https://github.com/docker/docker-credential-helpers/releases/download/v0.9.3/docker-credential-pass-v0.9.3.linux-amd64
 
 docker_packages:
   - ca-certificates
@@ -14,11 +14,6 @@ docker_packages:
   - containerd.io
   - docker-buildx-plugin
   - docker-compose-plugin
-
-docker_remove_packages:
-  - docker-buildx-plugin
-  - docker-compose-plugin
-  - docker-ce-cli
 
 docker_compose_url: https://github.com/docker/compose/releases/download/v2.33.1/docker-compose-linux-x86_64
 
@@ -30,18 +25,19 @@ docker_obsolete_packages:
   - podman-docker
   - containerd
   - runc
-   
+
 # ## Configuration Files
 docker_config_dir: /etc/docker
 docker_config_file: daemon.json
-docker_config_file_mode: "0600"
-docker_config_dir_mode: "0755"
+docker_config_file_mode: '0600'
+docker_config_dir_mode: '0755'
 
 # ## Data dir
 docker_data_dir: /var/lib/docker
 
-# ## Log dir 
-docker_log_dir: /var/log/docker
+# ## Log dir
+docker_log_dir:
+  /var/log/docker
 
   # ## Configuration
 docker_default_config:

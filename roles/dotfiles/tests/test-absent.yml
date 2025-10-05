@@ -1,0 +1,16 @@
+---
+- name: Test dotfiles role absent state
+  hosts: localhost
+  gather_facts: true
+  vars:
+    dotfiles_state: absent
+  tasks:
+    - name: Include dotfiles role
+      ansible.builtin.include_role:
+        name: net.markfaine.dotfiles
+      tags: test
+
+    - name: Verify dotfiles role runs without critical errors
+      ansible.builtin.debug:
+        msg: "Dotfiles role absent state completed"
+      tags: test

@@ -1,2 +1,4 @@
 ---
 wsl_state: present
+wsl_username: '' # Primary user for WSL configuration (for backward compatibility)
+wsl_user: '' # Optional: defaults to user running playbook if not set

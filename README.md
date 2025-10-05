@@ -1,113 +1,188 @@
 # net.markfaine
 
+[![Ansible Collection](https://img.shields.io/badge/Ansible-Collection-blue)](https://ansible.com)
+[![License](https://img.shields.io/badge/License-GPL--2.0--or--later-green)](LICENSE)
+
 ## Overview
-This project contains tools for installing/updating my tools and dotfiles across multiple Ubuntu (and maybe Debian) environments. It uses Ansible, Doppler, Tuckr, and Mise to Install tooling and dotfiles.
 
-Note: The script below need to be run with a privileged user account.
+This Ansible collection provides roles and playbooks for setting up and managing
+development environments on Ubuntu (and Debian-based) systems. It includes tools
+for user management, dotfiles installation, package management, and more, using
+modern tools like Doppler for secrets, Mise for runtime management, and Tuckr
+for dotfile management.
 
-```sh
-# To setup on a stock ubuntu
+The collection is designed to be flexible and customizable, allowing users to
+configure their environments according to their needs.
+
+## Requirements
+
+- **Ansible**: 2.16.1 or later
+- **Target Systems**: Ubuntu 20.04+ or Debian-based distributions
+- **Privileges**: Root or sudo access required for system-level changes
+- **Internet Access**: Required for downloading packages and cloning repositories
+
+## Quick Start
+
+### Bootstrap a New System
+
+For a fresh Ubuntu installation, run the bootstrap script as root:
+
+```bash
+# Update and install curl
 apt-get update && apt-get install -y curl
-curl https://raw.githubusercontent.com/markfaine/net-markfaine/refs/heads/main/bootstrap.sh | bash
 
-```
-The above will output an `ansible-playbook` command. Edit the inventory file located at `/tmp/uv/inventory.yml` and then run the `ansible-playbook` command.
-
-Note:  You may want to create a simple `ansible.cfg` file at `/tmp/uv/ansible.cfg` prior to running the ansible playbook.
-
-```ini
-[defaults]
-action_warnings=False
-deprecation_warnings=False
-ansible_managed = This file is managed by Ansible, all changes will be lost.
-debug=False
-forks=10
-gathering = smart
-host_key_checking = False
-interpreter_python=auto_silent
-log_path=~/ansible.log
-nocolor=False
-nocows=True
-retry_files_enabled = False
-timeout=60
-transport=ssh
-verbosity=0
-[ssh_connection]
-pipelining = True
-scp_if_ssh = True
+# Run the bootstrap script
+curl -fsSL https://raw.githubusercontent.com/markfaine/net-markfaine/main/bootstrap.sh | bash
 ```
 
+The bootstrap script will:
 
-## Post Ansible
+- Install system dependencies
+- Set up uv (Python package manager)
+- Install the Ansible collection
+- Run the main playbook with interactive inventory creation if needed
 
-### Doppler
-[Doppler](https://doppler.com) requires that you have a doppler project configured for use with env and/or secrets.
-However you can just add a `.env` file to your `$HOME` directory and it will also be sourced.  The benefit of using Doppler here is that it allows me to deploy different environment 
-variables and secrets for different environments without duplicating files. It's also free for up to 3 users.
-```sh
-doppler login # Open a browser and login
-doppler setup
-doppler secrets download --no-file --format env > ~/.env
-...
+### Bootstrap Options
+
+The bootstrap script supports several options:
+
+```bash
+./bootstrap.sh [options]
+
+Options:
+  -v, --verbose    Show detailed command output
+  -i, --inventory FILE    Specify custom inventory file
+  -h, --help       Show help message
 ```
-See: `doppler --help` for more information.
 
-### Tuckr/Mise
-[Tuckr](https://github.com/RaphGL/Tuckr) is like [GNU Stow](https://www.gnu.org/software/stow/) and will install dotfiles.  The dotfiles come from a [dotfiles repo](https://github.com/markfaine/dotfiles/tree/main) and are using the layout required by Tuckr.  The Ansible inventory file contains a variable that points to the dotfiles repo.  Since rust isn't installed until after Mise is installed but mise doesn't have any configuration file until Tuckr symlinks the dotfiles I have to get creative here.
+## Configuration
 
-```sh
-eval "$(mise activate zsh)"
-mise use -g rust
-cargo install tuckr
+### Inventory
+
+Create an inventory file (e.g., `inventory.yml`) with your user configuration:
+
+```yaml
+all:
+  hosts:
+    localhost:
+      ansible_connection: local
+      ansible_python_interpreter: /usr/bin/python3
+
+      users:
+        - name: 'yourusername'
+          comment: 'Your Name'
+          uid: '1000'
+          gid: '1000'
+          group_name: 'yourusername'
+          home: '/home/yourusername'
+          shell: '/usr/bin/zsh'
+          extra_groups: ['sudo', 'docker']
+          user_ssh_key_sources:
+            - 'https://github.com/yourusername.keys'
+          dotfiles_repo: 'https://github.com/yourusername/dotfiles.git'
+          docker_access: true
+          mise: true
+          doppler: true
+          state: 'present'
+```
+
+### Environment Variables
+
+The bootstrap script can be customized with environment variables:
+
+- `UV_INSTALL_DIR`: Directory for uv installation (default: `/tmp/uv`)
+- `COLLECTION`: Collection repository URL
+- `COLLECTION_BRANCH`: Branch to install (default: `main`)
+
+## Roles
+
+This collection includes the following roles:
+
+### net.markfaine.apt
+Manages APT packages and repositories.
+
+### net.markfaine.user
+Creates and configures user accounts with SSH keys, sudo access, and more.
+
+### net.markfaine.dotfiles
+Clones and manages dotfiles repositories using git, mise, and tuckr.
+
+### net.markfaine.fonts
+Installs Nerd Fonts for development.
+
+### net.markfaine.mise
+Sets up Mise (formerly RTX) for runtime management.
+
+### net.markfaine.doppler
+Configures Doppler for secrets management.
+
+### net.markfaine.docker
+Installs and configures Docker.
+
+### net.markfaine.wsl
+WSL-specific configurations.
+
+## Usage
+
+### Running Individual Roles
+
+After bootstrapping, you can run specific roles:
+
+```bash
+ansible-playbook -i inventory.yml playbooks/user.yml
+ansible-playbook -i inventory.yml playbooks/dotfiles.yml
+```
+
+### Updating Dotfiles
+
+The collection clones dotfiles over HTTPS for initial setup. To enable pushing changes back to your repository, update the remote URL:
+
+```bash
 cd ~/.config/dotfiles
-tuckr add \* -f # A pre-hook should remove "$HOME/.config/mise/config.toml" if it exists and is a regular file, if not force
-exec zsh
-```
-See `tuckr --help` for more information.
-
-### Mise
-[Mise (mise-en-place)](https://mise.jdx.dev/) will install the tools configured from  `~/.config/mise/config.toml` installed from the dotfiles repo by Mise.
-
-```sh
-mise install
+git remote set-url origin git@github.com:yourusername/dotfiles.git
 ```
 
-### Restart
-Some of the configuration changes won't take effect until the shell restarts.
+### Managing Secrets with Doppler
 
-```sh
-exec zsh
+The collection can set up Doppler for secrets management. If a `doppler_token` is provided, it will configure authentication automatically. Otherwise, it will prompt for browser-based login.
+
+## Development
+
+### Testing
+
+Run tests with Molecule:
+
+```bash
+cd roles/<role_name>
+molecule test
 ```
 
-### Updating dotfiles
-Since the point is to be able to manage shared dotfiles (and tools) it's necessary to update the remote for the repository once everything is working so that dotfile updates can easily be pushed back to the remote.  This is because the Ansible role uses an http remote since other users may wish to use this as a starting point for thier own projects. If so, replace the repo below with your repository remote.
+### Contributing
 
-```sh
-cd ~/.config/dotfiles
-git remote set-url origin git@github.com:markfaine/dotfiles.git
-```
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run tests
+5. Submit a pull request
 
-### Neovim
-The first time neovim is opened it may need to download some tools with Mason.  
+## Troubleshooting
 
-**Update**: Mise now manages all of the tools required by neovim plugins, with the exception of `ansible-language-server` which I've yet to find a way to install using Mise.
+### Common Issues
 
-Note: This neovim config is based on [kickstart.nvim](https://github.com/nvim-lua/kickstart.nvim) and is absolutely a work in progress.
+- **Permission Denied**: Ensure you're running with sudo or as root
+- **Missing Dependencies**: The bootstrap script installs required packages
+- **Inventory Errors**: Verify your inventory file syntax and paths
 
-```sh
-nvim
-# wait for it to finish and then exit
-```
+### Getting Help
 
-### Setting Default Tool Paths
+- Check the role-specific README files in `roles/*/README.md`
+- Review Ansible logs for detailed error messages
+- Open an issue on GitHub for bugs or feature requests
 
-#### Python
-This may be later added to the role but for now run this command to set the default python
+## License
 
-```sh
-sudo update-alternatives --install /usr/bin/python python "$HOME/.local/share/mise/installs/python/latest" 1
-sudo update-alternatives --config python # select 0 or 1
-```
+GPL-2.0-or-later
 
+## Author
 
-
+Mark Faine <mark.faine@pm.me>
