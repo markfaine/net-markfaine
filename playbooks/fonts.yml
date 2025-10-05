@@ -1,8 +1,23 @@
 ---
 - name: Install fonts
   hosts: all
-  gather_facts: false
+  gather_facts: true
+  pre_tasks:
+    - name: Ensure required packages are installed
+      ansible.builtin.package:
+        name: ['wget', 'jq', 'unzip']
+        state: present
+      become: true
   tasks:
-    - ansible.builtin.include_role:
+    - name: Include fonts role
+      ansible.builtin.include_role:
         name: net.markfaine.fonts
       tags: fonts
+  post_tasks:
+    - name: Verify fonts directory exists for users
+      ansible.builtin.stat:
+        path: "{{ item.home | default('/home/' + item.name) }}/.fonts"
+      register: fonts_check
+      failed_when: not fonts_check.stat.exists
+      loop: '{{ users }}'
+      tags: validation, fonts

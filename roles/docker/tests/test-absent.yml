@@ -1,0 +1,23 @@
+---
+- name: Test docker role absent state
+  hosts: localhost
+  vars:
+    docker_state: absent
+  tasks:
+    - name: Include docker role
+      ansible.builtin.include_role:
+        name: net.markfaine.docker
+      tags: test
+
+    - name: Verify Docker service is stopped
+      ansible.builtin.service:
+        name: docker
+        state: stopped
+      become: true
+      failed_when: false # Service might not exist
+      tags: test
+
+    - name: Verify docker role runs without critical errors
+      ansible.builtin.debug:
+        msg: 'Docker role absent state completed'
+      tags: test

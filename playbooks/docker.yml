@@ -2,7 +2,33 @@
 - name: Install/Configure docker
   hosts: all
   gather_facts: true
+  pre_tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+      become: true
   tasks:
-    - ansible.builtin.include_role:
+    - name: Include docker role
+      ansible.builtin.include_role:
         name: net.markfaine.docker
       tags: docker
+  post_tasks:
+    - name: Verify Docker service is running
+      ansible.builtin.service:
+        name: docker
+        state: started
+      become: true
+      tags: validation, docker
+    - name: Test Docker with hello-world
+      ansible.builtin.command: docker run --rm hello-world
+      register: docker_test
+      changed_when: false
+      failed_when: docker_test.rc != 0
+      tags: validation, docker
+    - name: Verify users are in docker group
+      ansible.builtin.command: groups {{ item.name }}
+      register: groups_check
+      changed_when: false
+      failed_when: "'docker' not in groups_check.stdout"
+      loop: "{{ users | selectattr('docker_access', 'equalto', true) | list }}"
+      tags: validation, docker

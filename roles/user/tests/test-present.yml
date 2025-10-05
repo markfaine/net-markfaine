@@ -1,0 +1,45 @@
+---
+- name: Test user role present state
+  hosts: localhost
+  gather_facts: true
+  vars:
+    users:
+      - name: testuser
+        uid: 2000
+        shell: /bin/bash
+        home: /home/testuser
+        user_sudo: true
+        user_ssh_key_sources:
+          - https://github.com/octocat.keys
+  tasks:
+    - name: Include user role
+      ansible.builtin.include_role:
+        name: net.markfaine.user
+      tags: test
+
+    - name: Verify user exists
+      ansible.builtin.getent:
+        database: passwd
+        key: testuser
+      tags: test
+
+    - name: Verify user home directory exists
+      ansible.builtin.stat:
+        path: /home/testuser
+      register: home_stat
+      failed_when: not home_stat.stat.exists
+      tags: test
+
+    - name: Verify user has sudo access
+      ansible.builtin.stat:
+        path: /etc/sudoers.d/testuser
+      register: sudo_stat
+      failed_when: not sudo_stat.stat.exists
+      tags: test
+
+    - name: Verify SSH directory exists
+      ansible.builtin.stat:
+        path: /home/testuser/.ssh
+      register: ssh_stat
+      failed_when: not ssh_stat.stat.exists
+      tags: test

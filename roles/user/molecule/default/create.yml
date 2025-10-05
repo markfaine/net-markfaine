@@ -1,0 +1,103 @@
+# vim: set ft=yaml.ansible foldmethod=marker foldmarker=<<<,>>> foldlevel=99 syntax=on :
+# This file is managed by Ansible, all changes will be lost.
+# Docker container provisioning <<<
+# Create and configure Docker containers for Molecule testing
+- name: Create
+  hosts: localhost
+  gather_facts: false
+  # no_log: true
+  vars:
+    # Initial inventory structure <<<
+    molecule_inventory:
+      all:
+        hosts: {}
+        molecule: {}
+        # End Initial inventory structure >>>
+  tasks:
+    # Container creation <<<
+    # Provision Docker containers with systemd support
+    - name: Create a container
+      community.docker.docker_container:
+        name: '{{ item.name }}'
+        image: '{{ item.image }}'
+        state: started
+        privileged: true
+        command: '{{ item.command | default("/sbin/init") }}'
+        log_driver: json-file
+      register: result
+      loop: '{{ molecule_yml.platforms }}'
+    - name: Print some info
+      ansible.builtin.debug:
+        msg: '{{ result.results }}'
+    # Container health validation <<<
+    # Check container status and handle failures
+    - name: Fail if container is not running
+      # End Container creation >>>
+
+      when: >
+        item.container.State.ExitCode != 0 or not item.container.State.Running
+
+      ansible.builtin.include_tasks:
+        file: tasks/create-fail.yml
+      loop: '{{ result.results }}'
+      loop_control:
+        label: '{{ item.container.Name }}'
+    # Dynamic inventory generation <<<
+    # Build Molecule inventory with container connection details
+    - name: Add container to molecule_inventory
+      # End Container health validation >>>
+
+      vars:
+        inventory_partial_yaml: |
+          all:
+            children:
+              molecule:
+                hosts:
+                  "{{ item.name }}":
+                    ansible_connection: community.docker.docker
+      ansible.builtin.set_fact:
+        molecule_inventory: >
+          {{ molecule_inventory | combine(inventory_partial_yaml | from_yaml, recursive=true) }}
+
+      loop: '{{ molecule_yml.platforms }}'
+      loop_control:
+        label: '{{ item.name }}'
+    - name: Dump molecule_inventory
+      ansible.builtin.copy:
+        content: |
+          {{ molecule_inventory | to_yaml }}
+        dest: '{{ molecule_ephemeral_directory }}/inventory/molecule_inventory.yml'
+        mode: '0600'
+    # Inventory validation <<<
+    # Refresh and validate inventory configuration
+    - name: Force inventory refresh
+      # End Dynamic inventory generation >>>
+
+      ansible.builtin.meta: refresh_inventory
+    - name: Fail if molecule group is missing
+      ansible.builtin.assert:
+        that: "'molecule' in groups"
+        fail_msg: |
+          molecule group was not found inside inventory groups: {{ groups }}
+      run_once: true # noqa: run-once[task]
+      # End Inventory validation >>>
+# Container connectivity verification <<<
+# Validate that containers are accessible and functional
+# Prevents errors like "Failed to create temporary directory"
+- name: Validate that inventory was refreshed
+  # End Docker container provisioning >>>
+
+  hosts: ubuntu
+  gather_facts: false
+  tasks:
+    # Basic connectivity test <<<
+    # Verify container accessibility via raw command
+    - name: Check uname
+      ansible.builtin.raw: uname -a
+      register: result
+      changed_when: false
+    - name: Display uname info
+      ansible.builtin.debug:
+        msg: '{{ result.stdout }}'
+        # End Basic connectivity test >>>
+# End Container connectivity verification >>>

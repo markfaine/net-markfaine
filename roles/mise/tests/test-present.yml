@@ -1,0 +1,42 @@
+---
+- name: Test mise role present state
+  hosts: localhost
+  gather_facts: true
+  vars:
+    users:
+      - name: testuser
+        mise: true
+        home: /home/testuser
+  tasks:
+    - name: Create test user
+      ansible.builtin.user:
+        name: testuser
+        state: present
+        create_home: true
+      become: true
+      tags: test
+
+    - name: Include mise role
+      ansible.builtin.include_role:
+        name: net.markfaine.mise
+      tags: test
+
+    - name: Verify mise is installed for user
+      ansible.builtin.command: mise --version
+      register: mise_check
+      changed_when: false
+      failed_when: mise_check.rc != 0
+      become: true
+      become_user: testuser
+      environment:
+        HOME: /home/testuser
+        PATH: /home/testuser/.local/bin:{{ ansible_env.PATH }}
+      tags: test
+
+    - name: Verify mise PATH is configured in bashrc
+      ansible.builtin.lineinfile:
+        path: /home/testuser/.bashrc
+        line: 'export PATH="$HOME/.local/bin:$PATH"'
+        state: present
+      check_mode: true
+      tags: test

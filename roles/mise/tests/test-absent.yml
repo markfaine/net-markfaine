@@ -1,0 +1,16 @@
+---
+- name: Test mise role absent state
+  hosts: localhost
+  gather_facts: true
+  vars:
+    mise_state: absent
+  tasks:
+    - name: Include mise role
+      ansible.builtin.include_role:
+        name: net.markfaine.mise
+      tags: test
+
+    - name: Verify mise role runs without critical errors
+      ansible.builtin.debug:
+        msg: "Mise role absent state completed"
+      tags: test

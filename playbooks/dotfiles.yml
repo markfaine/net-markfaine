@@ -1,8 +1,29 @@
 ---
 - name: Create/update dotfiles
   hosts: all
-  gather_facts: false
+  gather_facts: true
+  pre_tasks:
+    - name: Ensure Git is installed
+      ansible.builtin.package:
+        name: git
+        state: present
+      become: true
+    - name: Validate required variables for dotfiles role
+      ansible.builtin.assert:
+        that:
+          - users | length > 0
+        fail_msg: 'Required variable "users" list must be provided'
+      tags: validation, dotfiles
   tasks:
-    - ansible.builtin.include_role:
+    - name: Include dotfiles role
+      ansible.builtin.include_role:
         name: net.markfaine.dotfiles
       tags: dotfiles
+  post_tasks:
+    - name: Verify dotfiles directories exist for users
+      ansible.builtin.stat:
+        path: "{{ item.home | default('/home/' + item.name) }}/.config/dotfiles"
+      register: dotfiles_check
+      failed_when: not dotfiles_check.stat.exists
+      loop: "{{ users | selectattr('dotfiles_repo', 'defined') | list }}"
+      tags: validation, dotfiles

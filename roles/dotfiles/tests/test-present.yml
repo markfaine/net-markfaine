@@ -1,0 +1,45 @@
+---
+- name: Test dotfiles role present state
+  hosts: localhost
+  gather_facts: true
+  vars:
+    users:
+      - name: testuser
+        dotfiles_repo: 'https://github.com/markfaine/dotfiles.git'
+        dotfiles_branch: main
+        home: /home/testuser
+  tasks:
+    - name: Create test user
+      ansible.builtin.user:
+        name: testuser
+        state: present
+        create_home: true
+      become: true
+      tags: test
+
+    - name: Ensure git is installed
+      ansible.builtin.package:
+        name: git
+        state: present
+      become: true
+      tags: test
+
+    - name: Include dotfiles role
+      ansible.builtin.include_role:
+        name: net.markfaine.dotfiles
+      tags: test
+
+    - name: Verify dotfiles directory exists
+      ansible.builtin.stat:
+        path: /home/testuser/.config/dotfiles
+      register: dotfiles_stat
+      failed_when: not dotfiles_stat.stat.exists
+      tags: test
+
+    - name: Verify dotfiles ownership
+      ansible.builtin.file:
+        path: /home/testuser/.config/dotfiles
+        owner: testuser
+        group: testuser
+      check_mode: true
+      tags: test

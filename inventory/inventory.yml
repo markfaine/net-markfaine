@@ -1,0 +1,39 @@
+# Edit to your requirements
+all:
+  hosts:
+    ubuntu:
+      ansible_python_interpreter: /usr/bin/python3
+
+      # Multi-user structure
+      # wsl_user: 'mfaine' # Optional: defaults to user running playbook
+      users:
+        - name: 'mfaine'
+          comment: 'Mark Faine'
+          uid: '1000'
+          gid: '1000'
+          group_name: 'mfaine'
+          home: '/home/mfaine'
+          shell: '/usr/bin/zsh'
+          extra_groups: ['sudo', 'docker']
+          user_ssh_key_sources:
+            - 'https://github.com/markfaine.keys'
+          dotfiles_repo: 'git+https://github.com/markfaine/dotfiles'
+          dotfiles_branch: 'main'
+          docker_access: true # Whether this user should be added to docker group
+          mise: true # Whether to install mise for this user
+          doppler: true # Whether to install doppler for this user
+          state: 'present' # present or absent
+        # Add more users as needed
+        # - name: 'otheruser'
+        #   comment: 'Other User'
+        #   uid: '1001'
+        #   gid: '1001'
+        #   group_name: 'otheruser'
+        #   home: '/home/otheruser'
+        #   shell: '/usr/bin/bash'
+        #   extra_groups: ['sudo']
+        #   user_ssh_key_sources: []
+        #   docker_access: false
+        #   mise: false
+        #   doppler: false
+        #   state: 'present'

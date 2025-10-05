@@ -1,54 +1,21 @@
 ---
-- name: Install gpg
+- name: Install system dependencies for doppler
   ansible.builtin.apt:
     name: ['apt-transport-https', 'ca-certificates', 'curl', 'gnupg']
     state: present
     update_cache: true
+    cache_valid_time: 3600
   become: true
+  tags: install
 
-- name: Ensure that /etc/apt/keyrings exists 
-  ansible.builtin.file:
-    path: /etc/apt/keyrings 
-    state: directory 
-    owner: root
-    group: root
-    mode: '0755'
-  become: true
+- name: Set users list for doppler
+  ansible.builtin.set_fact:
+    doppler_users: '{{ doppler_users | default([]) }}'
+  tags: doppler
 
-- name: Install doppler official gpg key 
-  block:
-    - name: Get repo key
-      ansible.builtin.get_url:
-        url: 'https://packages.doppler.com/public/cli/gpg.DE2A7741A397C129.key'
-        dest: /tmp/doppler.asc
-        checksum: "sha256:7b9552d5da3f8c8706b77ecc41ea37b86f5242e2e2913d53de6caf8346140154"
-        owner: root
-        group: root
-        mode: '0640'
-        force: true
-    - name: Dearmor key
-      ansible.builtin.shell: cat /tmp/doppler.asc | gpg --dearmor > /tmp/doppler.asc.gpg
-      args:
-        chdir: /tmp
-      tags: skip_ansible_lint
-    - name: Create a keyring
-      ansible.builtin.command: >
-        gpg --no-default-keyring --keyring /tmp/doppler-keyring.gpg --import /tmp/doppler.asc.gpg
-    - name: Extract and install key 
-      ansible.builtin.shell: >
-        gpg --no-default-keyring --keyring /tmp/doppler-keyring.gpg --export > /etc/apt/keyrings/doppler-keyring.gpg
-    - name: Install repo
-      ansible.builtin.copy:
-        content: "deb [signed-by=/etc/apt/keyrings/doppler-keyring.gpg arch=amd64] https://packages.doppler.com/public/cli/deb/debian any-version main"
-        dest: "/etc/apt/sources.list.d/doppler.list" 
-        owner: root
-        group: root
-        mode: '0644'
-  become: true
-
-- name: Install packages
-  ansible.builtin.apt:
-    name: doppler
-    state: "{{ doppler_state | default('latest') }}"
-    update_cache: true
-  become: true
+- name: Install doppler for users
+  ansible.builtin.include_tasks: install_doppler.yml
+  loop: "{{ doppler_users | selectattr('doppler', 'equalto', true) | list }}"
+  loop_control:
+    loop_var: user_item
+  tags: doppler

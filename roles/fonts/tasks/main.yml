@@ -8,67 +8,87 @@
     executable: /bin/bash
   changed_when: false
   register: fonts_url_list
-  tags: skip_ansible_lint
+  tags:
+    - download
+    - skip_ansible_lint
+  environment: '{{ proxy_env | default({}) }}'
 
 - name: Create a font map
   ansible.builtin.set_fact:
-    font_map: >-
-      {{ font_map 
-      | default([]) + [{'name': item | split('/') | last | split('.') 
+    fonts_font_map: >-
+      {{ fonts_font_map
+      | default([]) + [{'name': item | split('/') | last | split('.')
       | first, 'url': item}] }}
-  loop: "{{ fonts_url_list.stdout_lines }}"
+  loop: '{{ fonts_url_list.stdout_lines }}'
+  tags: download
 
 - name: Make sure fonts directory exists
   ansible.builtin.file:
-    path: "{{ home }}/.fonts"
+    path: '{{ item.home | default("/home/" + item.name) }}/.fonts'
     state: directory
-    owner: "{{ username }}"
-    group: "{{ group_name | default(username) }}"
+    owner: '{{ item.name }}'
+    group: '{{ item.group | default(item.name) }}'
     mode: '0750'
   become: true
+  loop: '{{ users }}'
+  tags: install
 
 - name: Install individual fonts
   ansible.builtin.unarchive:
-    src: "{{ item.url }}"
-    dest: "{{ home }}/.fonts"
-    owner: "{{ username }}"
-    group: "{{ group_name | default(username) }}"
+    src: '{{ item.1.url }}'
+    dest: '{{ item.0.home | default("/home/" + item.0.name) }}/.fonts'
+    owner: '{{ item.0.name }}'
+    group: '{{ item.0.group | default(item.0.name) }}'
     mode: '0640'
     remote_src: true
   become: true
-  loop: "{{ font_map | selectattr('name', 'in', fonts) }}"
+  loop: '{{ users | product(fonts_font_map | selectattr("name", "in", fonts_fonts)) | list }}'
   when:
-    - fonts is defined and fonts | length
-    - "'all' not in fonts"
+    - fonts_fonts is defined and fonts_fonts | length
+    - "'all' not in fonts_fonts"
   notify: fc-cache
+  environment: '{{ proxy_env | default({}) }}'
+  tags: install
 
 - name: Install all fonts
   ansible.builtin.unarchive:
-    src: "{{ item.url }}"
-    dest: "{{ home }}/.fonts"
-    owner: "{{ username }}"
-    group: "{{ group_name | default(username) }}"
+    src: '{{ item.1.url }}'
+    dest: '{{ item.0.home | default("/home/" + item.0.name) }}/.fonts'
+    owner: '{{ item.0.name }}'
+    group: '{{ item.0.group | default(item.0.name) }}'
     mode: '0640'
     remote_src: true
   become: true
-  loop: "{{ font_map }}"
-  when: 
-    - fonts is defined and fonts | length
-    - "'all' in fonts"
+  loop: '{{ users | product(fonts_font_map) | list }}'
+  when:
+    - fonts_fonts is defined and fonts_fonts | length
+    - "'all' in fonts_fonts"
   notify: fc-cache
+  environment: '{{ proxy_env | default({}) }}'
+  tags: install
 
 # Required by Tokyo-nights tmux theme
 - name: Install Noto Sans Symbols
   ansible.builtin.unarchive:
-    src: https://font.download/dl/font/noto-sans-symbols-2.zip 
-    dest: "{{ home }}/.fonts/NotoSansSymbols2-Regular.ttf"
-    owner: "{{ username }}"
-    group: "{{ group_name | default(username) }}"
+    src: https://font.download/dl/font/noto-sans-symbols-2.zip
+    dest: '{{ item.home | default("/home/" + item.name) }}/.fonts'
+    owner: '{{ item.name }}'
+    group: '{{ item.group | default(item.name) }}'
     mode: '0640'
     remote_src: true
   become: true
-  loop: "{{ font_map }}"
-  when: 
-    - fonts is defined and fonts | length
-    - "'all' in fonts"
+  loop: '{{ users }}'
+  when:
+    - fonts_fonts is defined and fonts_fonts | length
+    - "'all' in fonts_fonts"
   notify: fc-cache
+  environment: '{{ proxy_env | default({}) }}'
+  tags: install
+
+- name: Verify fonts directory exists
+  ansible.builtin.stat:
+    path: '{{ item.home | default("/home/" + item.name) }}/.fonts'
+  register: fonts_dir_stat
+  failed_when: not fonts_dir_stat.stat.exists
+  loop: '{{ users }}'
+  tags: validation

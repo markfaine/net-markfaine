@@ -1,0 +1,53 @@
+---
+- name: Manage dotfiles repository for {{ user_item.name }}
+  when: user_item.dotfiles_repo is defined
+  block:
+    - name: Set safe directory for {{ user_item.name }}
+      ansible.builtin.command: git config --global --add safe.directory "{{ user_item.home | default('/home/' + user_item.name) }}/.config/dotfiles"
+      changed_when: false
+      become: true
+      become_user: '{{ user_item.name }}'
+      tags:
+        - clone
+        - skip_ansible_lint
+
+    - name: Set permissions on dotfiles directory for {{ user_item.name }}
+      ansible.builtin.file:
+        path: "{{ user_item.home | default('/home/' + user_item.name) }}/.config"
+        state: directory
+        owner: '{{ user_item.name }}'
+        group: '{{ user_item.group_name | default(user_item.name) }}'
+        recurse: true
+        mode: 'u+rwX,g+rX,o-rwX'
+      become: true
+      tags: permissions
+
+    - name: Ensure .local/bin directory exists for {{ user_item.name }}
+      ansible.builtin.file:
+        path: "{{ user_item.home | default('/home/' + user_item.name) }}/.local/bin"
+        state: directory
+        owner: '{{ user_item.name }}'
+        group: '{{ user_item.group_name | default(user_item.name) }}'
+        mode: '0755'
+      become: true
+      tags: script
+
+    - name: Generate update-dotfiles script for {{ user_item.name }}
+      ansible.builtin.template:
+        src: update-dotfiles.sh.j2
+        dest: "{{ user_item.home | default('/home/' + user_item.name) }}/.local/bin/update-dotfiles.sh"
+        owner: '{{ user_item.name }}'
+        group: '{{ user_item.group_name | default(user_item.name) }}'
+        mode: '0755'
+      become: true
+      tags: script
+
+    - name: Install dotfiles setup script for {{ user_item.name }}
+      ansible.builtin.copy:
+        src: setup.sh
+        dest: "{{ user_item.home | default('/home/' + user_item.name) }}/.setup-dotfiles.sh"
+        owner: '{{ user_item.name }}'
+        group: '{{ user_item.group_name | default(user_item.name) }}'
+        mode: '0755'
+      become: true
+      tags: script

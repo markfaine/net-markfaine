@@ -2,22 +2,74 @@
 
 ## Overview
 
-This role installs docker from the docker repo and uninstalls any operating system version of docker.
+This role installs Docker from the official Docker repository and uninstalls any operating system version of Docker.
 
-It also installs the docker credential helper for pass and docker compose.
+It also installs the Docker credential helper for pass and Docker Compose.
 
-Role variables:
+## Requirements
+
+- Ansible 2.13 or later
+- Debian or Ubuntu based systems
+- Sudo privileges
+- Internet access for downloading Docker packages and keys
+
+## Role Variables
+
+### run_docker_role
+- **Default**: `true`
+- **Description**: If `false` or unset, the role doesn't run.
+
+### docker_config
+- **Default**: See `vars/main.yml` for `docker_default_config`
+- **Description**: Maps directly to options in `/etc/docker/daemon.json`. Example:
+  ```yaml
+  docker_config:
+    ipv6: false
+    icc: true
+    userland-proxy: true
+    no-new-privileges: false
+    experimental: true
+    selinux-enabled: false
+    dns: []
+  ```
+
+### username
+- **Description**: The user to add to the `docker` group.
+
+### proxy_env (optional)
+- **Description**: Proxy environment variables for Docker service.
+
+See `vars/main.yml` for non-user-configurable variables like package lists and URLs.
+
+## Dependencies
+
+None
+
+## Example Playbook
 
 ```yaml
-docker_config: # maps directly to options in ~/.docker/config.json
-  ipv6: false
-  icc: true
-  userland-proxy: true
-  no-new-privileges: false
-  experimental: true
-  selinux-enabled: false
-  dns: []
-run_docker_role: true # if false or unset the role doesn't run
+- hosts: servers
+  roles:
+    - net.markfaine.docker
 ```
 
-See `vars/main.yml` for non-user-configurable variables.
+To override configuration:
+
+```yaml
+- hosts: servers
+  roles:
+    - role: net.markfaine.docker
+      docker_config:
+        experimental: true
+        dns:
+          - 8.8.8.8
+      username: myuser
+```
+
+## License
+
+GPL-2.0-or-later
+
+## Author Information
+
+Mark Faine <mark.faine@pm.me>

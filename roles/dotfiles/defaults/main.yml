@@ -1,1 +1,7 @@
 ---
+dotfiles_users: [] # List of users to process for dotfiles
+  # Example:
+  # - name: 'username'
+  #   home: '/home/username'
+  #   dotfiles_repo: 'https://git.example.com/team/dotfiles.git'
+  #   dotfiles_branch: 'main'

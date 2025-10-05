@@ -1,0 +1,48 @@
+---
+- name: Install mise for {{ user_item.name }}
+  ansible.builtin.shell: |
+    set -e -o pipefail
+    curl https://mise.jdx.dev/install.sh | sh
+  args:
+    creates: "{{ user_item.home | default('/home/' + user_item.name) }}/.local/bin/mise"
+    executable: /bin/bash
+  become: true
+  become_user: '{{ user_item.name }}'
+  environment:
+    HOME: "{{ user_item.home | default('/home/' + user_item.name) }}"
+  tags: install
+
+- name: Ensure mise is in PATH for {{ user_item.name }}
+  ansible.builtin.lineinfile:
+    path: "{{ user_item.home | default('/home/' + user_item.name) }}/.bashrc"
+    line: 'export PATH="$HOME/.local/bin:$PATH"'
+    create: true
+    owner: '{{ user_item.name }}'
+    group: '{{ user_item.group_name | default(user_item.name) }}'
+    mode: '0644'
+  become: true
+  tags: configure
+
+- name: Ensure mise is in PATH for zsh {{ user_item.name }}
+  ansible.builtin.lineinfile:
+    path: "{{ user_item.home | default('/home/' + user_item.name) }}/.zshrc"
+    line: 'export PATH="$HOME/.local/bin:$PATH"'
+    create: true
+    owner: '{{ user_item.name }}'
+    group: '{{ user_item.group_name | default(user_item.name) }}'
+    mode: '0644'
+  become: true
+  when: user_item.shell | default('') == '/usr/bin/zsh' or user_item.shell | default('') == '/bin/zsh'
+  tags: configure
+
+- name: Verify mise installation for {{ user_item.name }}
+  ansible.builtin.command: mise --version
+  register: mise_version
+  changed_when: false
+  failed_when: mise_version.rc != 0
+  become: true
+  become_user: '{{ user_item.name }}'
+  environment:
+    HOME: "{{ user_item.home | default('/home/' + user_item.name) }}"
+    PATH: "{{ user_item.home | default('/home/' + user_item.name) }}/.local/bin:{{ ansible_env.PATH }}"
+  tags: validation

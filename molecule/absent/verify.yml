@@ -1,0 +1,48 @@
+---
+# vim: set ft=yaml.ansible foldmethod=marker foldmarker=<<<,>>> foldlevel=99 syntax=on :
+# Collection verification and testing <<<
+# Validate all roles absent states
+- name: Verify all roles absent states
+  hosts: ubuntu
+  environment:
+    # SMDEV container configuration <<<
+    # Disable SMDEV container features for testing environment
+    SMDEV_CONTAINER_OFF: 'true'
+    # End SMDEV container configuration >>>
+
+  tasks:
+    # Test execution <<<
+    # Execute comprehensive absent state tests for all roles
+    - name: Include apt test-absent.yml
+      ansible.builtin.include_tasks:
+        file: roles/apt/tests/test-absent.yml
+
+    - name: Include user test-absent.yml
+      ansible.builtin.include_tasks:
+        file: roles/user/tests/test-absent.yml
+
+    - name: Include mise test-absent.yml
+      ansible.builtin.include_tasks:
+        file: roles/mise/tests/test-absent.yml
+
+    - name: Include doppler test-absent.yml
+      ansible.builtin.include_tasks:
+        file: roles/doppler/tests/test-absent.yml
+
+    - name: Include dotfiles test-absent.yml
+      ansible.builtin.include_tasks:
+        file: roles/dotfiles/tests/test-absent.yml
+
+    - name: Include fonts test-absent.yml
+      ansible.builtin.include_tasks:
+        file: roles/fonts/tests/test-absent.yml
+
+    - name: Include docker test-absent.yml
+      ansible.builtin.include_tasks:
+        file: roles/docker/tests/test-absent.yml
+
+    - name: Include wsl test-absent.yml
+      ansible.builtin.include_tasks:
+        file: roles/wsl/tests/test-absent.yml
+    # End Test execution >>>
+# End Collection verification and testing >>>

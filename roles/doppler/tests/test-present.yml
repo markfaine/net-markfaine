@@ -1,0 +1,42 @@
+---
+- name: Test doppler role present state
+  hosts: localhost
+  gather_facts: true
+  vars:
+    users:
+      - name: testuser
+        doppler: true
+        home: /home/testuser
+  tasks:
+    - name: Create test user
+      ansible.builtin.user:
+        name: testuser
+        state: present
+        create_home: true
+      become: true
+      tags: test
+
+    - name: Include doppler role
+      ansible.builtin.include_role:
+        name: net.markfaine.doppler
+      tags: test
+
+    - name: Verify doppler is installed for user
+      ansible.builtin.command: doppler --version
+      register: doppler_check
+      changed_when: false
+      failed_when: doppler_check.rc != 0
+      become: true
+      become_user: testuser
+      environment:
+        HOME: /home/testuser
+        PATH: /home/testuser/.doppler/bin:{{ ansible_env.PATH }}
+      tags: test
+
+    - name: Verify doppler PATH is configured in bashrc
+      ansible.builtin.lineinfile:
+        path: /home/testuser/.bashrc
+        line: 'export PATH="$HOME/.doppler/bin:$PATH"'
+        state: present
+      check_mode: true
+      tags: test

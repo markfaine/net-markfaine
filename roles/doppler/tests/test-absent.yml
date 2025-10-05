@@ -1,0 +1,16 @@
+---
+- name: Test doppler role absent state
+  hosts: localhost
+  gather_facts: true
+  vars:
+    doppler_state: absent
+  tasks:
+    - name: Include doppler role
+      ansible.builtin.include_role:
+        name: net.markfaine.doppler
+      tags: test
+
+    - name: Verify doppler role runs without critical errors
+      ansible.builtin.debug:
+        msg: "Doppler role absent state completed"
+      tags: test

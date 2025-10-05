@@ -1,0 +1,16 @@
+---
+- name: Test fonts role absent state
+  hosts: localhost
+  gather_facts: true
+  vars:
+    fonts_state: absent
+  tasks:
+    - name: Include fonts role
+      ansible.builtin.include_role:
+        name: net.markfaine.fonts
+      tags: test
+
+    - name: Verify fonts role runs without critical errors
+      ansible.builtin.debug:
+        msg: "Fonts role absent state completed"
+      tags: test

@@ -3,39 +3,39 @@
   ansible.builtin.service_facts:
   listen: docker-start
 
-- name: docker-enable
+- name: Enable docker
   ansible.builtin.service:
     name: docker
     enabled: true
   listen: docker-start
   become: true
 
-- name: docker-disable
+- name: Disable docker
   ansible.builtin.service:
     name: docker
     enabled: false
   become: true
 
-- name: docker-service-start
+- name: Start docker service
   ansible.builtin.service:
     name: docker
     state: started
   listen: docker-start
   become: true
 
-- name: docker-stop
+- name: Stop docker
   ansible.builtin.service:
     name: docker
     state: stopped
   become: true
 
-- name: docker-reload
+- name: Reload docker
   ansible.builtin.service:
     name: docker
     state: reloaded
   become: true
 
-- name: docker-restart
+- name: Restart docker
   ansible.builtin.service:
     name: docker
     state: restarted
@@ -47,13 +47,14 @@
   changed_when: false
   tags: skip_ansible_lint
 
-- name: nftables-restart
+- name: Restart nftables
   ansible.builtin.service:
     name: nftables
     state: restarted
   become: true
 
-- name: systemd-daemon-reload
+- name: Reload systemd daemon
   ansible.builtin.command: systemctl daemon-reload
   changed_when: false
   become: true
+  tags: skip_ansible_lint

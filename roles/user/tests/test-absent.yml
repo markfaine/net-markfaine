@@ -1,0 +1,30 @@
+---
+- name: Test user role absent state
+  hosts: localhost
+  gather_facts: true
+  vars:
+    users:
+      - name: testuser
+        state: absent
+  tasks:
+    - name: Include user role
+      ansible.builtin.include_role:
+        name: net.markfaine.user
+      tags: test
+
+    - name: Verify user does not exist
+      ansible.builtin.getent:
+        database: passwd
+        key: testuser
+      register: user_check
+      failed_when: user_check.ansible_facts.getent_passwd is defined
+      ignore_errors: true
+      tags: test
+
+    - name: Verify sudoers file is removed
+      ansible.builtin.stat:
+        path: /etc/sudoers.d/testuser
+      register: sudo_stat
+      failed_when: sudo_stat.stat.exists
+      ignore_errors: true
+      tags: test

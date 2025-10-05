@@ -1,1 +1,3 @@
 ---
+fonts_fonts: [] # List of fonts to install, e.g., ["all"] or ["FiraCode", "Hack"]
+# users: [] # Required: list of users to install fonts for (defined in inventory)

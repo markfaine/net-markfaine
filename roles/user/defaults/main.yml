@@ -1,1 +1,22 @@
 ---
+# defaults file for user
+user_users: []
+  # Example:
+  # - name: 'username'
+  #   uid: '1000'
+  #   comment: 'User Comment'
+  #   group_name: 'group'
+  #   gid: '1000'
+  #   shell: '/usr/bin/bash'
+  #   extra_groups: []
+  #   home: '/home/username'
+  #   password: ''
+  #   user_ssh_key_sources: []       # List of URLs or file paths to authorized_keys data
+  #   user_sudo: true
+  #   user_ssh_keys: true
+  #   user_authorized_keys: []
+  #   user_ssh_key_ignore_errors: true
+  #   dotfiles_repo: 'git@example.com:org/dotfiles.git'
+  #   dotfiles_branch: 'main'
+  #   remove_home_on_delete: false
+  #   state: 'present'

@@ -1,0 +1,9 @@
+---
+- name: Prepare test environment
+  hosts: ubuntu
+  gather_facts: true
+  tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+      become: true
