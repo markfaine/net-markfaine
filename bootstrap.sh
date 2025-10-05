@@ -31,13 +31,6 @@ run_cmd() {
     "$@"
 }
 
-# Default values
-UV_INSTALL_DIR="${UV_INSTALL_DIR:-/tmp/uv}"
-UV_INSTALL_SCRIPT="${UV_INSTALL_SCRIPT:-https://astral.sh/uv/install.sh}"
-COLLECTION="${COLLECTION:-git+https://github.com/markfaine/net-markfaine.git}"
-COLLECTION_BRANCH="${COLLECTION_BRANCH:-main}"
-INVENTORY_FILE="${INVENTORY_FILE:-$UV_INSTALL_DIR/inventory.yml}"
-
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -119,6 +112,13 @@ DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 
 # Change to script directory
 pushd "$DIR" &>/dev/null || exit 1
+
+# Default values
+UV_INSTALL_DIR="${UV_INSTALL_DIR:-/tmp/uv}"
+UV_INSTALL_SCRIPT="${UV_INSTALL_SCRIPT:-https://astral.sh/uv/install.sh}"
+COLLECTION="${COLLECTION:-git+https://github.com/markfaine/net-markfaine.git}"
+COLLECTION_BRANCH="${COLLECTION_BRANCH:-main}"
+INVENTORY_FILE="${INVENTORY_FILE:-$DIR/inventory.yml}"
 
 function install_dependencies() {
     log_info "Installing system dependencies..."
