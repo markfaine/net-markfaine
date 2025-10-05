@@ -129,7 +129,7 @@ function install_dependencies() {
 
 function install_uv() {
     log_info "Installing uv..."
-    if [[ -x "$UV_INSTALL_DIR/bin/uv" ]]; then
+    if [[ -x "$UV_INSTALL_DIR/uv" ]]; then
         echo "✓ uv already installed"
         return
     fi
@@ -140,13 +140,13 @@ function install_uv() {
 
 function install_collection() {
     log_info "Installing Ansible collection..."
-    run_cmd "$UV_INSTALL_DIR/bin/uvx" --from ansible-core ansible-galaxy collection install -f "$COLLECTION,$COLLECTION_BRANCH"
+    run_cmd "$UV_INSTALL_DIR/uvx" --from ansible-core ansible-galaxy collection install -f "$COLLECTION,$COLLECTION_BRANCH"
     echo "✓ Collection installed"
 }
 
 function run_playbook() {
     log_info "Running Ansible playbook..."
-    local playbook_cmd=("$UV_INSTALL_DIR/bin/uvx" --with passlib --from ansible-core ansible-playbook)
+    local playbook_cmd=("$UV_INSTALL_DIR/uvx" --with passlib --from ansible-core ansible-playbook)
     playbook_cmd+=(-i "$INVENTORY_FILE")
     playbook_cmd+=(~/.ansible/collections/ansible_collections/net/markfaine/playbooks/site.yml)
 
