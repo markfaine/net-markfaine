@@ -1,4 +1,14 @@
 ---
+- name: Ensure .local/bin directory exists for {{ user_item.name }}
+  ansible.builtin.file:
+    path: "{{ user_item.home | default('/home/' + user_item.name) }}/.local/bin"
+    state: directory
+    owner: '{{ user_item.name }}'
+    group: '{{ user_item.group_name | default(user_item.name) }}'
+    mode: '0755'
+  become: true
+  tags: install
+
 - name: Install mise for {{ user_item.name }}
   ansible.builtin.shell: |
     set -e -o pipefail
