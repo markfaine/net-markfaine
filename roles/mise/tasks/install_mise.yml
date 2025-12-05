@@ -36,7 +36,7 @@
   tags: configure
 
 - name: Verify mise installation for {{ user_item.name }}
-  ansible.builtin.command: mise --version
+  ansible.builtin.command: "{{ user_item.home | default('/home/' + user_item.name) }}/.local/bin/mise --version"
   register: mise_version
   changed_when: false
   failed_when: mise_version.rc != 0
@@ -44,5 +44,4 @@
   become_user: '{{ user_item.name }}'
   environment:
     HOME: "{{ user_item.home | default('/home/' + user_item.name) }}"
-    PATH: "{{ user_item.home | default('/home/' + user_item.name) }}/.local/bin:{{ ansible_facts['env']['PATH'] }}"
   tags: validation
