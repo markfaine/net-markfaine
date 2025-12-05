@@ -39,27 +39,27 @@
       tags: skip_ansible_lint
 
     - name: Verify mise installation for users
-      ansible.builtin.command: "{{ item.home | default('/home/'' + item.name) }}/.local/bin/mise --version"
+      ansible.builtin.command: "{{ item.home | default('/home/' + item.name) }}/.local/bin/mise --version"
       register: mise_check
       failed_when: mise_check.rc != 0
       changed_when: false
       become: true
       become_user: '{{ item.name }}'
       environment:
-        HOME: "{{ item.home | default('/home/'' + item.name) }}"
+        HOME: "{{ item.home | default('/home/' + item.name) }}"
       loop: "{{ users | default([]) | selectattr('mise', 'equalto', true) | list }}"
       when: users | default([]) | length > 0
       tags: validation, mise
 
     - name: Verify doppler installation for users
-      ansible.builtin.command: "{{ item.home | default('/home/'' + item.name) }}/.doppler/bin/doppler --version"
+      ansible.builtin.command: "{{ item.home | default('/home/' + item.name) }}/.doppler/bin/doppler --version"
       register: doppler_check
       failed_when: doppler_check.rc != 0
       changed_when: false
       become: true
       become_user: '{{ item.name }}'
       environment:
-        HOME: "{{ item.home | default('/home/'' + item.name) }}"
+        HOME: "{{ item.home | default('/home/' + item.name) }}"
       loop: "{{ users | default([]) | selectattr('doppler', 'equalto', true) | list }}"
       when: users | default([]) | length > 0
       tags: validation, doppler
