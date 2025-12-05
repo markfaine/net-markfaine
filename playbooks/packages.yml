@@ -11,6 +11,8 @@
     - name: Include mise role
       ansible.builtin.include_role:
         name: net.markfaine.mise
+      vars:
+        mise_users: "{{ users }}"
       tags:
         - mise
         - packages
@@ -18,6 +20,8 @@
     - name: Include doppler role
       ansible.builtin.include_role:
         name: net.markfaine.doppler
+      vars:
+        doppler_users: "{{ users }}"
       tags:
         - doppler
         - packages
