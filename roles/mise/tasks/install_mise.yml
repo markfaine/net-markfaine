@@ -22,6 +22,19 @@
     HOME: "{{ user_item.home | default('/home/' + user_item.name) }}"
   tags: install
 
+- name: List .local/bin directory
+  ansible.builtin.command: "ls -la {{ user_item.home | default('/home/' + user_item.name) }}/.local/bin"
+  become: true
+  become_user: '{{ user_item.name }}'
+  register: ls_result
+  changed_when: false
+  tags: install
+
+- name: Debug ls result
+  ansible.builtin.debug:
+    var: ls_result.stdout_lines
+  tags: install
+
 - name: Ensure mise is in PATH for {{ user_item.name }}
   ansible.builtin.lineinfile:
     path: "{{ user_item.home | default('/home/' + user_item.name) }}/.bashrc"
