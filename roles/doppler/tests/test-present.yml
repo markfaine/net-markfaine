@@ -30,7 +30,7 @@
       become_user: testuser
       environment:
         HOME: /home/testuser
-        PATH: /home/testuser/.doppler/bin:{{ ansible_env.PATH }}
+        PATH: /home/testuser/.doppler/bin:{{ ansible_facts['env']['PATH'] }}
       tags: test
 
     - name: Verify doppler PATH is configured in bashrc

@@ -44,5 +44,5 @@
   become_user: '{{ user_item.name }}'
   environment:
     HOME: "{{ user_item.home | default('/home/' + user_item.name) }}"
-    PATH: "{{ user_item.home | default('/home/' + user_item.name) }}/.local/bin:{{ ansible_env.PATH }}"
+    PATH: "{{ user_item.home | default('/home/' + user_item.name) }}/.local/bin:{{ ansible_facts['env']['PATH'] }}"
   tags: validation

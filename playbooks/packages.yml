@@ -35,6 +35,7 @@
       failed_when: git_check.rc != 0
       changed_when: false
       tags: skip_ansible_lint
+
     - name: Verify mise installation for users
       ansible.builtin.command: mise --version
       register: mise_check
@@ -44,10 +45,11 @@
       become_user: '{{ item.name }}'
       environment:
         HOME: "{{ item.home | default('/home/' + item.name) }}"
-        PATH: "{{ item.home | default('/home/' + item.name) }}/.local/bin:{{ ansible_env.PATH }}"
+        PATH: "{{ item.home | default('/home/' + item.name) }}/.local/bin:{{ ansible_facts['env']['PATH'] }}"
       loop: "{{ users | default([]) | selectattr('mise', 'equalto', true) | list }}"
       when: users | default([]) | length > 0
       tags: validation, mise
+
     - name: Verify doppler installation for users
       ansible.builtin.command: doppler --version
       register: doppler_check
@@ -57,7 +59,7 @@
       become_user: '{{ item.name }}'
       environment:
         HOME: "{{ item.home | default('/home/' + item.name) }}"
-        PATH: "{{ item.home | default('/home/' + item.name) }}/.doppler/bin:{{ ansible_env.PATH }}"
+        PATH: "{{ item.home | default('/home/' + item.name) }}/.doppler/bin:{{ ansible_facts['env']['PATH'] }}"
       loop: "{{ users | default([]) | selectattr('doppler', 'equalto', true) | list }}"
       when: users | default([]) | length > 0
       tags: validation, doppler

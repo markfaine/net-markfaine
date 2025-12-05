@@ -9,7 +9,7 @@
   tasks:
     - name: Mock WSL environment variables
       ansible.builtin.set_fact:
-        ansible_os_family: Debian
+        os_family: Debian
         ansible_kernel: 'Linux 5.4.72-microsoft-standard-WSL2'
       tags: test
 

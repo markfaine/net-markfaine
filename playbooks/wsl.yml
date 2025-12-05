@@ -19,7 +19,7 @@
     - name: Validate WSL environment
       ansible.builtin.assert:
         that:
-          - ansible_os_family is defined and ansible_os_family == "Debian"
+          - ansible_facts['os_family'] is defined and ansible_facts['os_family'] == "Debian"
           - "'microsoft-standard-WSL2' in ansible_kernel"
           - is_wsl is defined and is_wsl
         fail_msg: 'This playbook can only run on Ubuntu systems under WSL2'
