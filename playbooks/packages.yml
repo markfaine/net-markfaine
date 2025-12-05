@@ -49,7 +49,7 @@
         HOME: "{{ item.home | default('/home/' + item.name) }}"
       loop: "{{ users | default([]) | selectattr('mise', 'equalto', true) | list }}"
       when: users | default([]) | length > 0
-      tags: validation, mise
+      tags: mise
 
     - name: Verify doppler installation for users
       ansible.builtin.command: "{{ item.home | default('/home/' + item.name) }}/.doppler/bin/doppler --version"
@@ -62,4 +62,4 @@
         HOME: "{{ item.home | default('/home/' + item.name) }}"
       loop: "{{ users | default([]) | selectattr('doppler', 'equalto', true) | list }}"
       when: users | default([]) | length > 0
-      tags: validation, doppler
+      tags: doppler
