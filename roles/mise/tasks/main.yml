@@ -10,7 +10,7 @@
 
 - name: Set users list for mise
   ansible.builtin.set_fact:
-    mise_users: '{{ mise_users | default([]) }}'
+    mise_users: '{{ users | default([]) }}'
   tags: mise
 
 - name: Install mise for users

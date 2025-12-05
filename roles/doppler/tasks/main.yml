@@ -10,7 +10,7 @@
 
 - name: Set users list for doppler
   ansible.builtin.set_fact:
-    doppler_users: '{{ doppler_users | default([]) }}'
+    doppler_users: '{{ users | default([]) }}'
   tags: doppler
 
 - name: Install doppler for users
