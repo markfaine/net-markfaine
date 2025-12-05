@@ -54,24 +54,35 @@ log_error() {
 create_inventory() {
     log_info "Inventory file not found. Creating temporary inventory..."
 
-    # Prompt for basic user configuration
-    read -r -p "Enter username (default: user): " username
-    username="${username:-user}"
+    # Check if running interactively
+    if [[ -t 0 ]]; then
+        # Prompt for basic user configuration
+        read -r -p "Enter username (default: user): " username
+        username="${username:-user}"
 
-    read -r -p "Enter UID (default: 1000): " uid
-    uid="${uid:-1000}"
+        read -r -p "Enter UID (default: 1000): " uid
+        uid="${uid:-1000}"
 
-    read -r -p "Enter GID (default: 1000): " gid
-    gid="${gid:-1000}"
+        read -r -p "Enter GID (default: 1000): " gid
+        gid="${gid:-1000}"
 
-    read -r -p "Enter home directory (default: /home/$username): " home
-    home="${home:-/home/$username}"
+        read -r -p "Enter home directory (default: /home/$username): " home
+        home="${home:-/home/$username}"
 
-    read -r -p "Enter shell (default: /bin/bash): " shell
-    shell="${shell:-/bin/bash}"
+        read -r -p "Enter shell (default: /bin/bash): " shell
+        shell="${shell:-/bin/bash}"
 
-    read -r -p "Enable sudo? (y/n, default: y): " sudo_enable
-    sudo_enable="${sudo_enable:-y}"
+        read -r -p "Enable sudo? (y/n, default: y): " sudo_enable
+        sudo_enable="${sudo_enable:-y}"
+    else
+        # Use defaults for non-interactive mode
+        username="user"
+        uid="1000"
+        gid="1000"
+        home="/home/$username"
+        shell="/bin/bash"
+        sudo_enable="y"
+    fi
 
     user_sudo=$([[ "$sudo_enable" =~ ^[Yy]$ ]] && echo "true" || echo "false")
 
@@ -108,7 +119,7 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 # Get script directory
-DIR="$(cd "$(dirname "$0")" &>/dev/null && pwd)"
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
 
 # Change to script directory
 pushd "$DIR" &>/dev/null || exit 1
