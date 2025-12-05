@@ -28,7 +28,9 @@
       tags:
         - apt
         - packages
+
   post_tasks:
+
     - name: Verify git is installed
       ansible.builtin.command: git --version
       register: git_check

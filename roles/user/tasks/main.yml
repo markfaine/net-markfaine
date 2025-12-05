@@ -2,13 +2,13 @@
 - name: Validate required variables
   ansible.builtin.assert:
     that:
-      - user_users | length > 0
-    fail_msg: "'user_users' list must be provided"
+      - users | length > 0
+    fail_msg: "'users' list must be provided"
   tags: user, validation
 
 - name: Process users
   ansible.builtin.include_tasks: process_user.yml
-  loop: '{{ user_users }}'
+  loop: '{{ users }}'
   loop_control:
-    loop_var: user_item
+    loop_var: user
   tags: user
