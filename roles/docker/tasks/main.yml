@@ -58,12 +58,20 @@
       become: true
     - name: Install repo
       ansible.builtin.copy:
-        content: "deb [signed-by=/etc/apt/keyrings/docker-keyring.gpg arch={{ docker_architecture | default(ansible_architecture) }}] {{ docker_repo_baseurl }} {{ ansible_facts['distribution_release'] }} stable"
+        content: "deb [signed-by=/etc/apt/keyrings/docker-keyring.gpg arch={{ docker_architecture }}] {{ docker_repo_baseurl }} {{ ansible_facts['distribution_release'] }} stable"
         dest: '/etc/apt/sources.list.d/docker.list'
         owner: root
         group: root
         mode: '0644'
       become: true
+      register: docker_repo_added
+
+- name: Update apt cache after adding Docker repository
+  ansible.builtin.apt:
+    update_cache: true
+  become: true
+  when: docker_repo_added is changed
+  tags: install
 
 - name: Remove obsolete packages
   ansible.builtin.apt:
@@ -78,7 +86,6 @@
     name: '{{ docker_packages }}'
     state: "{{ docker_state | default('latest') }}"
     update_cache: true
-    cache_valid_time: 3600
   become: true
   environment: '{{ proxy_env | default({}) }}'
   notify:

@@ -11,7 +11,7 @@ docker_arch_map:
   aarch64: arm64
   armv7l: armhf
   
-docker_architecture: "{{ docker_arch_map[ansible_architecture] | default('amd64') }}"
+docker_architecture: "{{ docker_arch_map[ansible_facts['architecture']] | default('amd64') }}"
 
 # Docker credential helper (architecture-aware)
 docker_cred_helper_version: v0.9.4
