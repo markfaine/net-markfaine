@@ -12,6 +12,12 @@
     - mise
     - doppler
 
+# Install and configure Docker
+- name: Import docker playbook
+  ansible.builtin.import_playbook: docker.yml
+  tags: docker
+  when: run_docker_role is defined and run_docker_role
+
 # Create and configure users
 - name: Import user playbook
   ansible.builtin.import_playbook: user.yml
@@ -22,12 +28,6 @@
 - name: Import dotfiles playbook
   ansible.builtin.import_playbook: dotfiles.yml
   tags: dotfiles
-
-# Install and configure Docker
-- name: Import docker playbook
-  ansible.builtin.import_playbook: docker.yml
-  tags: docker
-  when: run_docker_role is defined and run_docker_role
 
 # Install fonts for users
 - name: Import fonts playbook
