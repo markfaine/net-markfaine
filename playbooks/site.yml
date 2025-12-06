@@ -16,7 +16,6 @@
 - name: Import docker playbook
   ansible.builtin.import_playbook: docker.yml
   tags: docker
-  when: run_docker_role is defined and run_docker_role
 
 # Create and configure users
 - name: Import user playbook
