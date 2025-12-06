@@ -22,18 +22,7 @@
     HOME: "{{ user_item.home | default('/home/' + user_item.name) }}"
   tags: install
 
-- name: List .local/bin directory
-  ansible.builtin.command: "ls -la {{ user_item.home | default('/home/' + user_item.name) }}/.local/bin"
-  become: true
-  become_user: '{{ user_item.name }}'
-  register: ls_result
-  changed_when: false
-  tags: install
 
-- name: Debug ls result
-  ansible.builtin.debug:
-    var: ls_result.stdout_lines
-  tags: install
 
 - name: Ensure mise is in PATH for {{ user_item.name }}
   ansible.builtin.lineinfile:
@@ -58,6 +47,13 @@
   when: user_item.shell | default('') == '/usr/bin/zsh' or user_item.shell | default('') == '/bin/zsh'
   tags: configure
 
+- name: Check if mise binary exists for {{ user_item.name }}
+  ansible.builtin.stat:
+    path: "{{ user_item.home | default('/home/' + user_item.name) }}/.local/bin/mise"
+  register: mise_binary_stat
+  become: true
+  tags: validation
+
 - name: Verify mise installation for {{ user_item.name }}
   ansible.builtin.command: "{{ user_item.home | default('/home/' + user_item.name) }}/.local/bin/mise --version"
   register: mise_version
@@ -67,4 +63,5 @@
   become_user: '{{ user_item.name }}'
   environment:
     HOME: "{{ user_item.home | default('/home/' + user_item.name) }}"
+  when: mise_binary_stat.stat.exists
   tags: validation

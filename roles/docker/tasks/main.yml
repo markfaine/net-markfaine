@@ -45,7 +45,7 @@
       changed_when: false
     - name: Install repo
       ansible.builtin.copy:
-        content: 'deb [signed-by=/etc/apt/keyrings/docker-keyring.gpg arch=amd64] {{ docker_repo_baseurl }} {{ ansible_facts['distribution_release'] }} stable'
+        content: "deb [signed-by=/etc/apt/keyrings/docker-keyring.gpg arch=amd64] {{ docker_repo_baseurl }} {{ ansible_facts['distribution_release'] }} stable"
         dest: '/etc/apt/sources.list.d/docker.list'
         owner: root
         group: root

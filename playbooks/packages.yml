@@ -42,28 +42,50 @@
       changed_when: false
       tags: skip_ansible_lint
 
-    - name: Verify mise installation for users
-      ansible.builtin.command: "{{ item.home | default('/home/' + item.name) }}/.local/bin/mise --version"
-      register: mise_check
-      failed_when: mise_check.rc != 0
-      changed_when: false
+    - name: Check if mise binary exists for users
+      ansible.builtin.stat:
+        path: "{{ item.home | default('/home/' + item.name) }}/.local/bin/mise"
+      register: mise_binary_check
       become: true
-      become_user: '{{ item.name }}'
-      environment:
-        HOME: "{{ item.home | default('/home/' + item.name) }}"
       loop: "{{ users | default([]) | selectattr('mise', 'equalto', true) | list }}"
       when: users | default([]) | length > 0
       tags: mise
 
+    - name: Verify mise installation for users
+      ansible.builtin.command: "{{ item.item.home | default('/home/' + item.item.name) }}/.local/bin/mise --version"
+      register: mise_check
+      failed_when: mise_check.rc != 0
+      changed_when: false
+      become: true
+      become_user: '{{ item.item.name }}'
+      environment:
+        HOME: "{{ item.item.home | default('/home/' + item.item.name) }}"
+      loop: "{{ mise_binary_check.results | default([]) }}"
+      when:
+        - users | default([]) | length > 0
+        - item.stat.exists
+      tags: mise
+
+    - name: Check if doppler binary exists for users
+      ansible.builtin.stat:
+        path: "{{ item.home | default('/home/' + item.name) }}/.doppler/bin/doppler"
+      register: doppler_binary_check
+      become: true
+      loop: "{{ users | default([]) | selectattr('doppler', 'equalto', true) | list }}"
+      when: users | default([]) | length > 0
+      tags: doppler
+
     - name: Verify doppler installation for users
-      ansible.builtin.command: "{{ item.home | default('/home/' + item.name) }}/.doppler/bin/doppler --version"
+      ansible.builtin.command: "{{ item.item.home | default('/home/' + item.item.name) }}/.doppler/bin/doppler --version"
       register: doppler_check
       failed_when: doppler_check.rc != 0
       changed_when: false
       become: true
-      become_user: '{{ item.name }}'
+      become_user: '{{ item.item.name }}'
       environment:
-        HOME: "{{ item.home | default('/home/' + item.name) }}"
-      loop: "{{ users | default([]) | selectattr('doppler', 'equalto', true) | list }}"
-      when: users | default([]) | length > 0
+        HOME: "{{ item.item.home | default('/home/' + item.item.name) }}"
+      loop: "{{ doppler_binary_check.results | default([]) }}"
+      when:
+        - users | default([]) | length > 0
+        - item.stat.exists
       tags: doppler

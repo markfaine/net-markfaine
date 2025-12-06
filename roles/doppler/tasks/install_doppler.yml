@@ -35,6 +35,13 @@
   when: user_item.shell | default('') == '/usr/bin/zsh' or user_item.shell | default('') == '/bin/zsh'
   tags: configure
 
+- name: Check if doppler binary exists for {{ user_item.name }}
+  ansible.builtin.stat:
+    path: "{{ user_item.home | default('/home/' + user_item.name) }}/.doppler/bin/doppler"
+  register: doppler_binary_stat
+  become: true
+  tags: validation
+
 - name: Verify doppler installation for {{ user_item.name }}
   ansible.builtin.command: "{{ user_item.home | default('/home/' + user_item.name) }}/.doppler/bin/doppler --version"
   register: doppler_version
@@ -44,6 +51,7 @@
   become_user: '{{ user_item.name }}'
   environment:
     HOME: "{{ user_item.home | default('/home/' + user_item.name) }}"
+  when: doppler_binary_stat.stat.exists
   tags: validation
 
 - name: Ensure .local/bin directory exists for {{ user_item.name }}

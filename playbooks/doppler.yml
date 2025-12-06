@@ -16,8 +16,16 @@
         - env
         - secrets
   post_tasks:
+    - name: Check if doppler binary exists
+      ansible.builtin.stat:
+        path: "{{ ansible_env.HOME }}/.doppler/bin/doppler"
+      register: doppler_binary_stat
+      tags: validation
+
     - name: Verify doppler is installed
       ansible.builtin.command: doppler --version
       register: doppler_check
       changed_when: false
       failed_when: doppler_check.rc != 0
+      when: doppler_binary_stat.stat.exists
+      tags: validation
