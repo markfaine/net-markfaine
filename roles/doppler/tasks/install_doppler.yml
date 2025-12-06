@@ -64,12 +64,12 @@
   become: true
   tags: script
 
-- name: Generate setup-doppler-env script for {{ user_item.name }}
-  ansible.builtin.template:
-    src: setup_doppler_env.sh.j2
-    dest: "{{ user_item.home | default('/home/' + user_item.name) }}/.local/bin/setup-doppler-env.sh"
-    owner: '{{ user_item.name }}'
-    group: '{{ user_item.group_name | default(user_item.name) }}'
-    mode: '0755'
-  become: true
-  tags: script
+# - name: Generate setup-doppler-env script for {{ user_item.name }}
+#   ansible.builtin.template:
+#     src: setup_doppler_env.sh.j2
+#     dest: "{{ user_item.home | default('/home/' + user_item.name) }}/.local/bin/setup-doppler-env.sh"
+#     owner: '{{ user_item.name }}'
+#     group: '{{ user_item.group_name | default(user_item.name) }}'
+#     mode: '0755'
+#   become: true
+#   tags: script
