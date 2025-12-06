@@ -23,17 +23,17 @@
   ansible.builtin.import_playbook: dotfiles.yml
   tags: dotfiles
 
-# Install fonts for users
-- name: Import fonts playbook
-  ansible.builtin.import_playbook: fonts.yml
-  tags: fonts
-  when: fonts is defined and fonts | length
-
 # Install and configure Docker
 - name: Import docker playbook
   ansible.builtin.import_playbook: docker.yml
   tags: docker
   when: run_docker_role is defined and run_docker_role
+
+# Install fonts for users
+- name: Import fonts playbook
+  ansible.builtin.import_playbook: fonts.yml
+  tags: fonts
+  when: fonts is defined and fonts | length
 
 # Configure WSL-specific settings (only runs on WSL)
 - name: Import wsl playbook
