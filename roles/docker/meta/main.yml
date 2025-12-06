@@ -27,12 +27,17 @@ galaxy_info:
   # https://galaxy.ansible.com/api/v1/platforms/
   #
   platforms:
-    - name: Debian
-      versions:
-        - all
     - name: Ubuntu
       versions:
-        - all
+        - focal       # 20.04
+        - jammy       # 22.04
+        - mantic      # 23.10
+        - noble       # 24.04
+        - plucky      # 25.10
+    - name: Debian
+      versions:
+        - bullseye    # 11
+        - bookworm    # 12
 
   galaxy_tags:
     - containers

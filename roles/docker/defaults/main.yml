@@ -11,6 +11,9 @@
 #   dns: []
 docker_run_docker_role: true # if false or unset the role doesn't run
 
+# Install docker credential helper for password management
+docker_install_credential_helper: true
+
 # Legacy single user variable (for backward compatibility)
 docker_username: '' # User to add to docker group
 

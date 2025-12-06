@@ -1,4 +1,12 @@
 ---
+- name: Validate OS compatibility
+  ansible.builtin.assert:
+    that:
+      - ansible_facts['os_family'] == "Debian"
+      - ansible_facts['distribution'] in ['Ubuntu', 'Debian']
+    fail_msg: "This role only supports Ubuntu and Debian-based systems"
+  tags: install
+
 - name: Install gpg
   ansible.builtin.apt:
     name: gpg
@@ -25,7 +33,6 @@
       ansible.builtin.get_url:
         url: '{{ docker_repo_gpgkey }}'
         dest: /tmp/docker.asc
-        checksum: 'sha256:1500c1f56fa9e26b9b8f42452a553675796ade0807cdce11975eb98170b3a570'
         owner: root
         group: root
         mode: '0640'
@@ -34,18 +41,24 @@
       ansible.builtin.shell: set -o pipefail; cat /tmp/docker.asc | gpg --dearmor > /tmp/docker.asc.gpg
       args:
         chdir: /tmp
+        creates: /tmp/docker.asc.gpg
       changed_when: false
     - name: Create a keyring
       ansible.builtin.command: >
         gpg --no-default-keyring --keyring /tmp/docker-keyring.gpg --import /tmp/docker.asc.gpg
+      args:
+        creates: /tmp/docker-keyring.gpg
       changed_when: false
     - name: Extract and install key
       ansible.builtin.shell: >
         gpg --no-default-keyring --keyring /tmp/docker-keyring.gpg --export > /etc/apt/keyrings/docker-keyring.gpg
+      args:
+        creates: /etc/apt/keyrings/docker-keyring.gpg
       changed_when: false
+      become: true
     - name: Install repo
       ansible.builtin.copy:
-        content: "deb [signed-by=/etc/apt/keyrings/docker-keyring.gpg arch=amd64] {{ docker_repo_baseurl }} {{ ansible_facts['distribution_release'] }} stable"
+        content: "deb [signed-by=/etc/apt/keyrings/docker-keyring.gpg arch={{ docker_architecture | default(ansible_architecture) }}] {{ docker_repo_baseurl }} {{ ansible_facts['distribution_release'] }} stable"
         dest: '/etc/apt/sources.list.d/docker.list'
         owner: root
         group: root
@@ -157,9 +170,9 @@
   ansible.builtin.get_url:
     url: '{{ docker_cred_helper_url }}'
     dest: /usr/local/bin/docker-credential-pass
-    checksum: 'sha256:dc2d864f5f4e4ddfb23ef8e2193626f5f26eee5be1e49ff2a9ba40d4298392e0'
     owner: root
     group: root
     mode: '0755'
   become: true
+  when: docker_install_credential_helper | default(true)
   tags: service

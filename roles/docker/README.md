@@ -9,9 +9,10 @@ It also installs the Docker credential helper for pass and Docker Compose.
 ## Requirements
 
 - Ansible 2.13 or later
-- Debian or Ubuntu based systems
+- Ubuntu 20.04+ or Debian-based systems (tested on Ubuntu 25.10)
 - Sudo privileges
 - Internet access for downloading Docker packages and keys
+- Supported architectures: amd64, arm64, armhf
 
 ## Role Variables
 

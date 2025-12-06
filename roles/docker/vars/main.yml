@@ -4,7 +4,18 @@
 # ## The Ubuntu specific installation information
 docker_repo_baseurl: https://download.docker.com/linux/ubuntu
 docker_repo_gpgkey: https://download.docker.com/linux/ubuntu/gpg
-docker_cred_helper_url: https://github.com/docker/docker-credential-helpers/releases/download/v0.9.3/docker-credential-pass-v0.9.3.linux-amd64
+
+# Architecture mapping for Docker repository
+docker_arch_map:
+  x86_64: amd64
+  aarch64: arm64
+  armv7l: armhf
+  
+docker_architecture: "{{ docker_arch_map[ansible_architecture] | default('amd64') }}"
+
+# Docker credential helper (architecture-aware)
+docker_cred_helper_version: v0.9.4
+docker_cred_helper_url: "https://github.com/docker/docker-credential-helpers/releases/download/{{ docker_cred_helper_version }}/docker-credential-pass-{{ docker_cred_helper_version }}.linux-{{ docker_architecture }}"
 
 docker_packages:
   - ca-certificates
@@ -14,8 +25,6 @@ docker_packages:
   - containerd.io
   - docker-buildx-plugin
   - docker-compose-plugin
-
-docker_compose_url: https://github.com/docker/compose/releases/download/v2.33.1/docker-compose-linux-x86_64
 
 docker_obsolete_packages:
   - docker.io
