@@ -78,7 +78,7 @@
     name: '{{ docker_obsolete_packages }}'
     state: absent
   become: true
-  notify: systemd-daemon-reload
+  notify: Reload systemd daemon
   tags: install
 
 - name: Install packages
@@ -89,7 +89,7 @@
   become: true
   environment: '{{ proxy_env | default({}) }}'
   notify:
-    - systemd-daemon-reload
+    - Reload systemd daemon
     - docker-start
   tags: install
 
@@ -112,7 +112,7 @@
     mode: '0640'
   become: true
   notify:
-    - systemd-daemon-reload
+    - Reload systemd daemon
     - docker-start
   tags: configure
 
@@ -137,7 +137,7 @@
     backup: true
   become: true
   notify:
-    - systemd-daemon-reload
+    - Reload systemd daemon
     - docker-start
   tags: configure
 
@@ -151,7 +151,7 @@
     backup: true
   become: true
   notify:
-    - systemd-daemon-reload
+    - Reload systemd daemon
     - docker-start
   tags: configure
 
