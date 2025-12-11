@@ -9,26 +9,21 @@
         fail_msg: 'Ansible version 2.16.1 or higher is required'
       tags: validation
 
-    - name: Validate required variables for wsl role
-      ansible.builtin.assert:
-        that:
-          - wsl_user is not defined or wsl_user != "" or username is defined
-        fail_msg: 'Either "wsl_user" must be set or the playbook must be run by a user (username fact available)'
+    - name: Check if running on WSL2
+      ansible.builtin.set_fact:
+        is_wsl2: "{{ ansible_facts['os_family'] == 'Debian' and 'microsoft-standard-WSL2' in ansible_facts['kernel'] }}"
       tags: validation, wsl
 
-    - name: Validate WSL environment
-      ansible.builtin.assert:
-        that:
-          - ansible_facts['os_family'] is defined and ansible_facts['os_family'] == "Debian"
-          - "'microsoft-standard-WSL2' in ansible_kernel"
-          - is_wsl is defined and is_wsl
-        fail_msg: 'This playbook can only run on Ubuntu systems under WSL2'
+    - name: Display WSL2 status
+      ansible.builtin.debug:
+        msg: "WSL2 environment: {{ 'detected' if is_wsl2 else 'not detected - skipping WSL role' }}"
       tags: validation, wsl
 
   tasks:
     - name: Include wsl role
       ansible.builtin.include_role:
         name: net.markfaine.wsl
+      when: is_wsl2 | default(false)
       tags: wsl
 
   post_tasks:
@@ -37,7 +32,9 @@
         path: /etc/wsl.conf
       register: wsl_conf_check
       failed_when: not wsl_conf_check.stat.exists
-      when: wsl_state | default('present') == 'present'
+      when:
+        - is_wsl2 | default(false)
+        - wsl_state | default('present') == 'present'
       tags: validation, wsl
 
     - name: Verify WSL configuration was removed
@@ -45,5 +42,7 @@
         path: /etc/wsl.conf
       register: wsl_conf_check
       failed_when: wsl_conf_check.stat.exists
-      when: wsl_state | default('present') == 'absent'
+      when:
+        - is_wsl2 | default(false)
+        - wsl_state | default('present') == 'absent'
       tags: validation, wsl
