@@ -22,9 +22,9 @@
         dotfiles_users: "{{ users | default([]) }}"
       tags: dotfiles
   post_tasks:
-    - name: Verify dotfiles update script exists for users
+    - name: Verify dotfiles directories exist for users
       ansible.builtin.stat:
-        path: "{{ item.home | default('/home/' + item.name) }}/.local/bin/update-dotfiles.sh"
+        path: "{{ item.home | default('/home/' + item.name) }}/.config/dotfiles"
       register: dotfiles_check
       failed_when: not dotfiles_check.stat.exists
       loop: "{{ users | selectattr('dotfiles_repo', 'defined') | list }}"

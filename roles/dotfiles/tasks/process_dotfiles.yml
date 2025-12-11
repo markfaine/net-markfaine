@@ -11,9 +11,29 @@
         - clone
         - skip_ansible_lint
 
-    - name: Set permissions on dotfiles directory for {{ user_item.name }}
+    - name: Set permissions on .config directory for {{ user_item.name }}
       ansible.builtin.file:
         path: "{{ user_item.home | default('/home/' + user_item.name) }}/.config"
+        state: directory
+        owner: '{{ user_item.name }}'
+        group: '{{ user_item.group_name | default(user_item.name) }}'
+        mode: '0755'
+      become: true
+      tags: permissions
+
+    - name: Clone dotfiles repository for {{ user_item.name }}
+      ansible.builtin.git:
+        repo: "{{ user_item.dotfiles_repo }}"
+        dest: "{{ user_item.home | default('/home/' + user_item.name) }}/.config/dotfiles"
+        update: true
+        force: false
+      become: true
+      become_user: '{{ user_item.name }}'
+      tags: clone
+
+    - name: Set permissions on dotfiles directory for {{ user_item.name }}
+      ansible.builtin.file:
+        path: "{{ user_item.home | default('/home/' + user_item.name) }}/.config/dotfiles"
         state: directory
         owner: '{{ user_item.name }}'
         group: '{{ user_item.group_name | default(user_item.name) }}'
