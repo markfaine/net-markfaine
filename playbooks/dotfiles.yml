@@ -18,6 +18,8 @@
     - name: Include dotfiles role
       ansible.builtin.include_role:
         name: net.markfaine.dotfiles
+      vars:
+        dotfiles_users: "{{ users | default([]) }}"
       tags: dotfiles
   post_tasks:
     - name: Verify dotfiles directories exist for users

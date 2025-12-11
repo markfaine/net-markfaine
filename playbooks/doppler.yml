@@ -11,6 +11,8 @@
     - name: Include doppler role
       ansible.builtin.include_role:
         name: net.markfaine.doppler
+      vars:
+        doppler_users: "{{ users | default([]) }}"
       tags:
         - doppler
         - env
