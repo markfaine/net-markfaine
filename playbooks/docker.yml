@@ -11,6 +11,8 @@
     - name: Include docker role
       ansible.builtin.include_role:
         name: net.markfaine.docker
+      vars:
+        docker_users: "{{ users | default([]) }}"
       tags: docker
   post_tasks:
     - name: Verify Docker service is running
