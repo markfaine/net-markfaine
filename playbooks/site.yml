@@ -3,6 +3,12 @@
   hosts: all
   gather_facts: false
 
+# Create and configure users
+- name: Import user playbook
+  ansible.builtin.import_playbook: user.yml
+  tags: user
+  when: run_user_role is not defined or run_user_role
+
 # Install system packages, mise, and doppler
 - name: Import packages playbook
   ansible.builtin.import_playbook: packages.yml
@@ -16,12 +22,6 @@
 - name: Import docker playbook
   ansible.builtin.import_playbook: docker.yml
   tags: docker
-
-# Create and configure users
-- name: Import user playbook
-  ansible.builtin.import_playbook: user.yml
-  tags: user
-  when: run_user_role is not defined or run_user_role
 
 # Clone user dotfiles
 - name: Import dotfiles playbook
