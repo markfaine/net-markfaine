@@ -38,6 +38,17 @@
       when: user.user_ssh_keys | default(true)
       tags: user, user_ssh
 
+    - name: Ensure user home directory has the correct permissions
+      ansible.builtin.file:
+        path: "{{ user.home | default('/home/' + user.name) }}/"
+        state: directory
+        owner: '{{ user.name }}'
+        group: '{{ user.group_name | default(user.name) }}'
+        recurse: true        
+        mode: '0700'
+      become: true
+      tags: user, user_ssh
+
     - name: Determine SSH key sources for {{ user.name }}
       ansible.builtin.set_fact:
         user_ssh_key_sources_effective: >-
