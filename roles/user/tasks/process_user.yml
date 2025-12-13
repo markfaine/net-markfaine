@@ -81,7 +81,6 @@
       ansible.builtin.copy:
         content: |
           {{ user.name }} ALL=(ALL) NOPASSWD: ALL
-          Defaults:{{ user.name }} !requiretty
         dest: '/etc/sudoers.d/{{ user.name }}'
         owner: root
         group: root
